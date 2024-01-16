@@ -6,7 +6,6 @@ import healthcheck.dto.Authentication.SignUpRequest;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.enums.Role;
-import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
@@ -29,53 +28,48 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse signUp(SignUpRequest request) {
-        UserAccount userAccount1 = (UserAccount) userAccountRepo.findUserAccountByEmail(request.getEmail());
+        UserAccount userAccount = UserAccount.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.USER)
+                .build();
 
-        if(userAccount1 != null){
-            throw new AlreadyExistsException("This user exists");
-        }
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .phoneNumber(request.getNumber())
+                .userAccount(userAccount)
+                .build();
 
-        UserAccount userAccount = new UserAccount();
-
-        userAccount.setEmail(request.getEmail());
-        userAccount.setPassword(request.getPassword());
-        userAccount.setRole(Role.USER);
-
-        User user = new User();
-        user.setFirstName(request.getFirstNameUp());
-        user.setLastName(request.getLastNameUp());
-        user.setPhoneNumber(request.getNumberUp());
-        user.setUserAccount(userAccount);
         userRepo.save(user);
-
-        userAccount.setUser(user);
-        userAccountRepo.save(userAccount);
 
         String jwt = jwtService.generateToken(userAccount);
 
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setEmail(userAccount.getEmail());
-        authenticationResponse.setRole(userAccount.getRole());
-        authenticationResponse.setToken(jwt);
-        return authenticationResponse;
+        return AuthenticationResponse.builder()
+                .email(userAccount.getEmail())
+                .role(userAccount.getRole())
+                .token(jwt)
+                .build();
     }
+
+
+
 
     @Override
     public AuthenticationResponse signIn(SignInRequest request) {
         UserAccount user = userAccountRepo.getUserByEmail(request.getEmail()).orElseThrow(() ->
                 new NotFoundException("Email not found"));
 
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Incorrect password");
         }
 
         String jwt = jwtService.generateToken(user);
 
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setEmail(user.getEmail());
-        authenticationResponse.setRole(user.getRole());
-        authenticationResponse.setToken(jwt);
-
-        return authenticationResponse;
+        return AuthenticationResponse.builder()
+                .email(user.getEmail())
+                .role(user.getRole())
+                .token(jwt)
+                .build();
     }
 }

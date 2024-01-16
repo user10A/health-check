@@ -17,7 +17,7 @@ public class AuthApi {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signUp")
-    public AuthenticationResponse createApplication(@RequestBody SignUpRequest application) {
+    public AuthenticationResponse signUp(@RequestBody SignUpRequest application) {
         return authenticationService.signUp(application);
     }
 

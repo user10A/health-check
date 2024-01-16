@@ -28,7 +28,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    @OneToOne(cascade = {CascadeType.REMOVE})
+    @OneToOne(cascade = {CascadeType.ALL})
     private UserAccount userAccount;
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Result> results;

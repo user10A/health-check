@@ -1,15 +1,13 @@
 package healthcheck.dto.Authentication;
 
 import healthcheck.enums.Role;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
+@Builder
 public class AuthenticationResponse {
     private String token;
     private String email;

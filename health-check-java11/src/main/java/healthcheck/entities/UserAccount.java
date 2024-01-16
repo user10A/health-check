@@ -38,7 +38,7 @@ public class UserAccount implements UserDetails {
     private Role role;
     private String verificationCode;
     private Date VerificationCodeTime;
-    @OneToOne(mappedBy = "userAccount",cascade = {CascadeType.REMOVE})
+    @OneToOne(mappedBy = "userAccount",cascade = {CascadeType.ALL})
     private User user;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

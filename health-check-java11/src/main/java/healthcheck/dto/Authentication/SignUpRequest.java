@@ -8,10 +8,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SignUpRequest {
-    private String firstNameUp;
-    private String lastNameUp;
-    private String numberUp;
+    private String firstName;
+    private String lastName;
+    private String number;
     private String email;
     private String password;
-    private String passwordRep;
 }
