@@ -20,8 +20,8 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "application_gen")
     @SequenceGenerator(name = "application_gen",sequenceName = "application_seq",allocationSize = 1)
     private long id;
-    private String userName;
-    private LocalDate dateApplication;
+    private String username;
+    private LocalDate dateOfApplicationCreation;
     private String phoneNumber;
     private boolean processed;
 }
