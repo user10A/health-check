@@ -27,8 +27,8 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "onlineAppointment_gen")
     @SequenceGenerator(name = "onlineAppointment_gen",sequenceName = "onlineAppointment_seq",allocationSize = 1)
     private Long id;
-    private LocalDate dateAppointment;
-    private LocalTime timeAppointment;
+    private LocalDate appointmentDate;
+    private LocalTime appointmentTime;
     @Enumerated(EnumType.STRING)
     private Status status;
     private boolean processed;
