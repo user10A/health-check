@@ -32,7 +32,7 @@ public class Department {
     @OneToMany(mappedBy = "department", cascade = CascadeType.REMOVE)
     private List<Appointment> appointments;
     @OneToMany(mappedBy ="department", cascade = {CascadeType.DETACH})
-    private List<Schedule>schedules;
+    private List<Schedule> schedules;
     @OneToMany(mappedBy = "department")
-    private List<Result>results;
+    private List<Result> results;
 }
