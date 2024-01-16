@@ -24,9 +24,9 @@ public class TimeSheet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "timeShift_gen")
     @SequenceGenerator(name = "timeShift_gen",sequenceName = "timeShift_seq",allocationSize = 1)
     private Long id;
-    private LocalDate dateConsultation;
-    private LocalTime startTimeConsultation;
-    private LocalTime endTimeConsultation;
+    private LocalDate dateOfConsultation;
+    private LocalTime startTimeOfConsultation;
+    private LocalTime endTimeOfConsultation;
     private boolean available;
     @ManyToOne(cascade = {CascadeType.DETACH})
     @JoinColumn(name = "schedule_id")
