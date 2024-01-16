@@ -6,6 +6,7 @@ import healthcheck.dto.Authentication.SignUpRequest;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.enums.Role;
+import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
@@ -28,6 +29,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse signUp(SignUpRequest request) {
+        if (userAccountRepo.existsUserAccountByEmail(request.getEmail())) {
+            throw new AlreadyExistsException("User with this email already exists");
+        }
+
         UserAccount userAccount = UserAccount.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
