@@ -34,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token)) {
                 try {
                     String username = jwtService.validateToken(token);
-                    UserAccount user = userRepository.getUserByEmail(username)
+                    UserAccount user = userRepository.getUserAccountByEmail(username)
                             .orElseThrow(() ->
                                     new EntityNotFoundException("user with email: " + username + " not found"));
 

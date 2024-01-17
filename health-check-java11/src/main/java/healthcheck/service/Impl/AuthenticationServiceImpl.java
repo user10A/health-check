@@ -1,4 +1,10 @@
 package healthcheck.service.Impl;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import healthcheck.config.JwtService;
 import healthcheck.dto.Authentication.AuthenticationResponse;
 import healthcheck.dto.Authentication.SignInRequest;
@@ -11,11 +17,15 @@ import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
 import healthcheck.service.AuthenticationService;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 @Transactional
@@ -48,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         userRepo.save(user);
 
-        String jwt = jwtService.generateToken(userAccount);
+        String jwt = jwtService.generateToken(userAccount.getEmail());
 
         return AuthenticationResponse.builder()
                 .email(userAccount.getEmail())
@@ -57,24 +67,50 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
-
-
-
     @Override
     public AuthenticationResponse signIn(SignInRequest request) {
-        UserAccount user = userAccountRepo.getUserByEmail(request.getEmail()).orElseThrow(() ->
+        UserAccount user = userAccountRepo.getUserAccountByEmail(request.getEmail()).orElseThrow(() ->
                 new NotFoundException("Email not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Incorrect password");
         }
 
-        String jwt = jwtService.generateToken(user);
+        String jwt = jwtService.generateToken(user.getEmail());
 
         return AuthenticationResponse.builder()
                 .email(user.getEmail())
                 .role(user.getRole())
                 .token(jwt)
                 .build();
+    }
+
+    @PostConstruct
+    void init() throws IOException {
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(new ClassPathResource("google.json").getInputStream());
+        FirebaseOptions firebaseOptions = FirebaseOptions.builder()
+                .setCredentials(googleCredentials)
+                .build();
+        FirebaseApp.initializeApp(firebaseOptions, "My First Project");
+    }
+
+    @Override
+    public AuthenticationResponse authWithGoogleAccount(String tokenId) throws FirebaseAuthException {
+        FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(tokenId);
+        User user;
+        if (!userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
+            User newUser = new User();
+            String[] name = firebaseToken.getName().split(" ");
+            newUser.setFirstName(name[0]);
+            newUser.setLastName(name[1]);
+            newUser.setUserAccount(new UserAccount(firebaseToken.getEmail(), firebaseToken.getEmail(), Role.USER));
+            userRepo.save(newUser);
+        }
+
+        user = userRepo.findUserByUserAccountEmail(firebaseToken.getEmail());
+        return new AuthenticationResponse(user.getUserAccount().getEmail(),
+                jwtService.generateToken(user.getUserAccount().getEmail()),
+                user.getUserAccount().getRole());
     }
 }

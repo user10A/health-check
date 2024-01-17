@@ -1,13 +1,12 @@
 package healthcheck.api;
+import com.google.firebase.auth.FirebaseAuthException;
 import healthcheck.dto.Authentication.AuthenticationResponse;
 import healthcheck.dto.Authentication.SignInRequest;
 import healthcheck.dto.Authentication.SignUpRequest;
 import healthcheck.service.AuthenticationService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,12 +16,21 @@ public class AuthApi {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signUp")
+    @Operation(summary = "Sign Up", description = "Register a new user")
     public AuthenticationResponse signUp(@RequestBody SignUpRequest signUpRequest) {
         return authenticationService.signUp(signUpRequest);
     }
 
     @PostMapping("/signIn")
-    public AuthenticationResponse signIn(@RequestBody SignInRequest signInRequest){
+    @Operation(summary = "Sign In", description = "Authenticate and sign in the user")
+    public AuthenticationResponse signIn(@RequestBody SignInRequest signInRequest) {
         return authenticationService.signIn(signInRequest);
     }
+
+    @Operation(summary = "Authentication with Google", description = "Authentication via Google using Firebase")
+    @PostMapping("/authenticate/google")
+    public AuthenticationResponse authWithGoogleAccount(@RequestParam String tokenId) throws FirebaseAuthException {
+        return authenticationService.authWithGoogleAccount(tokenId);
+    }
+
 }
