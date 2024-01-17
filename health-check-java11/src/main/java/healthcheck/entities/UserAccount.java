@@ -30,7 +30,9 @@ import java.util.List;
 public class UserAccount implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "user_gen")
-    @SequenceGenerator(name = "user_gen",sequenceName = "user_seq",allocationSize = 1)
+    @SequenceGenerator(name = "user_gen",sequenceName = "user_seq",
+            initialValue = 21,
+            allocationSize = 1)
     private Long id;
     private String email;
     private String password;
@@ -38,7 +40,7 @@ public class UserAccount implements UserDetails {
     private Role role;
     private String verificationCode;
     private Date VerificationCodeTime;
-    @OneToOne(mappedBy = "userAccount",cascade = {CascadeType.REMOVE})
+    @OneToOne(mappedBy = "userAccount",cascade = {CascadeType.ALL})
     private User user;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -22,7 +22,9 @@ import java.time.LocalTime;
 public class TimeSheet {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "timeShift_gen")
-    @SequenceGenerator(name = "timeShift_gen",sequenceName = "timeShift_seq",allocationSize = 1)
+    @SequenceGenerator(name = "timeShift_gen",sequenceName = "timeShift_seq",
+            initialValue = 21,
+            allocationSize = 1)
     private Long id;
     private LocalDate dateOfConsultation;
     private LocalTime startTimeOfConsultation;
