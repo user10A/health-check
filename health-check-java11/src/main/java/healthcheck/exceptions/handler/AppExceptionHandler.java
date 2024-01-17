@@ -33,7 +33,7 @@ public class AppExceptionHandler {
                 .build();
     }
     @ExceptionHandler(BadCredentialsException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ExceptionResponse badCredentialsException(BadCredentialsException e){
         return ExceptionResponse.builder()
                 .httpStatus(HttpStatus.BAD_REQUEST)
