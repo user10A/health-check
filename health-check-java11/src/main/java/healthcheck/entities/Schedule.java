@@ -1,20 +1,6 @@
 package healthcheck.entities;
 import healthcheck.enums.Interval;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,14 +29,15 @@ public class Schedule {
     private LocalTime endBreakTime;
     @Enumerated(EnumType.STRING)
     private Interval intervalInMinutes;
-    @ElementCollection()
+    @ElementCollection
     @CollectionTable(name = "schedule_day_of_week", joinColumns = @JoinColumn(name = "schedule_id"))
-    @Enumerated(EnumType.STRING)
+    @MapKeyEnumerated(EnumType.STRING)
+    @MapKeyColumn(name = "day_of_week")
     @Column(name = "is_working_day")
     private Map<DayOfWeek, Boolean> dayOfWeek;
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
     private List<TimeSheet> timeSheets;
-    @OneToOne(mappedBy = "schedule",cascade = {CascadeType.DETACH})
+    @OneToOne(cascade = {CascadeType.DETACH})
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
     @ManyToOne

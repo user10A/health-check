@@ -34,7 +34,7 @@ public class Doctor {
     private Department department;
     @OneToMany(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     private List<Appointment> appointments;
-    @OneToOne(cascade = {CascadeType.REMOVE})
+    @OneToOne(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     private Schedule schedule;
 
 
