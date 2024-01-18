@@ -21,8 +21,8 @@ import java.time.LocalTime;
 @NoArgsConstructor
 public class TimeSheet {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "timeShift_gen")
-    @SequenceGenerator(name = "timeShift_gen",sequenceName = "timeShift_seq",
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "timeSheet_gen")
+    @SequenceGenerator(name = "timeSheet_gen",sequenceName = "timeSheet_seq",
             initialValue = 21,
             allocationSize = 1)
     private Long id;
