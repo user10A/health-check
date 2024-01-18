@@ -22,9 +22,7 @@ import java.util.List;
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "doctor_gen")
-    @SequenceGenerator(name = "doctor_gen",sequenceName = "doctor_seq",
-            initialValue = 26,
-            allocationSize = 1)
+    @SequenceGenerator(name = "doctor_gen",sequenceName = "doctor_seq", allocationSize = 1, initialValue = 21)
     private Long id;
     private String firstName;
     private String lastName;

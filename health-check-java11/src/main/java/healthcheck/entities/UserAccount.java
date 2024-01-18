@@ -30,9 +30,7 @@ import java.util.List;
 public class UserAccount implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "user_gen")
-    @SequenceGenerator(name = "user_gen",sequenceName = "user_seq",
-            initialValue = 21,
-            allocationSize = 1)
+    @SequenceGenerator(name = "user_gen",sequenceName = "user_seq", allocationSize = 1, initialValue = 21)
     private Long id;
     private String email;
     private String password;

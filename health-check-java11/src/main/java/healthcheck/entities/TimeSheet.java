@@ -22,9 +22,7 @@ import java.time.LocalTime;
 public class TimeSheet {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "timeSheet_gen")
-    @SequenceGenerator(name = "timeSheet_gen",sequenceName = "timeSheet_seq",
-            initialValue = 21,
-            allocationSize = 1)
+    @SequenceGenerator(name = "timeSheet_gen",sequenceName = "timeSheet_seq", allocationSize = 1, initialValue = 21)
     private Long id;
     private LocalDate dateOfConsultation;
     private LocalTime startTimeOfConsultation;

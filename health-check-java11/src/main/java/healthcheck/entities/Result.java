@@ -22,9 +22,7 @@ import java.time.LocalTime;
 public class Result {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "result_gen")
-    @SequenceGenerator(name = "result_gen",sequenceName = "result_seq",
-            initialValue = 21,
-            allocationSize = 1)
+    @SequenceGenerator(name = "result_gen",sequenceName = "result_seq", allocationSize = 1, initialValue = 21)
     private Long id;
     private LocalDate resultDate;
     private LocalTime timeOfUploadingResult;
