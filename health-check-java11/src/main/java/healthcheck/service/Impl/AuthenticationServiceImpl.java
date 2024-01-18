@@ -72,7 +72,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         UserAccount user = userAccountRepo.getUserAccountByEmail(request.getEmail()).orElseThrow(() ->
                 new NotFoundException("Email not found"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        String passwordBCryp = request.getPassword();
+        passwordEncoder.encode(passwordBCryp);
+
+        if (!passwordEncoder.matches(passwordBCryp, user.getPassword())) {
             throw new BadCredentialsException("Incorrect password");
         }
 

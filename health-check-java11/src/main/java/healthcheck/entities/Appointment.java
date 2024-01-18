@@ -25,7 +25,7 @@ import java.time.LocalTime;
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "onlineAppointment_gen")
-    @SequenceGenerator(name = "onlineAppointment_gen",sequenceName = "onlineAppointment_seq",allocationSize = 1)
+    @SequenceGenerator(name = "onlineAppointment_gen",sequenceName = "onlineAppointment_seq", allocationSize = 1, initialValue = 21)
     private Long id;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;

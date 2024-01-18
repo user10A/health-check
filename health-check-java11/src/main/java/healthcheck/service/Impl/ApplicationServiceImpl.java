@@ -1,9 +1,11 @@
 package healthcheck.service.Impl;
 import healthcheck.dto.Application.ApplicationRequest;
+import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Application;
 import healthcheck.repo.ApplicationRepo;
 import healthcheck.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,7 +17,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepo applicationRepo;
 
     @Override
-    public void createApplication(ApplicationRequest applicationRequest) {
+    public SimpleResponse createApplication(ApplicationRequest applicationRequest) {
         Application application = Application.builder().username(applicationRequest.getUsername())
                 .dateOfApplicationCreation(LocalDate.now())
                 .phoneNumber(applicationRequest.getPhoneNumber())
@@ -23,5 +25,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .build();
 
         applicationRepo.save(application);
+        return SimpleResponse.builder().message("Успешно создан!").httpStatus(HttpStatus.CREATED).build();
     }
 }
