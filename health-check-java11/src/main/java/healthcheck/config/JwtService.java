@@ -32,6 +32,6 @@ public class JwtService {
                         .build();
 
         DecodedJWT jwt = jwtVerifier.verify(token);
-        return jwt.getClaim("username").asString();
+        return jwt.getClaim("email").asString();
     }
 }

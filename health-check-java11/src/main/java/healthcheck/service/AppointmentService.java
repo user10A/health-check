@@ -1,5 +1,9 @@
 package healthcheck.service;
 
-public interface AppointmentService {
+import healthcheck.dto.Appointment.AppointmentResponse;
 
+import java.util.List;
+
+public interface AppointmentService {
+    List<AppointmentResponse> getAllAppointment(String word);
 }

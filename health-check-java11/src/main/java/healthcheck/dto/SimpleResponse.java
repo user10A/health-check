@@ -12,4 +12,9 @@ import org.springframework.http.HttpStatus;
 public class SimpleResponse {
     private String message;
     private HttpStatus httpStatus;
+
+    public SimpleResponse(HttpStatus httpStatus, String successMessage) {
+        this.httpStatus=httpStatus;
+        this.message=successMessage;
+    }
 }

@@ -1,7 +1,9 @@
 package healthcheck.service;
+import healthcheck.dto.SimpleResponse;
+import healthcheck.dto.User.ChangePasswordUserRequest;
 import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ProfileResponse;
 
 public interface UserService {
-    ProfileResponse editUserProfile(ProfileRequest profileRequest);
+    SimpleResponse editUserProfile(ProfileRequest profileRequest);
+    SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest);
 }

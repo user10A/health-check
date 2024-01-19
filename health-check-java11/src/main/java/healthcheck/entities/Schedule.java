@@ -1,11 +1,27 @@
 package healthcheck.entities;
+import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Interval;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Column;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.MapKeyEnumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -34,7 +50,7 @@ public class Schedule {
     @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "day_of_week")
     @Column(name = "is_working_day")
-    private Map<DayOfWeek, Boolean> dayOfWeek;
+    private Map<DaysOfRepetition, Boolean> dayOfWeek;
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
     private List<TimeSheet> timeSheets;
     @OneToOne(cascade = {CascadeType.DETACH})

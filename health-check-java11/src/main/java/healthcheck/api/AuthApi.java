@@ -5,6 +5,7 @@ import healthcheck.dto.Authentication.SignInRequest;
 import healthcheck.dto.Authentication.SignUpRequest;
 import healthcheck.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class AuthApi {
 
     @PostMapping("/signUp")
     @Operation(summary = "Sign Up", description = "Register a new user")
-    public AuthenticationResponse signUp(@RequestBody SignUpRequest signUpRequest) {
+    public AuthenticationResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
         return authenticationService.signUp(signUpRequest);
     }
 
