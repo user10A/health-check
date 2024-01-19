@@ -22,7 +22,7 @@ import java.util.List;
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "doctor_gen")
-    @SequenceGenerator(name = "doctor_gen",sequenceName = "doctor_seq",allocationSize = 1)
+    @SequenceGenerator(name = "doctor_gen",sequenceName = "doctor_seq", allocationSize = 1, initialValue = 21)
     private Long id;
     private String firstName;
     private String lastName;
@@ -34,7 +34,7 @@ public class Doctor {
     private Department department;
     @OneToMany(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     private List<Appointment> appointments;
-    @OneToOne(cascade = {CascadeType.REMOVE})
+    @OneToOne(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     private Schedule schedule;
 
 

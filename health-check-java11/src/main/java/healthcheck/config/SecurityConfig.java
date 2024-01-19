@@ -31,11 +31,12 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/auth/**",
                                         "/swagger-ui/**",
-                                        "/actuator/**"
+                                        "/actuator/**",
+                                        "/v3/api-docs/**"
                                 )
                                 .permitAll()
-                        .anyRequest()
-                        .permitAll()
+                                .anyRequest()
+                                .authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -26,12 +26,12 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .processed(false)
                 .build();
 
-        try {
+      try {
             applicationRepo.save(application);
             String successMessage = "Успешно сохранен!";
             log.info(successMessage);
             return new SimpleResponse(HttpStatus.OK, successMessage);
-        } catch (Exception e) {
+      } catch (Exception e) {
             String errorMessage = "Ошибка при сохранении заявки: " + e.getMessage();
             log.info(errorMessage);
             return SimpleResponse.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();

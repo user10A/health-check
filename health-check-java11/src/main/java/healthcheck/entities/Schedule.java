@@ -35,7 +35,7 @@ import java.util.Map;
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "schedule_gen")
-    @SequenceGenerator(name = "schedule_gen",sequenceName = "schedule_seq",allocationSize = 1)
+    @SequenceGenerator(name = "schedule_gen",sequenceName = "schedule_seq", allocationSize = 1, initialValue = 26)
     private Long id;
     private LocalDate startDateWork;
     private LocalDate endDateWork;
@@ -53,7 +53,7 @@ public class Schedule {
     private Map<DaysOfRepetition, Boolean> dayOfWeek;
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
     private List<TimeSheet> timeSheets;
-    @OneToOne(mappedBy = "schedule",cascade = {CascadeType.DETACH})
+    @OneToOne(cascade = {CascadeType.DETACH})
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
     @ManyToOne
