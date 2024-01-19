@@ -19,8 +19,8 @@ public class ApplicationApi {
 
     private final ApplicationService applicationService;
 
-    @Operation(summary = "Create a new application", description = "Endpoint for creating a new application")
-    @PostMapping("/applications")
+    @PostMapping("/createApplication")
+    @Operation(summary = "Create Application", description = "Endpoint to create a new application.")
     public SimpleResponse createApplication(@Valid @RequestBody ApplicationRequest applicationRequest){
         return applicationService.createApplication(applicationRequest);
     }
