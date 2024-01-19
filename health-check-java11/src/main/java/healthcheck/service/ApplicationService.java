@@ -1,7 +1,8 @@
 package healthcheck.service;
 
 import healthcheck.dto.Application.ApplicationRequest;
+import healthcheck.dto.SimpleResponse;
 
 public interface ApplicationService {
-    void createApplication(ApplicationRequest applicationRequest);
+    SimpleResponse createApplication(ApplicationRequest applicationRequest);
 }

@@ -1,4 +1,9 @@
 package healthcheck.dto;
+import lombok.Builder;
+import org.springframework.http.HttpStatus;
 
-public class SimpleResponse {
+@Builder
+public record SimpleResponse(HttpStatus status,
+                             String message) {
+
 }
