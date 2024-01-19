@@ -1,11 +1,11 @@
 package healthcheck.enums;
 
 public enum DaysOfRepetition {
-    Пн,
-    Вт,
-    Ср,
-    Чт,
-    Пт,
-    Сб,
-    Вс;
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
 }

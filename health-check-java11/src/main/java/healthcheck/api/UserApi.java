@@ -1,16 +1,14 @@
 package healthcheck.api;
-
+import healthcheck.dto.User.UserResponse;
 import healthcheck.dto.User.ProfileRequest;
 import healthcheck.dto.User.ProfileResponse;
+import healthcheck.dto.User.UserResponseGetById;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,5 +22,27 @@ public class UserApi {
     @PostAuthorize("hasAuthority('USER')")
     public ProfileResponse editUserProfile(@RequestBody ProfileRequest profileRequest){
         return userService.editUserProfile(profileRequest);
+    }
+
+    @GetMapping("/getAppointmentsOfUser")
+    @Operation(summary = "get all appointments of user",
+            description = "this method allows to get all appointments")
+    public List<UserResponse> getAllAppointmentsOfUser() {
+        return userService.getAllAppointmentsOfUser();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "get appointment by user id",
+            description = "page of appointment of user")
+    public UserResponseGetById getAppointmentById(@PathVariable Long id) {
+        return userService.getById(id);
+    }
+
+    @DeleteMapping("/deleteAppointmentsOfUser")
+    @Operation(summary = "delete appointments of user",
+            description = " this method allows to delete appointments of user")
+    public String clearMyAppointments() {
+        int deletedCount = userService.clearMyAppointments();
+        return "Deleted " + deletedCount + " appointments.";
     }
 }
