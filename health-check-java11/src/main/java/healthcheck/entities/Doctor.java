@@ -37,5 +37,7 @@ public class Doctor {
     @OneToOne(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     private Schedule schedule;
 
-
+    public String getFullNameDoctor() {
+        return this.getFirstName() + " " + this.getLastName();
+    }
 }

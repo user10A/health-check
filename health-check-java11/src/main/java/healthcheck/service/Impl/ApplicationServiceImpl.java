@@ -34,7 +34,7 @@ public class ApplicationServiceImpl implements ApplicationService {
       } catch (Exception e) {
             String errorMessage = "Ошибка при сохранении заявки: " + e.getMessage();
             log.info(errorMessage);
-            return SimpleResponse.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();
+            return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();
         }
     }
 }
