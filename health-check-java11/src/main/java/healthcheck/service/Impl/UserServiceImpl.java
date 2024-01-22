@@ -58,18 +58,20 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
+   @Override
     public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String email = authentication.getName();
-            log.info(email);
 
             UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+            String oldPassword = changePasswordUserRequest.getOldPassword();
 
-            if(!userAccount.getPassword().equals(changePasswordUserRequest.getOldPassword()) &&
-                    !changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())){
-                throw new InvalidPasswordException("Error password");
+            if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
+                if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
+                    throw new InvalidPasswordException("Error new password");
+                }
+                throw new InvalidPasswordException("Error old password");
             }
 
             String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
