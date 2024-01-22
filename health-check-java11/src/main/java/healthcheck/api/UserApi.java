@@ -3,15 +3,16 @@ package healthcheck.api;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.ChangePasswordUserRequest;
 import healthcheck.dto.User.ProfileRequest;
+import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,5 +33,26 @@ public class UserApi {
     @PostAuthorize("hasAuthority('USER')")
     public SimpleResponse changeUserPassword(@Valid @RequestBody ChangePasswordUserRequest changePasswordUserRequest){
         return userService.changePassword(changePasswordUserRequest);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")    @DeleteMapping()
+    @Operation(summary = "Удаление пациента",description = "Метод Удаление пациента по ID")
+    public SimpleResponse deleteByUserId(@RequestParam Long id){
+        return userService.deletePatientsById(id);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/getAllPatients")
+    @Operation(summary = "Страница получение пациентов", description = "Метод получение всех пациентов")
+    public List<ResultUsersResponse> responses(){
+        return userService.getAllPatients();
+    }
+
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("search")
+    @Operation(summary = "Страница получение пациентов по поиску",description = "метод поиска по имени и фио или по email")
+    public List<ResultUsersResponse> responsesBySearch(@RequestParam String word){
+        return userService.getAllPatientsBySearch(word);
     }
 }
