@@ -1,5 +1,6 @@
 package healthcheck.service.Impl;
 import healthcheck.dto.Application.ApplicationRequest;
+import healthcheck.dto.Application.ApplicationResponse;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Application;
 import healthcheck.repo.ApplicationRepo;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +38,10 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.info(errorMessage);
             return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();
         }
+    }
+
+    @Override
+    public List<ApplicationResponse> getApplications(String word) {
+        return applicationRepo.getApplications(word);
     }
 }
