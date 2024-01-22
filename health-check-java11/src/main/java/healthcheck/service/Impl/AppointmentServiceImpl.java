@@ -26,7 +26,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         for (Appointment appointment : all) {
             if (appointment.getStatus().equals(Status.CONFIRMED)) {
                 status = false;
-            } else if (appointment.getStatus().equals(Status.CANCELLED)) {
+            } else if (appointment.getStatus().equals(Status.COMPLETE)) {
                 status = true;
             }
 
