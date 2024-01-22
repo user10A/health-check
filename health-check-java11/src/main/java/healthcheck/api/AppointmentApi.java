@@ -16,10 +16,10 @@ public class AppointmentApi {
 
     private final AppointmentService appointmentService;
 
-    @GetMapping("/getAppointment")
+   @GetMapping("/getAppointment")
     @Operation(summary = "Get appointment", description = "Endpoint to get appointment.")
     @PostAuthorize("hasAuthority('ADMIN')")
-    public List<AppointmentResponse> createApplication(String word){
+    public List<AppointmentResponse> getAppointment(String word){
         return appointmentService.getAllAppointment(word);
     }
 }
