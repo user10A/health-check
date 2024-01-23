@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DepartmentRepo extends JpaRepository<Department,Long> {
-    @Query("select d from Department d where d.facility =:facility")
+    @Query("select d from Department d where d.facility = :facility")
     Department getByFacilityName(@Param("facility") String facility);
 
 }
