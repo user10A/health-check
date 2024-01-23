@@ -1,14 +1,14 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ProfileResponse;
-import healthcheck.dto.User.UserResponse;
-import healthcheck.dto.User.UserResponseGetById;
+import healthcheck.dto.User.ResponseToGetUserAppointments;
+import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.entities.User;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.ChangePasswordUserRequest;
+import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
@@ -24,14 +24,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
-    private final UserAccountRepo userAccountRepo;
     private final UserDao userDao;
+    private final UserAccountRepo userAccountRepo;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -68,7 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllAppointmentsOfUser() {
+    public List<ResponseToGetUserAppointments> getAllAppointmentsOfUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
@@ -79,8 +81,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseGetById getById(Long id) {
-        return userDao.getById(id);
+    public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
+        return userDao.getUserAppointmentById(id);
     }
 
     @Override
@@ -93,33 +95,54 @@ public class UserServiceImpl implements UserService {
         });
         return userDao.clearMyAppointments(user.getId());
     }
-}
 
    @Override
     public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
+       try {
+           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+           String email = authentication.getName();
 
-            UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
-            String oldPassword = changePasswordUserRequest.getOldPassword();
+           UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+           String oldPassword = changePasswordUserRequest.getOldPassword();
 
-            if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
-                if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
-                    throw new InvalidPasswordException("Error new password");
-                }
-                throw new InvalidPasswordException("Error old password");
-            }
+           if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
+               if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
+                   throw new InvalidPasswordException("Error new password");
+               }
+               throw new InvalidPasswordException("Error old password");
+           }
 
-            String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
-            userAccount.setPassword(newPassword);
+           String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
+           userAccount.setPassword(newPassword);
 
-            userAccountRepo.save(userAccount);
+           userAccountRepo.save(userAccount);
 
-            return SimpleResponse.builder().message("Успешно изменен пароль!").httpStatus(HttpStatus.OK).build();
-        } catch (DataUpdateException e) {
-            log.error("Error editing change password", e);
-            throw new RuntimeException("Error editing change password", e);
+           return SimpleResponse.builder().message("Успешно изменен пароль!").httpStatus(HttpStatus.OK).build();
+       } catch (DataUpdateException e) {
+           log.error("Error editing change password", e);
+           throw new RuntimeException("Error editing change password", e);
+       }
+   }
+
+    @Override
+    public SimpleResponse deletePatientsById(Long id) {
+        Optional<User> optionalUser = userRepo.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            userRepo.delete(user);
+            return new SimpleResponse("User successfully deleted", HttpStatus.OK);
+        } else {
+            return new SimpleResponse("User not found", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Override
+    public List<ResultUsersResponse> getAllPatients() {
+        return userDao.getAllPatients();
+    }
+
+    @Override
+    public List<ResultUsersResponse> getAllPatientsBySearch(String word) {
+        return userRepo.resultUsersBySearch(word);
     }
 }

@@ -1,6 +1,8 @@
-package healthcheck.repo.Dao.impl;
-import healthcheck.dto.User.UserResponse;
-import healthcheck.dto.User.UserResponseGetById;
+package healthcheck.repo.Dao.Impl;
+
+import healthcheck.dto.User.ResponseToGetUserAppointments;
+import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
+import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.enums.Status;
 import healthcheck.repo.Dao.UserDao;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,8 +17,33 @@ public class UserDaoImpl implements UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
     @Override
-    public List<UserResponse> getAllAppointmentsOfUser(Long id) {
+    public List<ResultUsersResponse> getAllPatients() {
+        var sql = """
+                SELECT
+                u.id
+                concat(u.first_name,' ',u.last_name) as full_name,
+                u.phone_number,
+                ua.email ,
+                r.result_date  from users u
+                join public.result r on r.user_id = u.id
+                join public.user_account ua on ua.id = u.user_account_id
+                order by full_name;
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ResultUsersResponse response = new ResultUsersResponse();
+            response.setId(rs.getLong("id"));
+            response.setSurname(rs.getString("full_name"));
+            response.setPhoneNumber(rs.getString("phone_number"));
+            response.setEmail(rs.getString("email"));
+            response.setResultDate(rs.getDate("result_date").toLocalDate());
+            return response;
+        });
+    }
+
+    @Override
+    public List<ResponseToGetUserAppointments> getAllAppointmentsOfUser(Long id) {
         var sql = """
                    SELECT
                        a.appointment_date,
@@ -42,7 +69,7 @@ public class UserDaoImpl implements UserDao {
                        u.id,
                        d.image;
                 """;
-        return jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) -> UserResponse.builder()
+        return jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) -> ResponseToGetUserAppointments.builder()
                 .appointmentDate(rs.getDate(1).toLocalDate())
                 .appointmentTime(rs.getTime(2).toLocalTime())
                 .status(Status.valueOf(rs.getString(3).toUpperCase()))  // Convert to upper case for safety
@@ -53,7 +80,7 @@ public class UserDaoImpl implements UserDao {
                 .build());
     }
     @Override
-    public UserResponseGetById getById(Long id) {
+    public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
         var sql = """
                     SELECT
                         u.first_name as first_name,
@@ -88,7 +115,7 @@ public class UserDaoImpl implements UserDao {
                 """;
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) ->
-                    UserResponseGetById.builder()
+                    ResponseToGetAppointmentByUserId.builder()
                             .first_name(rs.getString("first_name"))
                             .last_name(rs.getString("last_name"))
                             .email(rs.getString("email"))

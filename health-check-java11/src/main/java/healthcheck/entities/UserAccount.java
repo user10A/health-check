@@ -36,7 +36,7 @@ public class UserAccount implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private String verificationCode;
+    private String tokenPassword;
     private Date VerificationCodeTime;
     @OneToOne(mappedBy = "userAccount",cascade = {CascadeType.ALL})
     private User user;

@@ -1,27 +1,36 @@
 package healthcheck.exceptions.handler;
 
 import healthcheck.exceptions.*;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@RestController
+@RestControllerAdvice
 public class AppExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleInvalidArguments(MethodArgumentNotValidException exception) {
-        Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult()
-                .getFieldErrors()
-                .forEach(fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
-        return errors;
+    public ResponseEntity<Object> handleValidationExceptions(@NotNull MethodArgumentNotValidException ex) {
+        BindingResult result = ex.getBindingResult();
+
+        List<String> errorMessages = result.getFieldErrors()
+                .stream()
+                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.badRequest().body(errorMessages);
     }
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
