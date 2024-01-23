@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleResponse {
+  
     private String message;
     private HttpStatus httpStatus;
 
