@@ -58,14 +58,14 @@ public class UserApi {
 
     @PreAuthorize("hasAuthority('ADMIN')")    @DeleteMapping()
     @Operation(summary = "Удаление пациента",description = "Метод Удаление пациента по ID")
-    public SimpleResponse deleteByUserId(@RequestParam Long id){
+    public SimpleResponse deletePatientById(@RequestParam Long id){
         return userService.deletePatientsById(id);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/getAllPatients")
     @Operation(summary = "Страница получение пациентов", description = "Метод получение всех пациентов")
-    public List<ResultUsersResponse> responses(){
+    public List<ResultUsersResponse> getAllPatients(){
         return userService.getAllPatients();
     }
 
@@ -73,7 +73,7 @@ public class UserApi {
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("search")
     @Operation(summary = "Страница получение пациентов по поиску",description = "метод поиска по имени и фио или по email")
-    public List<ResultUsersResponse> responsesBySearch(@RequestParam String word){
+    public List<ResultUsersResponse> getPatientsBySearch(@RequestParam String word){
         return userService.getAllPatientsBySearch(word);
     }
 
