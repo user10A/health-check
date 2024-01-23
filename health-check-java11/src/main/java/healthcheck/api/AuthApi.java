@@ -4,7 +4,7 @@ import healthcheck.dto.Authentication.AuthenticationResponse;
 import healthcheck.dto.Authentication.SignInRequest;
 import healthcheck.dto.Authentication.SignUpRequest;
 import healthcheck.dto.SimpleResponse;
-import healthcheck.email.EmailServiceImpl;
+import healthcheck.email.EmailService;
 import healthcheck.service.AuthenticationService;
 import healthcheck.validation.EmailValidation;
 import healthcheck.validation.ValidPassword;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthApi {
 
     private final AuthenticationService authenticationService;
-    private final EmailServiceImpl emailService;
+    private final EmailService emailService;
     @PostMapping("/signUp")
     @Operation(summary = "Sign Up", description = "Register a new user")
     public AuthenticationResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
