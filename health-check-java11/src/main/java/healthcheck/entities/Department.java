@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -35,4 +37,11 @@ public class Department {
     private List<Schedule> schedules;
     @OneToMany(mappedBy = "department")
     private List<Result> results;
+
+    public void addDoctor(Doctor doctor) {
+        if (doctor == null) {
+            doctors = new ArrayList<>();
+        }
+        doctors.add(doctor);
+    }
 }

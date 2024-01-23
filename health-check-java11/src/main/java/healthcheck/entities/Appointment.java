@@ -39,5 +39,4 @@ public class Appointment {
     private Department department;
     @ManyToOne(cascade = {CascadeType.DETACH})
     private Doctor doctor;
-
 }

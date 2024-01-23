@@ -1,8 +1,10 @@
 package healthcheck.api;
-import healthcheck.dto.User.UserResponse;
-import healthcheck.dto.User.ProfileRequest;
+
 import healthcheck.dto.User.ProfileResponse;
 import healthcheck.dto.User.UserResponseGetById;
+import healthcheck.dto.SimpleResponse;
+import healthcheck.dto.User.ChangePasswordUserRequest;
+import healthcheck.dto.User.ProfileRequest;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +18,6 @@ import java.util.List;
 public class UserApi {
 
     private final UserService userService;
-
-    @Operation(summary = "Edit user profile", description = "Endpoint to edit the user's profile information")
-    @PostMapping("/editUserProfile")
-    @PostAuthorize("hasAuthority('USER')")
-    public ProfileResponse editUsersProfile(@RequestBody ProfileRequest profileRequest){
-        return userService.editUserProfile(profileRequest);
-    }
 
     @GetMapping
     @Operation(summary = "get all appointments of user",
@@ -46,3 +41,17 @@ public class UserApi {
         return "Deleted " + deletedCount + " appointments.";
     }
 }
+
+    @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    public SimpleResponse editUserProfile(@Valid @RequestBody ProfileRequest profileRequest){
+        return userService.editUserProfile(profileRequest);
+    }
+
+    @Operation(summary = "Change user password", description = "Endpoint for authenticated users to change their password.")
+    @PostMapping("/changeUserPassword")
+    @PostAuthorize("hasAuthority('USER')")
+    public SimpleResponse changeUserPassword(@Valid @RequestBody ChangePasswordUserRequest changePasswordUserRequest){
+        return userService.changePassword(changePasswordUserRequest);
+    }
+}
+

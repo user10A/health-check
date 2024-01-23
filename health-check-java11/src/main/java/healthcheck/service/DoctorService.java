@@ -1,5 +1,8 @@
 package healthcheck.service;
 
-public interface DoctorService {
+import healthcheck.dto.Doctor.DoctorSaveRequest;
+import healthcheck.dto.SimpleResponse;
 
+public interface DoctorService {
+    SimpleResponse saveDoctor(DoctorSaveRequest request);
 }
