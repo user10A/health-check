@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("api/user")
 public class UserApi {
 
     private final UserService userService;
@@ -20,14 +20,14 @@ public class UserApi {
     @Operation(summary = "Edit user profile", description = "Endpoint to edit the user's profile information")
     @PostMapping("/editUserProfile")
     @PostAuthorize("hasAuthority('USER')")
-    public ProfileResponse editUserProfile(@RequestBody ProfileRequest profileRequest){
+    public ProfileResponse editUsersProfile(@RequestBody ProfileRequest profileRequest){
         return userService.editUserProfile(profileRequest);
     }
 
-    @GetMapping("/getAppointmentsOfUser")
+    @GetMapping
     @Operation(summary = "get all appointments of user",
             description = "this method allows to get all appointments")
-    public List<UserResponse> getAllAppointmentsOfUser() {
+    public List<UserResponse> getAllUsersAppointments() {
         return userService.getAllAppointmentsOfUser();
     }
 
@@ -38,10 +38,10 @@ public class UserApi {
         return userService.getById(id);
     }
 
-    @DeleteMapping("/deleteAppointmentsOfUser")
+    @DeleteMapping
     @Operation(summary = "delete appointments of user",
             description = " this method allows to delete appointments of user")
-    public String clearMyAppointments() {
+    public String clearUsersAppointments() {
         int deletedCount = userService.clearMyAppointments();
         return "Deleted " + deletedCount + " appointments.";
     }
