@@ -1,4 +1,5 @@
 package healthcheck.service.Impl;
+
 import healthcheck.dto.Appointment.AppointmentResponse;
 import healthcheck.entities.Appointment;
 import healthcheck.enums.Status;
@@ -7,7 +8,6 @@ import healthcheck.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
