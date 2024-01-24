@@ -7,7 +7,7 @@ import java.time.LocalTime;
 
 @Data
 @Builder
-public class UserResponseGetById {
+public class ResponseToGetAppointmentByUserId {
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
     private Status status;
@@ -19,7 +19,7 @@ public class UserResponseGetById {
     private String email;
     private String image;
 
-    public UserResponseGetById(LocalDate appointmentDate, LocalTime appointmentTime, Status status, String surnameOfDoctor, String department, String first_name, String last_name, String phone_number, String email, String image) {
+    public ResponseToGetAppointmentByUserId(LocalDate appointmentDate, LocalTime appointmentTime, Status status, String surnameOfDoctor, String department, String first_name, String last_name, String phone_number, String email, String image) {
         this.appointmentDate = appointmentDate;
         this.appointmentTime = appointmentTime;
         this.status = status;

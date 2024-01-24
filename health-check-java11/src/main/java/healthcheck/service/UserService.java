@@ -1,11 +1,7 @@
 package healthcheck.service;
 import healthcheck.dto.SimpleResponse;
-import healthcheck.dto.User.ChangePasswordUserRequest;
-import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ResultUsersResponse;
-import healthcheck.dto.User.ProfileResponse;
-import healthcheck.dto.User.UserResponse;
-import healthcheck.dto.User.UserResponseGetById;
+import healthcheck.dto.User.*;
+
 import java.util.List;
 
 public interface UserService {
@@ -14,7 +10,9 @@ public interface UserService {
     SimpleResponse deletePatientsById(Long id);
     List<ResultUsersResponse> getAllPatients() ;
     List<ResultUsersResponse> getAllPatientsBySearch(String word);
-    List<UserResponse> getAllAppointmentsOfUser();
-    UserResponseGetById getById(Long id);
+    List<ResponseToGetUserAppointments> getAllAppointmentsOfUser();
+    ResponseToGetAppointmentByUserId getUserAppointmentById(Long id);
     int clearMyAppointments();
+    ResponseToGetUserById getUserById(Long id);
+
 }
