@@ -3,6 +3,7 @@ package healthcheck.api;
 import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorSaveRequest;
 import healthcheck.dto.Doctor.DoctorUpdateRequest;
+import healthcheck.dto.Doctor.ResponseToGetDoctorsByDepartment;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.service.DoctorService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,5 +38,9 @@ public class DoctorApi {
     @Operation(summary = "Update doctor", description = "This endpoint allows an admin to update doctor.")
     public SimpleResponse updateDoctor(@RequestParam Long id,@RequestBody DoctorUpdateRequest request) {
         return doctorService.updateDoctor(id,request);
+    }
+    @GetMapping("/byDepartment")
+    public List<ResponseToGetDoctorsByDepartment> getDoctorsByDepartment() {
+        return doctorService.getDoctorsByDepartment();
     }
 }
