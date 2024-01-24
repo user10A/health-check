@@ -1,5 +1,4 @@
 package healthcheck.repo.Dao.Impl;
-
 import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.dto.User.ResultUsersResponse;
