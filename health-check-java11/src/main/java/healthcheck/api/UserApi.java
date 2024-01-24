@@ -53,7 +53,7 @@ public class UserApi {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @DeleteMapping()
+    @DeleteMapping("/{id}")
     @Operation(summary = "Удаление пациента",description = "Метод Удаление пациента по ID")
     public SimpleResponse deletePatientById(@RequestParam Long id){
         return userService.deletePatientsById(id);
