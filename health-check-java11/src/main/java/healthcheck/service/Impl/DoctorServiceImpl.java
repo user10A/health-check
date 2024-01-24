@@ -1,11 +1,11 @@
 package healthcheck.service.Impl;
+import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorSaveRequest;
-import healthcheck.dto.Doctor.ResponseToGetDoctorsByDepartment;
+import healthcheck.dto.Doctor.DoctorUpdateRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
 import healthcheck.exceptions.NotFoundException;
-import healthcheck.repo.Dao.DoctorDao;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.service.DoctorService;
@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,7 +21,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
-    private final DoctorDao doctorDao;
+
     @Override
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
         Department department = departmentRepo.findById(request.getDepartmentId())
@@ -53,7 +51,37 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<ResponseToGetDoctorsByDepartment> getDoctorsByDepartment() {
-        return doctorDao.getDoctorsByDepartment();
+    public DoctorResponse getDoctorById(Long id) {
+        Doctor doctor = doctorRepo.findById(id)
+                .orElseThrow(()-> new NotFoundException("Доктор c таким id :"+id+" не найден"));
+        return DoctorResponse.builder()
+                .firstName(doctor.getFirstName())
+                .lastName(doctor.getLastName())
+                .position(doctor.getPosition())
+                .image(doctor.getImage())
+                .department(doctor.getDepartment().getFacility().name())
+                .description(doctor.getDescription())
+                .build();
+    }
+
+    @Override
+    public SimpleResponse updateDoctor(Long id,DoctorUpdateRequest request) {
+        Department department = departmentRepo.getByFacilityName(request.getFacility());
+        Doctor doctor =
+                doctorRepo.findById(id)
+                .orElseThrow(()-> new NotFoundException("Доктор c таким id :"+id+" не найден"));
+        doctor = Doctor.builder()
+                .id(doctor.getId())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .position(request.getPosition())
+                .image(request.getImage())
+                .department(department)
+                .description(request.getDescription())
+                .build();
+        department.addDoctor(doctor);
+        doctorRepo.save(doctor);
+        departmentRepo.save(department);
+        return new SimpleResponse("doctor successfully updated",HttpStatus.OK);
     }
 }
