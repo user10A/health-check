@@ -1,21 +1,17 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ProfileResponse;
-import healthcheck.dto.User.UserResponse;
-import healthcheck.dto.User.UserResponseGetById;
+import healthcheck.dto.User.ResponseToGetUserAppointments;
+import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.entities.User;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.ChangePasswordUserRequest;
-import healthcheck.dto.User.ProfileRequest;
 import healthcheck.dto.User.ResultUsersResponse;
-import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
-import healthcheck.repo.Dao.UserDao;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
 import healthcheck.service.UserService;
@@ -28,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,7 +34,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserDao userDao;
     private final UserAccountRepo userAccountRepo;
-    private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -76,7 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllAppointmentsOfUser() {
+    public List<ResponseToGetUserAppointments> getAllAppointmentsOfUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
@@ -87,8 +81,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseGetById getById(Long id) {
-        return userDao.getById(id);
+    public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
+        return userDao.getUserAppointmentById(id);
     }
 
     @Override

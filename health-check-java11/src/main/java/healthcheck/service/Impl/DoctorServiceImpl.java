@@ -2,10 +2,12 @@ package healthcheck.service.Impl;
 import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorSaveRequest;
 import healthcheck.dto.Doctor.DoctorUpdateRequest;
+import healthcheck.dto.Doctor.ResponseToGetDoctorsByDepartment;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.DoctorDao;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.service.DoctorService;
@@ -14,12 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepo doctorRepo;
+    private final DoctorDao doctorDao;
     private final DepartmentRepo departmentRepo;
 
     @Override
@@ -83,5 +88,10 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepo.save(doctor);
         departmentRepo.save(department);
         return new SimpleResponse("doctor successfully updated",HttpStatus.OK);
+    }
+
+    @Override
+    public List<ResponseToGetDoctorsByDepartment> getDoctorsByDepartment() {
+        return doctorDao.getDoctorsByDepartment();
     }
 }

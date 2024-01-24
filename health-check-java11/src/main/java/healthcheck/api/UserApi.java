@@ -1,13 +1,10 @@
 package healthcheck.api;
 
-import healthcheck.dto.User.ProfileResponse;
-import healthcheck.dto.User.UserResponseGetById;
+import healthcheck.dto.User.*;
 import healthcheck.dto.SimpleResponse;
-import healthcheck.dto.User.ChangePasswordUserRequest;
-import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,28 +18,27 @@ public class UserApi {
 
     private final UserService userService;
 
-    @GetMapping
+    @GetMapping("/getAllAppointmentsOfUser")
     @Operation(summary = "get all appointments of user",
             description = "this method allows to get all appointments")
-    public List<UserResponse> getAllUsersAppointments() {
+    public List<ResponseToGetUserAppointments> getAllUsersAppointments() {
         return userService.getAllAppointmentsOfUser();
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "get appointment by user id",
             description = "page of appointment of user")
-    public UserResponseGetById getAppointmentById(@PathVariable Long id) {
-        return userService.getById(id);
+    public ResponseToGetAppointmentByUserId getUserAppointmentById(@PathVariable Long id) {
+        return userService.getUserAppointmentById(id);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/deleteAppointments")
     @Operation(summary = "delete appointments of user",
             description = " this method allows to delete appointments of user")
     public String clearUsersAppointments() {
         int deletedCount = userService.clearMyAppointments();
         return "Deleted " + deletedCount + " appointments.";
     }
-}
 
     @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public SimpleResponse editUserProfile(@Valid @RequestBody ProfileRequest profileRequest){
@@ -56,7 +52,8 @@ public class UserApi {
         return userService.changePassword(changePasswordUserRequest);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")    @DeleteMapping()
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Удаление пациента",description = "Метод Удаление пациента по ID")
     public SimpleResponse deletePatientById(@RequestParam Long id){
         return userService.deletePatientsById(id);
