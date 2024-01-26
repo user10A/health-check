@@ -41,7 +41,7 @@ public class Schedule {
     private LocalDate endDateWork;
     private LocalTime startDayTime;
     private LocalTime endDayTime;
-    private LocalTime StartBreakTime;
+    private LocalTime startBreakTime;
     private LocalTime endBreakTime;
     @Enumerated(EnumType.STRING)
     private Interval intervalInMinutes;

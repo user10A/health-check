@@ -27,7 +27,7 @@ public class UserApi {
         return userService.editUserProfile(profileRequest);
     }
 
-    @Operation(summary = "Change user password", description = "Endpoint for authenticated users to change their password.")
+    @Operation(summary = "Change user password", description = "Endpoint for authenticated  users to change their password.")
     @PostMapping("/changeUserPassword")
     @PostAuthorize("hasAuthority('USER')")
     public SimpleResponse changeUserPassword(@Valid @RequestBody ChangePasswordUserRequest changePasswordUserRequest){

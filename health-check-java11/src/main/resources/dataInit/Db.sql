@@ -1,6 +1,6 @@
 INSERT INTO user_account (id, email, password, role)
 VALUES
-    (1, 'mia.brown@gmail.com', '$2a$10$R09T1ozvLWYvh4A6pFhWe.PsSxnoo2A.MXfD1yROEgSWr8rQlye5G()', 'ADMIN'),
+    (1,'admin@gmail.com','$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K','ADMIN'),
     (2, 'john.doe@gmail.com', '$2a$10$NpPdEn2CswW4aj3gqHfTveqg42GR/kNjM.UxsZp6CFjt.mR3Dc0Lm', 'USER'),
     (3, 'alice.smith@gmail.com', '$2a$10$GSyQFd8GLOlVfzUzk7ouYuf2Hq1TGZt5ac7rOMXt2AoBb/ObRov8G', 'USER'),
     (4, 'charlie.brown@gmail.com', '$2a$10$BP2LeQU2.sYh7toztf3l5eFp9AnPV/uDDrnFMvSXoyJIHlcw6mUlq', 'USER'),
