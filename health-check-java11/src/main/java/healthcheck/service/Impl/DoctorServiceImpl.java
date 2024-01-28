@@ -3,6 +3,7 @@ import healthcheck.dto.Doctor.DoctorSaveRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
+import healthcheck.enums.Facility;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,12 +42,22 @@ public class DoctorServiceImpl implements DoctorService {
 
         department.addDoctor(doctor);
         doctorRepo.save(doctor);
-        log.info("Сохранен врач с полным именем: " + doctor.getFirstName() + " " + doctor.getLastName());
 
+        log.info("Врач успешно сохранен: " + doctor.getFirstName() + " " + doctor.getLastName());
 
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
                 .message("Успешно сохранен!")
                 .build();
+    }
+
+    @Override
+    public List<Doctor> getDoctorsByDepartment(Facility facility) {
+        Department department = departmentRepo.getDepartmentByFacility(facility).orElseThrow(() ->
+                new NotFoundException("Отделение не найдено"));
+
+        log.info("Получены врачи для отделения: " + department.getFacility().name());
+
+        return doctorRepo.getDoctorsByDepartment(department);
     }
 }

@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String email = authentication.getName();
-            log.info(email);
+            log.info("Редактирование профиля пользователя с email: {}", email);
 
             UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
 
@@ -51,14 +51,16 @@ public class UserServiceImpl implements UserService {
             userRepo.save(userAccount.getUser());
             userAccountRepo.save(userAccount);
 
+            log.info("Профиль пользователя успешно изменен");
+
             return SimpleResponse.builder().message("Успешно изменено!").httpStatus(HttpStatus.OK).build();
         } catch (DataUpdateException e) {
-            log.error("Error editing user profile", e);
-            throw new RuntimeException("Error editing user profile", e);
+            log.error("Ошибка при редактировании профиля пользователя", e);
+            throw new RuntimeException("Ошибка при редактировании профиля пользователя", e);
         }
     }
 
-   @Override
+    @Override
     public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -69,9 +71,9 @@ public class UserServiceImpl implements UserService {
 
             if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
                 if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
-                    throw new InvalidPasswordException("Error new password");
+                    throw new InvalidPasswordException("Ошибка в новом пароле");
                 }
-                throw new InvalidPasswordException("Error old password");
+                throw new InvalidPasswordException("Ошибка в старом пароле");
             }
 
             String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
@@ -79,10 +81,12 @@ public class UserServiceImpl implements UserService {
 
             userAccountRepo.save(userAccount);
 
+            log.info("Пароль пользователя успешно изменен");
+
             return SimpleResponse.builder().message("Успешно изменен пароль!").httpStatus(HttpStatus.OK).build();
         } catch (DataUpdateException e) {
-            log.error("Error editing change password", e);
-            throw new RuntimeException("Error editing change password", e);
+            log.error("Ошибка при изменении пароля пользователя", e);
+            throw new RuntimeException("Ошибка при изменении пароля пользователя", e);
         }
     }
 }

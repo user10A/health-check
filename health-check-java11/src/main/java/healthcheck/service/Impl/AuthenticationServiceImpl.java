@@ -20,6 +20,7 @@ import healthcheck.service.AuthenticationService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,7 @@ import java.io.IOException;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserRepo userRepo;
@@ -39,81 +41,111 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse signUp(SignUpRequest request) {
-        if (userAccountRepo.existsUserAccountByEmail(request.getEmail())) {
-            throw new AlreadyExistsException("User with this email already exists");
+        try {
+            if (userAccountRepo.existsUserAccountByEmail(request.getEmail())) {
+                throw new AlreadyExistsException("Пользователь с этим адресом электронной почты уже существует");
+            }
+
+            UserAccount userAccount = UserAccount.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(Role.USER)
+                    .build();
+
+            User user = User.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .phoneNumber(request.getNumber())
+                    .userAccount(userAccount)
+                    .build();
+
+            userRepo.save(user);
+
+            String jwt = jwtService.generateToken(userAccount.getEmail());
+
+            log.info("Пользователь успешно зарегистрирован: {}", userAccount.getEmail());
+
+            return AuthenticationResponse.builder()
+                    .email(userAccount.getEmail())
+                    .role(userAccount.getRole())
+                    .token(jwt)
+                    .build();
+        } catch (Exception e) {
+            log.error("Ошибка во время регистрации: {}", e.getMessage(), e);
+            throw e;
         }
-
-        UserAccount userAccount = UserAccount.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
-
-        User user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .phoneNumber(request.getNumber())
-                .userAccount(userAccount)
-                .build();
-
-        userRepo.save(user);
-
-        String jwt = jwtService.generateToken(userAccount.getEmail());
-
-        return AuthenticationResponse.builder()
-                .email(userAccount.getEmail())
-                .role(userAccount.getRole())
-                .token(jwt)
-                .build();
     }
 
     @Override
     public AuthenticationResponse signIn(SignInRequest request) {
-        UserAccount user = userAccountRepo.getUserAccountByEmail(request.getEmail()).orElseThrow(() ->
-                new NotFoundException("Email not found"));
+        try {
+            UserAccount user = userAccountRepo.getUserAccountByEmail(request.getEmail()).orElseThrow(() ->
+                    new NotFoundException("Электронная почта не найдена"));
 
-        String passwordBCryp = request.getPassword();
-        passwordEncoder.encode(passwordBCryp);
+            String passwordBCrypt = request.getPassword();
+            passwordEncoder.encode(passwordBCrypt);
 
-        if (!passwordEncoder.matches(passwordBCryp, user.getPassword())) {
-            throw new BadCredentialsException("Incorrect password");
+            if (!passwordEncoder.matches(passwordBCrypt, user.getPassword())) {
+                throw new BadCredentialsException("Неверный пароль");
+            }
+
+            String jwt = jwtService.generateToken(user.getEmail());
+
+            log.info("Пользователь успешно вошел в систему: {}", user.getEmail());
+
+            return AuthenticationResponse.builder()
+                    .email(user.getEmail())
+                    .role(user.getRole())
+                    .token(jwt)
+                    .build();
+        } catch (Exception e) {
+            log.error("Ошибка при входе в систему: {}", e.getMessage(), e);
+            throw e;
         }
-
-        String jwt = jwtService.generateToken(user.getEmail());
-
-        return AuthenticationResponse.builder()
-                .email(user.getEmail())
-                .role(user.getRole())
-                .token(jwt)
-                .build();
     }
 
     @PostConstruct
     void init() throws IOException {
-        GoogleCredentials googleCredentials = GoogleCredentials
-                .fromStream(new ClassPathResource("google.json").getInputStream());
-        FirebaseOptions firebaseOptions = FirebaseOptions.builder()
-                .setCredentials(googleCredentials)
-                .build();
-        FirebaseApp.initializeApp(firebaseOptions, "My First Project");
+        try {
+            GoogleCredentials googleCredentials = GoogleCredentials
+                    .fromStream(new ClassPathResource("google.json").getInputStream());
+            FirebaseOptions firebaseOptions = FirebaseOptions.builder()
+                    .setCredentials(googleCredentials)
+                    .build();
+            FirebaseApp.initializeApp(firebaseOptions, "My First Project");
+
+            log.info("FirebaseApp успешно инициализирован");
+        } catch (IOException e) {
+            log.error("Ошибка при инициализации FirebaseApp: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override
     public AuthenticationResponse authWithGoogleAccount(String tokenId) throws FirebaseAuthException {
-        FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(tokenId);
-        User user;
-        if (!userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
-            User newUser = new User();
-            String[] name = firebaseToken.getName().split(" ");
-            newUser.setFirstName(name[0]);
-            newUser.setLastName(name[1]);
-            newUser.setUserAccount(new UserAccount(firebaseToken.getEmail(), firebaseToken.getEmail(), Role.USER));
-            userRepo.save(newUser);
-        }
+        try {
+            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(tokenId);
+            User user;
+            if (!userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
+                User newUser = new User();
+                String[] name = firebaseToken.getName().split(" ");
+                newUser.setFirstName(name[0]);
+                newUser.setLastName(name[1]);
+                newUser.setUserAccount(new UserAccount(firebaseToken.getEmail(), firebaseToken.getEmail(), Role.USER));
+                userRepo.save(newUser);
+                log.info("Новый пользователь зарегистрирован с помощью Google: {}", firebaseToken.getEmail());
+            }
 
-        user = userRepo.findUserByUserAccountEmail(firebaseToken.getEmail());
-        return new AuthenticationResponse(user.getUserAccount().getEmail(),
-                jwtService.generateToken(user.getUserAccount().getEmail()),
-                user.getUserAccount().getRole());
+            user = userRepo.findUserByUserAccountEmail(firebaseToken.getEmail());
+
+            log.info("Пользователь успешно вошел в систему с помощью Google: {}", user.getUserAccount().getEmail());
+
+            return new AuthenticationResponse(user.getUserAccount().getEmail(),
+                    jwtService.generateToken(user.getUserAccount().getEmail()),
+                    user.getUserAccount().getRole());
+        } catch (Exception e) {
+            log.error("Ошибка во время аутентификации через Google: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 }

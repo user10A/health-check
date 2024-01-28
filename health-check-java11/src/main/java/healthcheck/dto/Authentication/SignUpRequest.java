@@ -22,4 +22,8 @@ public class SignUpRequest {
     private String email;
     @ValidPassword
     private String password;
+
+    public SignUpRequest() {
+
+    }
 }

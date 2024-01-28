@@ -20,6 +20,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
+        log.info("Запрос на получение всех приемов для слова: {}", word);
+
         List<Appointment> all = appointmentRepo.getAllAppointment(word);
         List<AppointmentResponse> response = new ArrayList<>();
         boolean status = false;
@@ -45,6 +47,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .status(status)
                     .build());
         }
+        log.info("Возвращено {} записей о приемах", response.size());
         return response;
     }
 }
