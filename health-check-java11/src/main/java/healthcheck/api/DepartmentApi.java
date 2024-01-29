@@ -18,10 +18,10 @@ public class DepartmentApi {
 
     private  final DepartmentService departmentService;
 
-    @PreAuthorize("hasAuthority('ADMIN,USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/getAllFacility")
-    @Operation( summary = "Получение услуг",description = "метод получение услуг")
-    public List<DepartmentResponse>getAllFacility() {
+    @Operation(summary = "Get All Facilities", description = "Retrieve a list of facilities. This method fetches information about available facilities.")
+    public List<DepartmentResponse> getAllFacility() {
         return departmentService.getAllFacility();
     }
 }

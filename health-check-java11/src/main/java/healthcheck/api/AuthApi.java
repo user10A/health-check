@@ -40,14 +40,15 @@ public class AuthApi {
         return authenticationService.authWithGoogleAccount(tokenId);
     }
     @SneakyThrows
-    @Operation(summary = "Отправление сообщения в емаил", description = "сообщения приходит в User и нажимает кнопку подтвердить")
+    @Operation(summary = "Send Email", description = "Sends an email to the user with a confirmation link. The user receives the message and clicks the confirmation button.")
     @PostMapping("/send-email")
     public SimpleResponse sendVerificationEmail(@EmailValidation @RequestParam String email, @RequestParam String link) {
-        return emailService.forgotPassword(email,link);
+        return emailService.forgotPassword(email, link);
     }
-    @Operation(summary = "При нажатии подтвердить переходит в page forgot password", description = "и зачем вы передаете нам token и даныые пароля")
+
+    @Operation(summary = "Navigate to Forgot Password Page", description = "When the user clicks 'Confirm,' it redirects to the forgot password page. You need to provide the token and new password data.")
     @PostMapping("/forgot-password")
     public ResponseEntity<String> completePasswordRecovery(@RequestParam String token, @ValidPassword @RequestParam String newPassword) {
-        return emailService.passwordRecovery(token,newPassword);
+        return emailService.passwordRecovery(token, newPassword);
     }
 }

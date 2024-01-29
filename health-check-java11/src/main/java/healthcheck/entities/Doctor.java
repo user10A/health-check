@@ -1,4 +1,5 @@
 package healthcheck.entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -31,10 +32,13 @@ public class Doctor {
     private String description;
     private boolean isActive;
     @ManyToOne(cascade = {CascadeType.DETACH})
+    @JsonIgnore
     private Department department;
     @OneToMany(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
+    @JsonIgnore
     private List<Appointment> appointments;
     @OneToOne(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
+    @JsonIgnore
     private Schedule schedule;
 
     public String getFullNameDoctor() {
