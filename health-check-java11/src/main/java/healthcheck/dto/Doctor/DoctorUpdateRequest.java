@@ -9,7 +9,6 @@ import lombok.Data;
 @Data
 @Builder
 public class DoctorUpdateRequest {
-    String facility;
     @Size(min = 3, max = 30, message = "Name should be between 2 and 30 characters.")
     @NotNull(message = "Name cannot be empty!")
     String firstName;
