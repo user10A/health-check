@@ -47,8 +47,8 @@ public class DoctorServiceImpl implements DoctorService {
 
         department.addDoctor(doctor);
         doctorRepo.save(doctor);
-        log.info("Сохранен врач с полным именем: " + doctor.getFirstName() + " " + doctor.getLastName());
 
+        log.info("Врач успешно сохранен: " + doctor.getFirstName() + " " + doctor.getLastName());
 
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
@@ -59,9 +59,13 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public List<Doctor> getDoctorsByDepartment(Facility facility) {
         Department department = departmentRepo.getDepartmentByFacility(facility).orElseThrow(() ->
-                new NotFoundException("Department not found"));
-        return doctorRepo.getDoctorsByDepartment(department);
 
+                new NotFoundException("Отделение не найдено"));
+
+        log.info("Получены врачи для отделения: " + department.getFacility().name());
+
+        return doctorRepo.getDoctorsByDepartment(department);
+      
     public DoctorResponse getDoctorById(Long id) {
         Doctor doctor = doctorRepo.findById(id)
                 .orElseThrow(()-> new NotFoundException("Доктор c таким id :"+id+" не найден"));

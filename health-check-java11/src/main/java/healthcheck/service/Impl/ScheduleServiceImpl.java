@@ -39,7 +39,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public SimpleResponse saveAppointment(@NonNull Facility facility, @NonNull Long doctorId,
-            @Valid @NonNull AddScheduleRequest addScheduleRequest
+                                          @Valid @NonNull AddScheduleRequest addScheduleRequest
     ) {
         Department department = departmentRepo.getDepartmentByFacility(facility)
                 .orElseThrow(() -> new NotFoundException("Департамент не найден"));
@@ -109,7 +109,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
         return SimpleResponse.builder().message("Успешно создано расписание!").httpStatus(HttpStatus.OK).build();
     }
-
+  
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Дата начала не может быть после даты окончания");
