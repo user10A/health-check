@@ -6,6 +6,7 @@ import healthcheck.dto.Doctor.ResponseToGetDoctorsByDepartment;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
+import healthcheck.enums.Facility;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.DoctorDao;
 import healthcheck.repo.DepartmentRepo;
@@ -56,6 +57,11 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    public List<Doctor> getDoctorsByDepartment(Facility facility) {
+        Department department = departmentRepo.getDepartmentByFacility(facility).orElseThrow(() ->
+                new NotFoundException("Department not found"));
+        return doctorRepo.getDoctorsByDepartment(department);
+
     public DoctorResponse getDoctorById(Long id) {
         Doctor doctor = doctorRepo.findById(id)
                 .orElseThrow(()-> new NotFoundException("Доктор c таким id :"+id+" не найден"));
@@ -88,10 +94,5 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepo.save(doctor);
         departmentRepo.save(department);
         return new SimpleResponse("doctor successfully updated",HttpStatus.OK);
-    }
-
-    @Override
-    public List<ResponseToGetDoctorsByDepartment> getDoctorsByDepartment() {
-        return doctorDao.getDoctorsByDepartment();
     }
 }
