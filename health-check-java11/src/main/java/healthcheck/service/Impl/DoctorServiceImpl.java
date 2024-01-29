@@ -59,6 +59,7 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public List<Doctor> getDoctorsByDepartment(Facility facility) {
         Department department = departmentRepo.getDepartmentByFacility(facility).orElseThrow(() ->
+
                 new NotFoundException("Отделение не найдено"));
 
         log.info("Получены врачи для отделения: " + department.getFacility().name());
