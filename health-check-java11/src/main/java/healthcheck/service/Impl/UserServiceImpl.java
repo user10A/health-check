@@ -1,14 +1,10 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ResponseToGetUserAppointments;
-import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
+import healthcheck.dto.User.*;
 import healthcheck.entities.User;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.dto.SimpleResponse;
-import healthcheck.dto.User.ChangePasswordUserRequest;
-import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
@@ -96,6 +92,11 @@ public class UserServiceImpl implements UserService {
             return new NotFoundException("User is not found !!!");
         });
         return userDao.clearMyAppointments(user.getId());
+    }
+
+    @Override
+    public ResponseToGetUserById getUserById(Long id) {
+        return userDao.getUserById(id);
     }
 
     @Override
