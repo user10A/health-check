@@ -3,8 +3,9 @@ package healthcheck.api;
 import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorSaveRequest;
 import healthcheck.dto.Doctor.DoctorUpdateRequest;
-import healthcheck.dto.Doctor.ResponseToGetDoctorsByDepartment;
 import healthcheck.dto.SimpleResponse;
+import healthcheck.entities.Doctor;
+import healthcheck.enums.Facility;
 import healthcheck.service.DoctorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class DoctorApi {
 
     private final DoctorService doctorService;
 
-    @PostMapping("/saveDoctor")
+    @PostMapping()
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Save a new doctor", description = "This endpoint allows an admin to save a new doctor.")
     public ResponseEntity<SimpleResponse> saveDoctor(@RequestBody DoctorSaveRequest request) {
@@ -36,11 +37,11 @@ public class DoctorApi {
     @PatchMapping()
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Update doctor", description = "This endpoint allows an admin to update doctor.")
-    public SimpleResponse updateDoctor(@RequestParam Long id,@RequestBody DoctorUpdateRequest request) {
-        return doctorService.updateDoctor(id,request);
+    public SimpleResponse updateDoctor(@RequestParam Facility facility, @RequestParam Long id,@RequestBody DoctorUpdateRequest request) {
+        return doctorService.updateDoctor(facility, id,request);
     }
     @GetMapping("/byDepartment")
-    public List<ResponseToGetDoctorsByDepartment> getDoctorsByDepartment() {
-        return doctorService.getDoctorsByDepartment();
+    public List<Doctor> getDoctorsByDepartment(@RequestParam Facility facility) {
+        return doctorService.getDoctorsByDepartment(facility);
     }
 }

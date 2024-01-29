@@ -98,25 +98,26 @@ public class UserServiceImpl implements UserService {
         return userDao.clearMyAppointments(user.getId());
     }
 
-   @Override
+    @Override
     public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
-       try {
-           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-           String email = authentication.getName();
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
 
-           UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
-           String oldPassword = changePasswordUserRequest.getOldPassword();
+            UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+            String oldPassword = changePasswordUserRequest.getOldPassword();
+
+            if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
                 if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
                     throw new InvalidPasswordException("Ошибка в новом пароле");
                 }
                 throw new InvalidPasswordException("Ошибка в старом пароле");
             }
-         
 
-           String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
-           userAccount.setPassword(newPassword);
+            String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
+            userAccount.setPassword(newPassword);
 
-           userAccountRepo.save(userAccount);
+            userAccountRepo.save(userAccount);
 
             log.info("Пароль пользователя успешно изменен");
 
@@ -126,7 +127,6 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Ошибка при изменении пароля пользователя", e);
         }
     }
-  
 
     @Override
     public SimpleResponse deletePatientsById(Long id) {
