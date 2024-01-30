@@ -1,14 +1,14 @@
 package healthcheck.repo.Dao.Impl;
-import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
+import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetUserById;
 import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.enums.Status;
 import healthcheck.repo.Dao.UserDao;
-import org.checkerframework.checker.units.qual.N;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.webjars.NotFoundException;
+
 import java.util.List;
 
 @Repository
@@ -147,23 +147,23 @@ public class UserDaoImpl implements UserDao {
     @Override
     public ResponseToGetUserById getUserById(Long id) {
         var sql = """
-       
-                SELECT
-           u.id,
-          u.first_name,
-          u.last_name ,
-           u.phone_number,
-           ua.email,
-           r.result_date
-       FROM
-           users u
-               JOIN
-           public.result r ON r.user_id = u.id
-               JOIN
-           public.user_account ua ON ua.id = u.user_account_id
-       WHERE
-               u.id = ?;
-                """;
+                       
+                         SELECT
+                    u.id,
+                   u.first_name,
+                   u.last_name ,
+                    u.phone_number,
+                    ua.email,
+                    r.result_date
+                FROM
+                    users u
+                        JOIN
+                    public.result r ON r.user_id = u.id
+                        JOIN
+                    public.user_account ua ON ua.id = u.user_account_id
+                WHERE
+                        u.id = ?;
+                         """;
 
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> ResponseToGetUserById.builder()
