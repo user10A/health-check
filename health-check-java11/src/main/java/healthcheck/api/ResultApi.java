@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/result")
 public class ResultApi {
     private final ResultService resultService;
-    private final S3Service s3Service;
+
 
     @PostMapping("/save")
     public ResponseEntity<SimpleResponse> saveResult(@RequestBody RequestSaveResult request) {
@@ -24,11 +24,5 @@ public class ResultApi {
     }
 
 
-    @Operation(summary = "Download file", description = "Download file from S3")
-    @GetMapping("/download")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ByteArrayResource> download(@RequestParam(name = "fileLink") String fileLink) {
-        return s3Service.download(fileLink);
-    }
 
 }
