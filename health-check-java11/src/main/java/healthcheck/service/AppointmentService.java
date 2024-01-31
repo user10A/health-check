@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface AppointmentService {
     List<AppointmentResponse> getAllAppointment(String word);
+    void buildAppointmentConfirmationEmail();
 }
