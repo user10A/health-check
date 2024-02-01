@@ -1,21 +1,25 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Appointment.AppointmentResponse;
-import healthcheck.entities.Appointment;
-import healthcheck.entities.User;
-import healthcheck.entities.UserAccount;
+import healthcheck.dto.Appointment.*;
+import healthcheck.dto.SimpleResponse;
+import healthcheck.email.EmailService;
+import healthcheck.entities.*;
+import healthcheck.enums.Facility;
 import healthcheck.enums.Status;
+import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
-import healthcheck.repo.AppointmentRepo;
-import healthcheck.repo.UserAccountRepo;
+import healthcheck.repo.*;
+import healthcheck.repo.Dao.AppointmentDao;
 import healthcheck.service.AppointmentService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
@@ -26,12 +30,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepo appointmentRepo;
     private final UserAccountRepo userAccountRepo;
     private final JavaMailSender mailSender;
+    private final DoctorRepo doctorRepo;
+    private final TimeSheetRepo timeSheetRepo;
+    private final EmailService emailService;
+    private final DepartmentRepo departmentRepo;
+    private final AppointmentDao appointmentDao;
 
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
@@ -95,6 +102,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         sendEmail(userAccount.getEmail(), variables);
     }
 
+
+
     private void sendEmail(String to, Map<String, String> variables) {
         try {
             String templatePath = "confirmiton_email";
@@ -144,4 +153,124 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return greeting;
     }
+    @Override
+    public OnlineAppointmentResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        log.info(email);
+        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+        log.info("User account found: " + userAccount);
+        Department department = departmentRepo.findByFacility(facility);
+        log.info("Department found: " + department);
+        Doctor doctor = doctorRepo.findById(request.getDoctorId())
+                .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
+        log.info("Doctor found: " + doctor);
+        LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
+        LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
+        log.info("startOfConsultation :"+startOfConsultation);
+        LocalTime endOfConsultation = timeSheetRepo.getTimeSheetByEndTimeOfConsultation(doctor.getId(),startOfConsultation);
+        log.info("endOfConsultation :" + endOfConsultation);
+        log.info("Creating appointment for user: " + userAccount.getUser().getFirstName() + " " +
+                userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
+                " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
+        Boolean booked = timeSheetRepo.booked(doctor.getSchedule().getId(),dateOfConsultation, startOfConsultation);
+        if (booked != null && booked) {
+            throw new AlreadyExistsException("Это время занято!");
+        } else if (booked == null) {
+            try {
+                throw new BadRequestException("Этот специалист не работает в этот день или в это время! Рабочие даты: с" + doctor.getSchedule().getStartDateWork() + " to " + doctor.getSchedule().getEndDateWork());
+            } catch (BadRequestException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Appointment appointment = Appointment.builder()
+                .user(userAccount.getUser())
+                .department(department)
+                .doctor(doctor)
+                .appointmentDate(dateOfConsultation)
+                .appointmentTime(startOfConsultation)
+                .status(Status.CONFIRMED)
+                .verificationCode(generateVerificationCode())
+                .build();
+        updateAvailability(doctor.getId(), dateOfConsultation, startOfConsultation,
+                endOfConsultation, false);
+        appointmentRepo.save(appointment);
+        log.info("успешно обновлен брониевание на true ");
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        log.info("Электронное письмо успешно отправлено на адрес: {}", email);
+        return OnlineAppointmentResponse.builder()
+                .id(appointment.getId())
+                .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
+                .dateOfAppointment(dateOfConsultation)
+                .startTimeOfConsultation(startOfConsultation)
+                .endTimeOfConsultation(endOfConsultation)
+                .imageDoctors(doctor.getImage())
+                .fullNameDoctors(doctor.getFullNameDoctor())
+                .facility(department.getFacility().name())
+                .verificationCode(appointment.getVerificationCode())
+                .build();
+    }
+    public void updateAvailability(Long doctorId, LocalDate date, LocalTime startTime, LocalTime endTime,boolean available) {
+        Doctor doctor = doctorRepo.findById(doctorId)
+                .orElseThrow(() -> new NotFoundException("Доктор с id: " + doctorId + " не найден"));
+        Schedule schedule = doctor.getSchedule();
+        List<TimeSheet> timeSheets = schedule.getTimeSheets();
+        for (LocalTime currentTime = startTime; currentTime.isBefore(endTime); currentTime = currentTime.plusMinutes(schedule.getIntervalInMinutes().getValue())) {
+            LocalTime finalCurrentTime = currentTime;
+            LocalTime finalCurrentTime1 = currentTime;
+            TimeSheet timeSheet = timeSheets.stream()
+                    .filter(sheet -> sheet.getDateOfConsultation().isEqual(date) && sheet.getStartTimeOfConsultation().equals(finalCurrentTime))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Не удалось найти TimeSheet для указанного времени: " + date + " " + finalCurrentTime1));
+            timeSheet.setAvailable(!available);
+            timeSheetRepo.save(timeSheet);
+        }
+    }
+
+    public String generateVerificationCode() {
+        Random random = new Random();
+        return String.format("%06d", random.nextInt(1000000));
+    }
+    public DayOfWeek getDayOfWeek(LocalDate date) {
+        return date.getDayOfWeek();
+    }
+
+
+    @Override
+    public SimpleResponse verifyAppointment(Long appointmentId, String verificationCode) {
+        Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("not found "));
+        String checkVerificationCode =appointment.getVerificationCode();
+        if (checkVerificationCode.equals(verificationCode)) {
+            appointment.setStatus(Status.FINISHED);
+            appointment.setVerificationCode(null);
+            appointmentRepo.save(appointment);
+            return new SimpleResponse("Пациент успешно записан", HttpStatus.OK);
+        } else {
+            return new SimpleResponse("Не правильный код регистрации",HttpStatus.CONFLICT);
+        }
+    }
+
+    @Override
+    public SimpleResponse deleteAppointment(Long id) {
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(()-> new NotFoundException("not found appointment by id: "+id));
+        appointmentRepo.delete(appointment);
+        return new SimpleResponse("успешно удален ", HttpStatus.OK);
+    }
+
+    @Override
+    public FindByDoctorForAppointment findByDoctorId(Long id) {
+        Doctor doctor = doctorRepo
+                .findById(id).orElseThrow(()-> new NotFoundException("not found Doctor by Id: "+id));
+        return FindByDoctorForAppointment.builder()
+                .image(doctor.getImage())
+                .fullNameDoctor(doctor.getFullNameDoctor())
+                .facility(doctor.getDepartment().getFacility().name())
+                .build();
+    }
+    @Override
+    public List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId) {
+        return appointmentDao.getTheDoctorFreeTimeInTheCalendar(startDate,endDate,doctorId);
+    }
+
 }

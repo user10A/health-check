@@ -28,4 +28,14 @@ public class User {
     private List<Result> results;
     @OneToMany(mappedBy = "user",cascade = {CascadeType.REMOVE})
     private List<Appointment> appointments;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                '}';
+    }
 }

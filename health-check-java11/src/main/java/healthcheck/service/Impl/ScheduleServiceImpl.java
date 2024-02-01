@@ -1,6 +1,8 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
+import healthcheck.dto.Schedule.ScheduleGetResponse;
+import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
@@ -10,6 +12,7 @@ import healthcheck.entities.TimeSheet;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.AlreadyExistsException;
+import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.ScheduleDao;
 import healthcheck.repo.DepartmentRepo;
@@ -26,8 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +44,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleDao scheduleDao;
 
     @Override
-    public SimpleResponse saveAppointment(@NonNull Facility facility, @NonNull Long doctorId,
+    public SimpleResponse saveSchedule(@NonNull Facility facility, @NonNull Long doctorId,
                                           @Valid @NonNull AddScheduleRequest addScheduleRequest
     ) {
         Department department = departmentRepo.getDepartmentByFacility(facility)
@@ -115,7 +117,75 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public List<ResponseToGetSchedules> getAllSchedules() {
+    public ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date,
+                                                        List<ScheduleUpdateRequest.TimeSlot> timeSlots) {
+        try {
+            Doctor doctor = doctorRepo.findById(doctorId)
+                    .orElseThrow(() -> new NotFoundException("Доктор не найден"));
+
+            Schedule schedule = Optional.ofNullable(doctor.getSchedule()).orElseGet(Schedule::new);
+
+            List<TimeSheet> timeSheets = new ArrayList<>(Optional.ofNullable(schedule.getTimeSheets()).orElse(new ArrayList<>()).stream()
+                    .filter(timeSheet -> timeSheet.getDateOfConsultation().equals(date))
+                    .toList());
+
+            if (timeSheets.size() + timeSlots.size() > 8) {
+                throw new RuntimeException("Достигнуто максимальное количество окошек для доктора");
+            }
+
+            LocalTime endTimeOfWork = schedule.getEndDayTime();
+
+            for (ScheduleUpdateRequest.TimeSlot timeSlot : timeSlots) {
+                LocalTime startTimeOfConsultation = LocalTime.parse(timeSlot.getFromTime());
+                LocalTime endTimeOfConsultation = LocalTime.parse(timeSlot.getToTime());
+
+                if (endTimeOfConsultation.isAfter(endTimeOfWork)) {
+                    schedule.setEndDayTime(endTimeOfConsultation);
+                }
+
+                boolean timeSlotExists = timeSheets.stream()
+                        .anyMatch(timeSheet ->
+                                timeSheet.getDateOfConsultation().equals(date) &&
+                                        !timeSheet.getEndTimeOfConsultation().isBefore(startTimeOfConsultation) &&
+                                        !timeSheet.getStartTimeOfConsultation().isAfter(endTimeOfConsultation.plusMinutes(10))
+                        );
+
+                if (timeSlotExists) {
+                    throw new RuntimeException("Время консультации уже занято");
+                }
+
+                TimeSheet newTimeSheet = new TimeSheet();
+                newTimeSheet.setStartTimeOfConsultation(startTimeOfConsultation);
+                newTimeSheet.setEndTimeOfConsultation(endTimeOfConsultation);
+                newTimeSheet.setDateOfConsultation(date);
+                newTimeSheet.setSchedule(schedule);
+
+                timeSheets.add(newTimeSheet);
+                timeSheetRepo.save(newTimeSheet);
+            }
+
+            schedule.setTimeSheets(timeSheets);
+            doctor.setSchedule(schedule);
+
+            doctorRepo.save(doctor);
+            log.info("Расписание доктора успешно обновлено: {}", doctorId);
+
+            return ScheduleGetResponse.builder()
+                    .department(doctor.getDepartment())
+                    .timeSheets(timeSheets)
+                    .doctorFullName(doctor.getFullNameDoctor())
+                    .localDateConsultation(date)
+                    .build();
+        } catch (NotFoundException e) {
+            log.error("Ошибка в методе updateScheduleByDoctorId: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception ex) {
+            log.error("Ошибка обновления расписания доктора: {}", ex.getMessage(), ex);
+            throw new DataUpdateException("Ошибка обновления расписания доктора");
+        }
+    }
+
+      public List<ResponseToGetSchedules> getAllSchedules() {
         return scheduleDao.getAllSchedules();
     }
 
