@@ -14,6 +14,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
@@ -23,10 +25,13 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -82,93 +87,32 @@ public class AppointmentServiceImpl implements AppointmentService {
         String greeting = getGreeting();
         String userName = user.getFirstName() + " " + user.getLastName();
 
-        String emailContent = "<!DOCTYPE html>" +
-                "<html lang=\"ru\">" +
-                "<head>" +
-                "    <meta charset=\"UTF-8\">" +
-                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
-                "    <title>Подтверждение записи</title>" +
-                "    <link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap\" rel=\"stylesheet\">" +
-                "    <style>" +
-                "        body {" +
-                "            font-family: 'Montserrat', sans-serif;" +
-                "            background-color: #f7f7f7;" +
-                "            padding: 20px;" +
-                "            margin: 0;" +
-                "        }" +
-                "        .container {" +
-                "            background-color: #fff;" +
-                "            padding: 30px;" +
-                "            border-radius: 10px;" +
-                "            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);" +
-                "            max-width: 600px;" +
-                "            margin: 0 auto;" +
-                "        }" +
-                "        h1 {" +
-                "            text-align: center;" +
-                "            color: #007bff;" +
-                "            font-size: 36px;" +
-                "            font-weight: 600;" +
-                "            margin-top: 0;" +
-                "            margin-bottom: 20px;" +
-                "        }" +
-                "        p {" +
-                "            font-size: 18px;" +
-                "            line-height: 1.6;" +
-                "            color: #333;" +
-                "            margin-bottom: 20px;" +
-                "        }" +
-                "        .image-container {" +
-                "            text-align: center;" +
-                "            margin-top: 20px;" +
-                "        }" +
-                "        .greetings-image {" +
-                "            max-width: 100%;" +
-                "            border-radius: 10px;" +
-                "            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);" +
-                "        }" +
-                "        .button {" +
-                "            display: inline-block;" +
-                "            background-color: #007bff;" +
-                "            color: #fff;" +
-                "            font-size: 18px;" +
-                "            font-weight: 600;" +
-                "            text-decoration: none;" +
-                "            padding: 10px 20px;" +
-                "            border-radius: 5px;" +
-                "            transition: all 0.3s ease-in-out;" +
-                "        }" +
-                "        .button:hover {" +
-                "            background-color: #0062cc;" +
-                "        }" +
-                "    </style>" +
-                "</head>" +
-                "<body>" +
-                "<div class=\"container\">" +
-                "    <h1>Подтверждение записи</h1>" +
-                "    <p style=\"color: #007bff; font-weight: bold;\">" + greeting + "</p>" +
-                "    <p>Уважаемый(ая) " + userName + ",</p>" +
-                "    <p>Ваша запись на " + LocalDate.now() + " успешно подтверждена.</p>" +
-                "    <p>Благодарим за выбор нашей клиники!</p>" +
-                "    <div class=\"image-container\">" +
-                "        <img src=\"cid:greetingsImage\" class=\"greetings-image\" alt=\"Greetings Image\">" +
-                "    </div>" +
-                "</div>" +
-                "</body>" +
-                "</html>";
+        Map<String, String> variables = new HashMap<>();
+        variables.put("greeting", greeting);
+        variables.put("userName", userName);
+        variables.put("localDate", LocalDate.now().toString());
 
-        sendEmail(userAccount.getEmail(), emailContent);
+        sendEmail(userAccount.getEmail(), variables);
     }
 
-    private void sendEmail(String to, String content) {
-        MimeMessage message = mailSender.createMimeMessage();
+    private void sendEmail(String to, Map<String, String> variables) {
         try {
+            String templatePath = "confirmiton_email";
+            Resource resource = new ClassPathResource("templates/" + templatePath + ".html");
+            String content = Files.readString(resource.getFile().toPath());
+
+
+            for (Map.Entry<String, String> entry : variables.entrySet()) {
+                content = content.replace("{" + entry.getKey() + "}", entry.getValue());
+            }
+
+            MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
             helper.setTo(to);
             helper.setSubject("Подтверждение записи");
             helper.setText(content, true);
-            String filePath = "C:/Users/user/Pictures/Без названия.png";
 
+            String filePath = "C:/Users/user/Pictures/Без названия.png";
             byte[] imageBytes;
             try (FileInputStream inputStream = new FileInputStream(filePath)) {
                 imageBytes = inputStream.readAllBytes();
