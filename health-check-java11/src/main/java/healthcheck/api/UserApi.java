@@ -27,7 +27,8 @@ public class UserApi {
     }
 
 
-    @GetMapping("/{id}/appointment")
+
+    @GetMapping("/{id}/userAppoinment")
     @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "get appointment by user id",
             description = "page of appointment of user")
@@ -74,7 +75,7 @@ public class UserApi {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("search")
+    @GetMapping("/search")
     @Operation(summary = "Search Patients", description = "Method to search for patients by name, full name, or email.")
     public List<ResultUsersResponse> getPatientsBySearch(@RequestParam String word){
         return userService.getAllPatientsBySearch(word);

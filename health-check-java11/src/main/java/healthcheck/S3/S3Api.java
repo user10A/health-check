@@ -2,7 +2,9 @@ package healthcheck.S3;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,5 +38,12 @@ public class S3Api {
     @PreAuthorize("hasAuthority('ADMIN')")
     Map<String, String> delete(@RequestParam String fileLink) {
         return s3Service.delete(fileLink);
+    }
+
+    @Operation(summary = "Download file", description = "Download file from S3")
+    @GetMapping("/download")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ByteArrayResource> download(@RequestParam(name = "fileLink") String fileLink) {
+        return s3Service.download(fileLink);
     }
 }

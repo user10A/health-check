@@ -1,6 +1,7 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
+import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
@@ -10,6 +11,7 @@ import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.ScheduleDao;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.repo.ScheduleRepo;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,6 +39,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final DepartmentRepo departmentRepo;
     private final ScheduleRepo scheduleRepo;
     private final TimeSheetRepo timeSheetRepo;
+    private final ScheduleDao scheduleDao;
 
     @Override
     public SimpleResponse saveAppointment(@NonNull Facility facility, @NonNull Long doctorId,
@@ -109,7 +113,22 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
         return SimpleResponse.builder().message("Успешно создано расписание!").httpStatus(HttpStatus.OK).build();
     }
-  
+
+    @Override
+    public List<ResponseToGetSchedules> getAllSchedules() {
+        return scheduleDao.getAllSchedules();
+    }
+
+    @Override
+    public List<ResponseToGetSchedules> getScheduleByDate(String startDate, String endDate) {
+        return scheduleDao.getScheduleByDate(startDate, endDate);
+    }
+
+    @Override
+    public List<ResponseToGetSchedules> getScheduleBySearch(String word) {
+        return scheduleDao.getScheduleBySearch(word);
+    }
+
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Дата начала не может быть после даты окончания");
