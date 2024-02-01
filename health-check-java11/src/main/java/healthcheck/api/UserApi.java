@@ -27,6 +27,7 @@ public class UserApi {
     }
 
 
+
     @GetMapping("/{id}/userAppoinment")
     @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "get appointment by user id",
