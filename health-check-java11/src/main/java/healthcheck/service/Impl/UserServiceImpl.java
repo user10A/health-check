@@ -1,14 +1,10 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ResponseToGetUserAppointments;
-import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
+import healthcheck.dto.User.*;
 import healthcheck.entities.User;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.dto.SimpleResponse;
-import healthcheck.dto.User.ChangePasswordUserRequest;
-import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
@@ -98,25 +94,31 @@ public class UserServiceImpl implements UserService {
         return userDao.clearMyAppointments(user.getId());
     }
 
-   @Override
-    public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
-       try {
-           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-           String email = authentication.getName();
+    @Override
+    public ResponseToGetUserById getUserById(Long id) {
+        return userDao.getUserById(id);
+    }
 
-           UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
-           String oldPassword = changePasswordUserRequest.getOldPassword();
+    @Override
+    public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+
+            UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+            String oldPassword = changePasswordUserRequest.getOldPassword();
+
+            if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
                 if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
                     throw new InvalidPasswordException("Ошибка в новом пароле");
                 }
                 throw new InvalidPasswordException("Ошибка в старом пароле");
             }
-         
 
-           String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
-           userAccount.setPassword(newPassword);
+            String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
+            userAccount.setPassword(newPassword);
 
-           userAccountRepo.save(userAccount);
+            userAccountRepo.save(userAccount);
 
             log.info("Пароль пользователя успешно изменен");
 
@@ -126,7 +128,6 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Ошибка при изменении пароля пользователя", e);
         }
     }
-  
 
     @Override
     public SimpleResponse deletePatientsById(Long id) {

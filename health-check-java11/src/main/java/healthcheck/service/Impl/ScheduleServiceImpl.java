@@ -3,6 +3,7 @@ package healthcheck.service.Impl;
 import healthcheck.dto.Appointment.AddScheduleRequest;
 import healthcheck.dto.Schedule.ScheduleGetResponse;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
+import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
@@ -13,6 +14,7 @@ import healthcheck.enums.Facility;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.ScheduleDao;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.repo.ScheduleRepo;
@@ -39,6 +41,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final DepartmentRepo departmentRepo;
     private final ScheduleRepo scheduleRepo;
     private final TimeSheetRepo timeSheetRepo;
+    private final ScheduleDao scheduleDao;
 
     @Override
     public SimpleResponse saveSchedule(@NonNull Facility facility, @NonNull Long doctorId,
@@ -180,6 +183,19 @@ public class ScheduleServiceImpl implements ScheduleService {
             log.error("Ошибка обновления расписания доктора: {}", ex.getMessage(), ex);
             throw new DataUpdateException("Ошибка обновления расписания доктора");
         }
+
+      public List<ResponseToGetSchedules> getAllSchedules() {
+        return scheduleDao.getAllSchedules();
+    }
+
+    @Override
+    public List<ResponseToGetSchedules> getScheduleByDate(String startDate, String endDate) {
+        return scheduleDao.getScheduleByDate(startDate, endDate);
+    }
+
+    @Override
+    public List<ResponseToGetSchedules> getScheduleBySearch(String word) {
+        return scheduleDao.getScheduleBySearch(word);
     }
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {

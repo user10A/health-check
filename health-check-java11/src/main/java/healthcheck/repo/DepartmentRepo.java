@@ -1,4 +1,5 @@
 package healthcheck.repo;
+
 import healthcheck.entities.Department;
 import healthcheck.enums.Facility;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface DepartmentRepo extends JpaRepository<Department,Long> {
+    @Query("select d from Department d where d.facility = :facility")
+    Department getByFacilityName(@Param("facility") String facility);
+    Department findByFacility(Facility facility);
     Optional<Department> getDepartmentByFacility(Facility facility);
 }

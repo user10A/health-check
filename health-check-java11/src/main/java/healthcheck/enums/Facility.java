@@ -1,6 +1,8 @@
 package healthcheck.enums;
 
-public enum Facility {
+import healthcheck.entities.Department;
+
+public enum Facility  {
     Анестезиология,
     Онкология,
     Терапия,

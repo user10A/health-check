@@ -20,7 +20,6 @@ public class DoctorDaoImpl implements DoctorDao {
                         CONCAT(d.first_name, ' ', d.last_name) as full_name,
                         d.image,
                         d.position
-
                     FROM
                         doctor d
                             JOIN department dep ON d.department_id = dep.id
