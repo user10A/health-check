@@ -1,4 +1,5 @@
 package healthcheck.entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -30,5 +31,6 @@ public class TimeSheet {
     private boolean available;
     @ManyToOne(cascade = {CascadeType.DETACH})
     @JoinColumn(name = "schedule_id")
+    @JsonIgnore
     private Schedule schedule;
 }

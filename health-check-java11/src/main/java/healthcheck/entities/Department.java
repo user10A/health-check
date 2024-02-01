@@ -1,4 +1,5 @@
 package healthcheck.entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import healthcheck.enums.Facility;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -30,12 +31,16 @@ public class Department {
     @Enumerated(EnumType.STRING)
     private Facility facility;
     @OneToMany(mappedBy = "department", cascade = CascadeType.DETACH)
+    @JsonIgnore
     private List<Doctor> doctors;
     @OneToMany(mappedBy = "department", cascade = CascadeType.REMOVE)
+    @JsonIgnore
     private List<Appointment> appointments;
     @OneToMany(mappedBy ="department", cascade = {CascadeType.DETACH})
+    @JsonIgnore
     private List<Schedule> schedules;
     @OneToMany(mappedBy = "department")
+    @JsonIgnore
     private List<Result> results;
 
     public void addDoctor(Doctor doctor) {

@@ -1,6 +1,8 @@
 package healthcheck.api;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
+import healthcheck.dto.Schedule.ScheduleGetResponse;
+import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -33,6 +36,15 @@ public class ScheduleApi {
     @PostAuthorize("hasAuthority('ADMIN')")
     public SimpleResponse saveScheduleDoctor(@RequestParam Facility facility, @RequestParam Long doctorId,
                                              @RequestBody AddScheduleRequest addScheduleRequest) {
-        return scheduleService.saveAppointment(facility, doctorId, addScheduleRequest);
+        return scheduleService.saveSchedule(facility, doctorId, addScheduleRequest);
+    }
+
+    @PatchMapping("/update-time-sheet-doctor")
+    @Operation(summary = "Обновить расписание для доктора")
+    @PostAuthorize("hasAuthority('ADMIN')")
+    public ScheduleGetResponse updateTimeSheetDoctor(@RequestParam Long doctorId, @RequestParam LocalDate date,
+                                                     @RequestBody ScheduleUpdateRequest scheduleUpdateRequest) {
+        List<ScheduleUpdateRequest.TimeSlot> timeSlots = scheduleUpdateRequest.getTimeSlots();
+        return scheduleService.updateScheduleByDoctorId(doctorId, date, timeSlots);
     }
 }
