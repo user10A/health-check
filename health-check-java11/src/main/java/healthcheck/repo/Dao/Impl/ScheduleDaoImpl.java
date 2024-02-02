@@ -175,7 +175,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
             );
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error while fetching schedules");
+            throw new NotFoundException("Error while fetching schedules");
         }
     }
 

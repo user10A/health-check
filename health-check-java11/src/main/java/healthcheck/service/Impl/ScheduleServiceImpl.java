@@ -11,6 +11,7 @@ import healthcheck.entities.Schedule;
 import healthcheck.entities.TimeSheet;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
+import healthcheck.excel.ExcelExportUtils;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.NotFoundException;
@@ -20,6 +21,7 @@ import healthcheck.repo.DoctorRepo;
 import healthcheck.repo.ScheduleRepo;
 import healthcheck.repo.TimeSheetRepo;
 import healthcheck.service.ScheduleService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -213,5 +216,12 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private boolean isConsultationTime(LocalTime currentTime, LocalTime startBreakTime, LocalTime endBreakTime) {
         return currentTime.isBefore(startBreakTime) || currentTime.isAfter(endBreakTime);
+    }
+
+    public List<Schedule> exportCustomerToExcel(HttpServletResponse response) throws IOException {
+        List<Schedule> schedules = scheduleRepo.findAll();
+        ExcelExportUtils exportUtils = new ExcelExportUtils(schedules);
+        exportUtils.exportDataToExcel(response);
+        return schedules;
     }
 }
