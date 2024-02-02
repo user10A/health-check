@@ -1,6 +1,7 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.Appointment.AppointmentResponse;
+import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Appointment;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
@@ -76,7 +78,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void buildAppointmentConfirmationEmail() {
+    public SimpleResponse appointmentConfirmationEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() ->
@@ -93,6 +95,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         variables.put("localDate", LocalDate.now().toString());
 
         sendEmail(userAccount.getEmail(), variables);
+        return SimpleResponse.builder().message("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
     }
 
     private void sendEmail(String to, Map<String, String> variables) {
