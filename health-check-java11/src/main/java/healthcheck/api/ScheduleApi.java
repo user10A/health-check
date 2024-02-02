@@ -11,12 +11,14 @@ import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
 import healthcheck.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -83,5 +85,15 @@ public class ScheduleApi {
             } catch (NotFoundException e) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+    }
+    @GetMapping("/export-to-excel")
+    @PostAuthorize("hasAuthority('ADMIN')")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=Doctors Schedule.xlsx";
+        response.setHeader(headerKey, headerValue);
+        scheduleService.exportCustomerToExcel(response);
+
     }
 }
