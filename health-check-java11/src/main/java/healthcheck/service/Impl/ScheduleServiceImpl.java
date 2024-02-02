@@ -183,7 +183,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             log.error("Ошибка обновления расписания доктора: {}", ex.getMessage(), ex);
             throw new DataUpdateException("Ошибка обновления расписания доктора");
         }
-    }
 
       public List<ResponseToGetSchedules> getAllSchedules() {
         return scheduleDao.getAllSchedules();
