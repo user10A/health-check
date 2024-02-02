@@ -49,4 +49,11 @@ public class Department {
         }
         doctors.add(doctor);
     }
+    @Override
+    public String toString() {
+        return "Department{" +
+                "id=" + id +
+                ", facility=" + facility +
+                '}';
+    }
 }

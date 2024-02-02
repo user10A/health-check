@@ -83,6 +83,27 @@ public class EmailServiceImpl implements EmailService {
         }
         return null;
     }
+
+    @Override
+    public SimpleResponse sendMassage(String email, String code,String subject) throws MessagingException, IOException {
+        UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
+                () -> new NotFoundException(
+                        String.format("Пациент с таким email: %s не существует!", email)));
+
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        helper.setFrom(mailUsername);
+        helper.setSubject(subject);
+        helper.setTo(email);
+        Resource resource = new ClassPathResource("templates/registrationCode.html");
+        String htmlContent = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        String formattedHtmlContent = htmlContent.replace("%verificationCode%", code);
+        helper.setText(formattedHtmlContent, true);
+        javaMailSender.send(mimeMessage);
+        log.info("Электронное письмо успешно отправлено на адрес: {}", email);
+        return new SimpleResponse(String.format("Код для подтверждения онлайн записи отправлен: %s", email),HttpStatus.OK);
+    }
+
     public boolean isVerificationCodeExpired(UserAccount request) {
         Date currentTime = new Date();
         Date sentTime = request.getVerificationCodeTime();

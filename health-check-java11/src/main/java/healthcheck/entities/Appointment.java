@@ -32,6 +32,7 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private Status status;
     private boolean processed;
+    private String verificationCode;
     @ManyToOne(cascade = {CascadeType.DETACH})
     private User user;
     @ManyToOne(cascade = {CascadeType.DETACH})
@@ -39,4 +40,14 @@ public class Appointment {
     private Department department;
     @ManyToOne(cascade = {CascadeType.DETACH})
     private Doctor doctor;
+    @Override
+    public String toString() {
+        return "Appointment{" +
+                "id=" + id +
+                ", appointmentDate=" + appointmentDate +
+                ", appointmentTime=" + appointmentTime +
+                ", status=" + status +
+                ", processed=" + processed +
+                '}';
+    }
 }
