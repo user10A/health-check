@@ -1,6 +1,5 @@
 package healthcheck.dto.User;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +8,6 @@ import java.time.LocalDate;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class ResultUsersResponse {
     private Long id;
@@ -17,4 +15,12 @@ public class ResultUsersResponse {
     private String phoneNumber;
     private String email;
     private LocalDate resultDate;
+
+    public ResultUsersResponse(Long id, String surname, String phoneNumber, String email, LocalDate resultDate) {
+        this.id = id;
+        this.surname = surname;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.resultDate = resultDate;
+    }
 }

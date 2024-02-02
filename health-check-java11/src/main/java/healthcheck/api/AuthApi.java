@@ -22,6 +22,7 @@ public class AuthApi {
 
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
+
     @PostMapping("/signUp")
     @Operation(summary = "Sign Up", description = "Register a new user")
     public AuthenticationResponse signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
