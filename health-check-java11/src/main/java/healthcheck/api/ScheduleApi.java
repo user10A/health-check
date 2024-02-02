@@ -1,9 +1,9 @@
 package healthcheck.api;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
+import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleGetResponse;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
-import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,29 +30,31 @@ public class ScheduleApi {
 
     @GetMapping("/getDoctorsByDepartment")
     @Operation(summary = "Get Doctors by Department", description = "Retrieve a list of doctors based on the specified facility.")
-    @PostAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public List<Doctor> getDoctorsByDepartment(@RequestParam Facility facility) {
         return doctorService.getDoctorsByDepartment(facility);
     }
 
     @PostMapping("/saveScheduleDoctor")
     @Operation(summary = "Save Doctor Schedule", description = "Save the schedule for a specific doctor in the given facility.")
-    @PostAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public SimpleResponse saveScheduleDoctor(@RequestParam Facility facility, @RequestParam Long doctorId,
                                              @RequestBody AddScheduleRequest addScheduleRequest) {
         return scheduleService.saveSchedule(facility, doctorId, addScheduleRequest);
     }
 
     @PatchMapping("/update-time-sheet-doctor")
-    @Operation(summary = "Обновить расписание для доктора")
-    @PostAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Update schedule for a doctor")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ScheduleGetResponse updateTimeSheetDoctor(@RequestParam Long doctorId, @RequestParam LocalDate date,
                                                      @RequestBody ScheduleUpdateRequest scheduleUpdateRequest) {
         List<ScheduleUpdateRequest.TimeSlot> timeSlots = scheduleUpdateRequest.getTimeSlots();
         return scheduleService.updateScheduleByDoctorId(doctorId, date, timeSlots);
     }
+
     @GetMapping("/all")
-    @PostAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Get all schedules")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ResponseToGetSchedules>> getAllSchedules() {
         List<ResponseToGetSchedules> schedules = scheduleService.getAllSchedules();
         if (schedules.isEmpty()) {
@@ -62,7 +64,8 @@ public class ScheduleApi {
     }
 
     @GetMapping("/getByDate")
-    @PostAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Get schedules by date range")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ResponseToGetSchedules>> getScheduleByDate(
             @RequestParam String startDate,
             @RequestParam String endDate) {
@@ -74,14 +77,16 @@ public class ScheduleApi {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-        @GetMapping("/search")
-        @PostAuthorize("hasAuthority('ADMIN')")
-        public ResponseEntity<List<ResponseToGetSchedules>> getScheduleBySearch(@RequestParam String word) {
-            try {
-                List<ResponseToGetSchedules> schedules = scheduleService.getScheduleBySearch(word);
-                return new ResponseEntity<>(schedules, HttpStatus.OK);
-            } catch (NotFoundException e) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search schedules by keyword")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<ResponseToGetSchedules>> getScheduleBySearch(@RequestParam String word) {
+        try {
+            List<ResponseToGetSchedules> schedules = scheduleService.getScheduleBySearch(word);
+            return new ResponseEntity<>(schedules, HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

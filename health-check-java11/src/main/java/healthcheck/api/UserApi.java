@@ -1,14 +1,14 @@
 package healthcheck.api;
 
-import healthcheck.dto.User.*;
 import healthcheck.dto.SimpleResponse;
+import healthcheck.dto.User.*;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -18,26 +18,24 @@ public class UserApi {
 
     private final UserService userService;
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/getAllAppointmentsOfUser")
-    @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "get all appointments of user",
             description = "this method allows to get all appointments")
     public List<ResponseToGetUserAppointments> getAllUsersAppointments() {
         return userService.getAllAppointmentsOfUser();
     }
 
-
-
-    @GetMapping("/{id}/userAppoinment")
-    @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/{id}/userAppointment")
     @Operation(summary = "get appointment by user id",
             description = "page of appointment of user")
     public ResponseToGetAppointmentByUserId getUserAppointmentById(@PathVariable Long id) {
         return userService.getUserAppointmentById(id);
     }
 
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/deleteAppointments")
-    @PostAuthorize("hasAuthority('USER')")
     @Operation(summary = "delete appointments of user",
             description = " this method allows to delete appointments of user")
     public String clearUsersAppointments() {
@@ -45,7 +43,7 @@ public class UserApi {
         return "Deleted " + deletedCount + " appointments.";
     }
 
-    @PostAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/editUserProfile")
     @Operation(summary = "Edit profile by user",
             description = "Edit")
@@ -53,8 +51,8 @@ public class UserApi {
         return userService.editUserProfile(profileRequest);
     }
 
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/changeUserPassword")
-    @PostAuthorize("hasAuthority('USER')")
     @Operation(summary = "Change user password", description = "Endpoint for authenticated  users to change their password.")
     public SimpleResponse changeUserPassword(@Valid @RequestBody ChangePasswordUserRequest changePasswordUserRequest){
         return userService.changePassword(changePasswordUserRequest);
@@ -87,7 +85,4 @@ public class UserApi {
     public ResponseToGetUserById getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
-
-
 }
-

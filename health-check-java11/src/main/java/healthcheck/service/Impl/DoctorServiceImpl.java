@@ -1,6 +1,7 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.Doctor.DoctorResponse;
+import healthcheck.dto.Doctor.DoctorResponseByWord;
 import healthcheck.dto.Doctor.DoctorSaveRequest;
 import healthcheck.dto.Doctor.DoctorUpdateRequest;
 import healthcheck.dto.SimpleResponse;
@@ -101,4 +102,25 @@ public class DoctorServiceImpl implements DoctorService {
         departmentRepo.save(department);
         return new SimpleResponse("doctor successfully updated",HttpStatus.OK);
     }
+
+    // Специалисты. Методы: 1 - Search по именам. 2 - Вывод всех докторов. 3 - Удаление ->
+    @Override
+    public List<DoctorResponseByWord> getAllDoctorsBySearch(String word) {
+        return doctorRepo.getAllDoctorsBySearch(word);
+    }
+
+    @Override
+    public List<DoctorResponseByWord> getAllDoctors() {
+        return doctorRepo.getAllDoctors();
+    }
+
+    @Override
+    public SimpleResponse deleteDoctorById(Long doctorId) {
+        Doctor doctor = doctorRepo.findById(doctorId).orElseThrow(() ->
+                new NotFoundException("Doctor не найден!"));
+
+        doctorRepo.delete(doctor);
+        return SimpleResponse.builder().message("Doctor успешно удален").httpStatus(HttpStatus.OK).build();
+    }
+    // <-
 }

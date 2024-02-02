@@ -14,5 +14,4 @@ public interface UserService {
     ResponseToGetAppointmentByUserId getUserAppointmentById(Long id);
     int clearMyAppointments();
     ResponseToGetUserById getUserById(Long id);
-
 }

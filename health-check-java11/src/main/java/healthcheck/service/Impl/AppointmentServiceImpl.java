@@ -1,10 +1,16 @@
 package healthcheck.service.Impl;
 
+
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.email.EmailService;
 import healthcheck.entities.*;
 import healthcheck.enums.Facility;
+import healthcheck.dto.Appointment.AppointmentResponse;
+import healthcheck.dto.SimpleResponse;
+import healthcheck.entities.Appointment;
+import healthcheck.entities.User;
+import healthcheck.entities.UserAccount;
 import healthcheck.enums.Status;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
@@ -83,7 +89,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void buildAppointmentConfirmationEmail() {
+    public SimpleResponse appointmentConfirmationEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() ->
@@ -100,6 +106,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         variables.put("localDate", LocalDate.now().toString());
 
         sendEmail(userAccount.getEmail(), variables);
+        return SimpleResponse.builder().message("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
     }
 
 
