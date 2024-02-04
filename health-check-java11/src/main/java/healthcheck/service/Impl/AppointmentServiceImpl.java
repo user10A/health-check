@@ -89,6 +89,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public void buildAppointmentConfirmationEmail() {
+
+    }
+
+    @Override
     public SimpleResponse appointmentConfirmationEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
