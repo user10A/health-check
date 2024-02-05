@@ -15,4 +15,7 @@ public interface AppointmentRepo extends JpaRepository<Appointment,Long> {
             "a.user.lastName like concat('%', :word, '%') or a.doctor.firstName like concat('%', :word, '%') or " +
             "a.doctor.lastName like concat('%', :word, '%'))")
     List<Appointment> getAllAppointment(@Param("word") String word);
+
+    @Query("select a from Appointment a")
+    List<Appointment> getAllAppointmentDefault();
 }

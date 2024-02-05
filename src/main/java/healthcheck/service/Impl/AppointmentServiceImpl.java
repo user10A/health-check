@@ -1,16 +1,10 @@
 package healthcheck.service.Impl;
 
-
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.email.EmailService;
 import healthcheck.entities.*;
 import healthcheck.enums.Facility;
-import healthcheck.dto.Appointment.AppointmentResponse;
-import healthcheck.dto.SimpleResponse;
-import healthcheck.entities.Appointment;
-import healthcheck.entities.User;
-import healthcheck.entities.UserAccount;
 import healthcheck.enums.Status;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
@@ -89,11 +83,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void buildAppointmentConfirmationEmail() {
-
-    }
-
-    @Override
     public SimpleResponse appointmentConfirmationEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -114,11 +103,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         return SimpleResponse.builder().message("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
     }
 
-
-
     private void sendEmail(String to, Map<String, String> variables) {
         try {
-            String templatePath = "confirmiton_email";
+            String templatePath = "confirmation_email";
             Resource resource = new ClassPathResource("templates/" + templatePath + ".html");
             String content = Files.readString(resource.getFile().toPath());
 
@@ -165,6 +152,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return greeting;
     }
+
     @Override
     public OnlineAppointmentResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -207,7 +195,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         updateAvailability(doctor.getId(), dateOfConsultation, startOfConsultation,
                 endOfConsultation, false);
         appointmentRepo.save(appointment);
-        log.info("успешно обновлен брониевание на true ");
+        log.info("успешно обновлен бронирование на true ");
         emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
         return OnlineAppointmentResponse.builder()
@@ -222,6 +210,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .verificationCode(appointment.getVerificationCode())
                 .build();
     }
+
     public void updateAvailability(Long doctorId, LocalDate date, LocalTime startTime, LocalTime endTime,boolean available) {
         Doctor doctor = doctorRepo.findById(doctorId)
                 .orElseThrow(() -> new NotFoundException("Доктор с id: " + doctorId + " не найден"));
@@ -243,10 +232,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));
     }
+
     public DayOfWeek getDayOfWeek(LocalDate date) {
         return date.getDayOfWeek();
     }
-
 
     @Override
     public SimpleResponse verifyAppointment(Long appointmentId, String verificationCode) {
@@ -280,9 +269,73 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .facility(doctor.getDepartment().getFacility().name())
                 .build();
     }
+
     @Override
     public List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId) {
         return appointmentDao.getTheDoctorFreeTimeInTheCalendar(startDate,endDate,doctorId);
     }
 
+    @Override
+    public List<AppointmentResponse> getAllAppointmentDefault() {
+        List<Appointment> all = appointmentRepo.getAllAppointmentDefault();
+        List<AppointmentResponse> response = new ArrayList<>();
+
+        for (Appointment appointment : all) {
+
+            String username = appointment.getUser().getFirstName() + " " +
+                    appointment.getUser().getLastName();
+
+            response.add(AppointmentResponse.builder()
+                    .appointmentId(appointment.getId())
+                    .fullName(username)
+                    .phoneNumber(appointment.getUser().getPhoneNumber())
+                    .email(appointment.getUser().getUserAccount().getEmail())
+                    .facility(String.valueOf(appointment.getDepartment().getFacility()))
+                    .specialist(appointment.getDoctor().getFullNameDoctor())
+                    .localDate(appointment.getAppointmentDate())
+                    .localTime(appointment.getAppointmentTime())
+                    .build());
+        }
+        return response;
+    }
+
+    @Override
+    public SimpleResponse deleteAppointmentById(AppointmentDeleteRequest appointmentDeleteRequest) {
+        Appointment appointment = appointmentRepo.findById(appointmentDeleteRequest.getId()).orElseThrow(() ->
+                new NotFoundException("Appointment не найден"));
+
+        if(appointmentDeleteRequest.isActive()) throw new RuntimeException("Вы не можете удалить пока не выберите");
+
+        appointmentRepo.delete(appointment);
+        return SimpleResponse.builder().message("Успешно удален").httpStatus(HttpStatus.OK).build();
+    }
+
+    @Override
+    public SimpleResponse deleteAllAppointmentById(List<AppointmentDeleteRequest> appointmentDeleteRequests) {
+        List<Long> failedToDelete = appointmentDeleteRequests.stream()
+                .filter(deleteRequest -> !deleteRequest.isActive())
+                .map(AppointmentDeleteRequest::getId)
+                .toList();
+
+        if (!failedToDelete.isEmpty()) {
+            return SimpleResponse.builder()
+                    .message("Нельзя удалить записи с ID: " + failedToDelete + ", так как их статус 'active' не совпадает с указанным в запросе")
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
+
+        appointmentDeleteRequests.stream()
+                .filter(AppointmentDeleteRequest::isActive)
+                .map(AppointmentDeleteRequest::getId)
+                .forEach(appointmentId -> {
+                    Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(() ->
+                            new NotFoundException("Appointment не найден"));
+                    appointmentRepo.delete(appointment);
+                });
+
+        return SimpleResponse.builder()
+                .message("Записи успешно удалены")
+                .httpStatus(HttpStatus.OK)
+                .build();
+    }
 }
