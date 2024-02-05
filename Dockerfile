@@ -1,7 +1,7 @@
 # Stage 1: Build Stage
 FROM maven:3.8.4-openjdk-17 AS build
 WORKDIR /app
-COPY health-check-java11 .
+COPY . ./
 RUN mvn clean package -DskipTests
 
 # Stage 2: Production Stage
