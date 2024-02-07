@@ -9,6 +9,7 @@ import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
 import healthcheck.service.DoctorService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/doctor")
+@CrossOrigin
+@Tag(name = "Doctor api", description = "APIs for doctors ")
 public class DoctorApi {
 
     private final DoctorService doctorService;

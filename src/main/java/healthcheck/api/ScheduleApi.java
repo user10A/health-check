@@ -11,6 +11,7 @@ import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
 import healthcheck.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/schedule")
+@CrossOrigin
+@Tag(name = "Schedule api", description = "API's for schedules ")
 public class ScheduleApi {
 
     private final ScheduleService scheduleService;
@@ -93,6 +96,7 @@ public class ScheduleApi {
         }
     }
     @GetMapping("/export-to-excel")
+    @Operation(summary = "export schedule to excel")
     @PostAuthorize("hasAuthority('ADMIN')")
     public void exportToExcel(HttpServletResponse response) throws IOException {
         response.setContentType("application/octet-stream");
