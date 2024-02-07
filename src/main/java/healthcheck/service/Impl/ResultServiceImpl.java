@@ -23,7 +23,6 @@ public class ResultServiceImpl implements ResultService {
     private final ResultRepo resultRepo;
     private final DepartmentRepo departmentRepo;
     private final UserRepo userRepo;
-
     private final S3Service s3Service;
 
     @Override
@@ -35,16 +34,15 @@ public class ResultServiceImpl implements ResultService {
                     .orElseThrow(() -> new NotFoundException(
                             String.format("Пользователь с ID: %d не найден", request.getUserId())
                     ));
-
             Result result = Result.builder()
                     .resultDate(request.getDataOfDelivery())
                     .pdfUrl(request.getUrl())
                     .department(department)
+                    .resultNumber(generateTenDigitNumber())
                     .user(user)
                     .build();
 
             resultRepo.save(result);
-
             String successMessage = "Успешно сохранен!";
             log.info(successMessage);
             return new SimpleResponse(HttpStatus.OK, successMessage);
@@ -53,6 +51,15 @@ public class ResultServiceImpl implements ResultService {
             log.error(errorMessage, e);
             return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();
         }
+    }
+
+    @Override
+    public String getResultByResultNumberResult(Long resultNumber) {
+        return resultRepo.getResultByResultNumberResult(resultNumber);
+    }
+    private static Long generateTenDigitNumber() {
+        long randomNumber = (long) (Math.random() * 9000000000L) + 1000000000L;
+        return randomNumber;
     }
 
 
