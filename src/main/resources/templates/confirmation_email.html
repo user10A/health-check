@@ -3,79 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./Header.jpg" />
+    <link
+            rel="stylesheet"
+            href="./Bok.png"
+    />
     <title>Подтверждение записи</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #f7f7f7;
-            padding: 20px;
+            font-family: "Montserrat", sans-serif;
             margin: 0;
+            padding: 0;
         }
-
+        .main {
+            margin: 20px 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            border: 1px solid #048741;
+            border-radius: 6px 6px 0px 6px;
+            width: 450px;
+            background-color: #F9F8F6;
+        }
+        .image {
+            width: 450px;
+            height: 16rem;
+            border-radius: 6px 6px 0px 0px;
+        }
+        .title-image {
+            width: 20rem;
+        }
         .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
+            padding: 2rem 4rem;
         }
-
-        h1 {
+        .description {
+            font-size: 20px;
+            color: green;
+            font-weight: bold;
+        }
+        .contacts {
+            background-color: #048741;
+            padding: 0.01rem;
+            width: 17rem;
             text-align: center;
-            color: #007bff;
-            font-size: 36px;
-            font-weight: 600;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-
-        p {
+            border-radius: 0rem 1rem 0rem 0rem;
+            height: 70px;
             font-size: 18px;
-            line-height: 1.6;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .image-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .greetings-image {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 600;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .button:hover {
-            background-color: #0062cc;
         }
     </style>
-
 </head>
 <body>
-<div class="container">
-    <h1>Подтверждение записи</h1>
-    <p style="color: #007bff; font-weight: bold;">{greeting}</p>
-    <p>Уважаемый(ая) {userName},</p>
-    <p>Ваша запись на {localDate} успешно подтверждена.</p>
-    <p>Благодарим за выбор нашей клиники!</p>
-    <div class="image-container">
-        <img src="cid:greetingsImage" class="greetings-image" alt="Greetings Image">
+<div class="main">
+    <img src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg" alt="doctor" class="image" />
+    <img
+            src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
+            alt="title"
+            class="title-image"
+    />
+    <div class="container">
+        <p class="description">
+            <span style="color: green; font-size: 28px;">{greeting}</span>
+        </p>
+        <p class="text" style=" font-size: 18px; ">Уважаемый(ая) <span style="font-size: 15px;">{userName}</span>,</p>
+        <p class="text" style= "font-size: 18px; ">Ваша запись на <span style="font-size: 15px;">{localDate}</span>
+            успешно подтверждена.</p>
+        <hr />
+    </div>
+    <div>
+        <div class="contacts">
+            <p>
+                +996 709 095 524 <span style="color: white">www.healthCheck</span>
+            </p>
+        </div>
     </div>
 </div>
 </body>

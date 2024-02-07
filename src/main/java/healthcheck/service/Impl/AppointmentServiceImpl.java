@@ -16,7 +16,6 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -26,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -119,16 +117,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             helper.setTo(to);
             helper.setSubject("Подтверждение записи");
             helper.setText(content, true);
-
-            String filePath = "C:/Users/user/Pictures/Без названия.png";
-            byte[] imageBytes;
-            try (FileInputStream inputStream = new FileInputStream(filePath)) {
-                imageBytes = inputStream.readAllBytes();
-            }
-
-            ByteArrayResource imageResource = new ByteArrayResource(imageBytes);
-
-            helper.addInline("greetingsImage", imageResource, "image/png");
 
             mailSender.send(message);
         } catch (MessagingException | IOException e) {
