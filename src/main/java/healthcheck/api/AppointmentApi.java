@@ -1,12 +1,10 @@
 package healthcheck.api;
 
-
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.TimeSheet.TimeSheetResponse;
 import healthcheck.enums.Facility;
 import healthcheck.dto.Appointment.AppointmentResponse;
-import healthcheck.dto.SimpleResponse;
 import healthcheck.service.AppointmentService;
 import healthcheck.service.TimeSheetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,5 +85,28 @@ public class AppointmentApi {
             @PathVariable Long id
     ){
         return appointmentService.getTheDoctorFreeTimeInTheCalendar(startDate,endDate,id);
+    }
+
+    @DeleteMapping("/deleteAll")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @Operation(summary = "Delete appointment",
+            description = "This method can be used by both administrators and patients")
+    public SimpleResponse delete(@RequestBody(required = false) List<AppointmentDeleteRequest> appointments) {
+        return appointmentService.deleteAllAppointmentById(appointments);
+    }
+
+    @GetMapping("/all")
+    @Operation(summary = "Get all appointments",
+            description = "Retrieve a list of all appointments with default settings.")
+    public List<AppointmentResponse> getAllAppointmentsDefault() {
+        return appointmentService.getAllAppointmentDefault();
+    }
+
+    @DeleteMapping("/deleteById")
+    @Operation(summary = "Delete appointment by ID",
+            description = "Delete an appointment by providing the appointment ID. " +
+                    "The appointment must be inactive to be deleted.")
+    public SimpleResponse deleteAppointmentById(@RequestBody AppointmentDeleteRequest appointmentDeleteRequest) {
+        return appointmentService.deleteAppointmentById(appointmentDeleteRequest);
     }
 }
