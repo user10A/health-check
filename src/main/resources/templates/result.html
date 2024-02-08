@@ -1,0 +1,88 @@
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="./Header.jpg" />
+  <link
+          rel="stylesheet"
+          href="./Bok.png"
+  />
+  <title>Java Techie Mail</title>
+  <style>
+    body {
+      font-family: "Montserrat", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .main {
+      margin: 20px 30px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+      border: 1px solid #048741;
+      border-radius: 6px 6px 0px 6px;
+      width: 450px;
+      background-color: #F9F8F6;
+    }
+    .image {
+      width: 450px;
+      height: 16rem;
+      border-radius: 6px 6px 0px 0px;
+    }
+    .title-image {
+      width: 20rem;
+    }
+    .container {
+      padding: 2rem 4rem;
+    }
+    .header-text {
+      font-family: "Inter", sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 150%;
+      color: #34453C;
+      padding-right: 50px;
+    }
+    .description {
+      font-size: 20px;
+      color: green;
+      font-weight: bold;
+    }
+    .contacts {
+      background-color: #048741;
+      padding: 0.01rem;
+      width: 17rem;
+      text-align: center;
+      border-radius: 0rem 1rem 0rem 0rem;
+      font-size: 14px;
+    }
+    .result-number {
+      color: #048741;
+    }
+  </style>
+</head>
+<body>
+<div class="main">
+  <img src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg" alt="doctor" class="image" />
+  <img
+          src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
+          alt="title"
+          class="title-image"
+  />
+  <div class="container">
+    <p class="description">
+      <span style="color: green"> Ваш результат готов.</span>
+    </p>
+    <p class="result-number">
+      Номер результата: <span style="color: black">example</span>
+    </p>
+    <hr />
+  </div>
+  <div>
+    <div class="contacts">
+      <p>
+        +996 709 095 524 <span style="color: white">www.healthCheck</span>
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

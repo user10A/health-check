@@ -9,6 +9,7 @@ import healthcheck.service.AuthenticationService;
 import healthcheck.validation.EmailValidation;
 import healthcheck.validation.ValidPassword;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@CrossOrigin
+@Tag(name = "Auth api", description = "API's for Authentication ")
 public class AuthApi {
 
     private final AuthenticationService authenticationService;
