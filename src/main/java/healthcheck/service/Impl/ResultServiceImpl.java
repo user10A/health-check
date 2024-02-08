@@ -13,16 +13,17 @@ import healthcheck.service.ResultService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-
 public class ResultServiceImpl implements ResultService {
     private final ResultRepo resultRepo;
     private final DepartmentRepo departmentRepo;
     private final UserRepo userRepo;
+    private final JmsTemplate jmsTemplate;
     private final S3Service s3Service;
 
     @Override
@@ -52,15 +53,14 @@ public class ResultServiceImpl implements ResultService {
             return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();
         }
     }
-
     @Override
     public String getResultByResultNumberResult(Long resultNumber) {
-        return resultRepo.getResultByResultNumberResult(resultNumber);
+        String result = resultRepo.getResultByResultNumberResult(resultNumber);
+        log.info("результат найден {}", result);
+        return result;
     }
     private static Long generateTenDigitNumber() {
-        long randomNumber = (long) (Math.random() * 9000000000L) + 1000000000L;
-        return randomNumber;
+        return (long) (Math.random() * 9000000000L) + 1000000000L;
     }
-
 
 }
