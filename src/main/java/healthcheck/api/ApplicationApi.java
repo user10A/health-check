@@ -6,6 +6,7 @@ import healthcheck.dto.Application.ApplicationResponse;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.service.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/application")
+@CrossOrigin
+@Tag(name = "Application api", description = "API's for applications ")
 public class ApplicationApi {
 
     private final ApplicationService applicationService;

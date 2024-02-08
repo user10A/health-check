@@ -8,6 +8,7 @@ import healthcheck.dto.Appointment.AppointmentResponse;
 import healthcheck.service.AppointmentService;
 import healthcheck.service.TimeSheetService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/appointment")
+@CrossOrigin
+@Tag(name = "Appointment api", description = "API's for appointments ")
 public class AppointmentApi {
 
     private final AppointmentService appointmentService;
