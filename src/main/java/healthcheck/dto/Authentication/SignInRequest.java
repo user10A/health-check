@@ -1,5 +1,6 @@
 package healthcheck.dto.Authentication;
 
+import healthcheck.validation.EmailValidation;
 import healthcheck.validation.ValidPassword;
 import healthcheck.validation.ValidPhoneNumber;
 import jakarta.validation.constraints.Email;
@@ -12,8 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SignInRequest {
-    @Email(message = "Email не может быть пустым и должен быть валидным")
-    @NotBlank(message = "Email не может быть пустым")
+    @EmailValidation(message = "Email не может быть пустым и должен быть валидным")
     private String email;
     @ValidPassword
     private String password;

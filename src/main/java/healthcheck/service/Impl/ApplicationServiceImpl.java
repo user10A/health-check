@@ -1,4 +1,5 @@
 package healthcheck.service.Impl;
+
 import healthcheck.dto.Application.ApplicationDelete;
 import healthcheck.dto.Application.ApplicationRequest;
 import healthcheck.dto.Application.ApplicationResponse;
@@ -9,7 +10,6 @@ import healthcheck.repo.ApplicationRepo;
 import healthcheck.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
       try {
             applicationRepo.save(application);
-            String successMessage = "Успешно сохранен!";
+            String successMessage = "Заявка успешно отправлена!";
             log.info(successMessage);
             return new SimpleResponse(HttpStatus.OK, successMessage);
       } catch (Exception e) {
@@ -73,14 +73,32 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .filter(ApplicationDelete::getIsActive)
                 .map(ApplicationDelete::getId)
                 .collect(Collectors.toList());
-        try {
-            List<Application> applicationsToDelete = applicationRepo.findAllById(idsToDelete);
-            applicationRepo.deleteAll(applicationsToDelete);
-            return new SimpleResponse("Successfully deleted applications", HttpStatus.OK);
-        } catch (EmptyResultDataAccessException e) {
-            return new SimpleResponse("Error deleting applications: Some applications not found", HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new SimpleResponse("Error deleting applications: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+
+        List<Application> applicationsToDelete = applicationRepo.findAllById(idsToDelete);
+        List<Long> foundIds = applicationsToDelete.stream()
+                .map(Application::getId)
+                .toList();
+
+        List<Long> notFoundIds = idsToDelete.stream()
+                .filter(id -> !foundIds.contains(id))
+                .toList();
+
+        StringBuilder message = new StringBuilder();
+        HttpStatus status = HttpStatus.OK;
+
+        if (!notFoundIds.isEmpty()) {
+            message.append("Applications not found: ").append(notFoundIds).append(". ");
+            status = HttpStatus.PARTIAL_CONTENT;
         }
+
+        try {
+            applicationRepo.deleteAll(applicationsToDelete);
+            message.append("Successfully deleted applications.");
+        } catch (Exception e) {
+            message.append("Error deleting applications: ").append(e.getMessage());
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return new SimpleResponse(message.toString(), status);
     }
 }

@@ -68,8 +68,6 @@ public class ResultServiceImpl implements ResultService {
             helper.setTo(user.getUserAccount().getEmail());
             helper.setText(emailContent, true);
 
-            javaMailSender.send(mimeMessage);
-
             resultRepo.save(result);
 
             String successMessage = "Успешно сохранен!";

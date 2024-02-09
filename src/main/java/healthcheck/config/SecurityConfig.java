@@ -1,4 +1,5 @@
 package healthcheck.config;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,10 @@ public class SecurityConfig {
                                         "/api/auth/**",
                                         "/swagger-ui/**",
                                         "/actuator/**",
-                                        "/v3/api-docs/**"
+                                        "/v3/api-docs/**",
+                                        "/chat-bot/**",
+                                        "/api/application/createApplication",
+                                        "/api/search/**"
                                 )
                                 .permitAll()
                                 .anyRequest()
@@ -50,9 +54,9 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("*");  // Разрешить запросы с любого источника
-        config.addAllowedMethod("*");  // Разрешить все HTTP-методы
-        config.addAllowedHeader("*");  // Разрешить все заголовки
+        config.addAllowedOrigin("*");
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

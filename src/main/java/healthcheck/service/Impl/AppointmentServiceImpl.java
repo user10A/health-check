@@ -152,6 +152,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Department found: " + department);
         Doctor doctor = doctorRepo.findById(request.getDoctorId())
                 .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
+        if (!department.getDoctors().contains(doctor)) throw new NotFoundException("This doctor does not work in this department");
         log.info("Doctor found: " + doctor);
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
@@ -244,6 +245,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepo.findById(id)
                 .orElseThrow(()-> new NotFoundException("not found appointment by id: "+id));
         appointmentRepo.delete(appointment);
+        updateAvailability(
+                appointment.getDoctor().getId(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime(),
+                timeSheetRepo.getTimeSheetByEndTimeOfConsultation(appointment.getDoctor().getId(),appointment.getAppointmentTime()),
+                true);
         return new SimpleResponse("успешно удален ", HttpStatus.OK);
     }
 

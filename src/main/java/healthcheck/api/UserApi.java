@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @CrossOrigin
 @Tag(name = "User api", description = "API's for user ")
 public class UserApi {
-
     private final UserService userService;
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
