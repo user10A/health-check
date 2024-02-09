@@ -72,14 +72,23 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public boolean processedById(ApplicationProcessed request) {
-        Optional<Application> application = Optional.ofNullable(applicationRepo.findById(request.getId())
-                .orElseThrow(() -> new NotFoundException("Not found Application by Id: " + request.getId())));
-        log.info("Application found by id: "+request.getId());
-        application.ifPresent(value -> value.setProcessed(request.getIsActive()));
-        log.info("Application successfully update is processed: "+ application.get().isProcessed());
-        applicationRepo.save(application.get());
-        return application.get().isProcessed();
+        try {
+            Optional<Application> applicationOptional = applicationRepo.findById(request.getId());
+            Application application = applicationOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
+
+            log.info("Заявка найдена по ID: " + request.getId());
+            application.setProcessed(request.getIsActive());
+            log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
+
+            applicationRepo.save(application);
+
+            return application.isProcessed();
+        } catch (NotFoundException e) {
+            log.error("Ошибка обработки заявки: " + e.getMessage());
+            throw e;
+        }
     }
+
 
     @Override
     public SimpleResponse deleteById(Long request) {

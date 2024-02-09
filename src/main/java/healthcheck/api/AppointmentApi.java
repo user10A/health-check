@@ -1,5 +1,6 @@
 package healthcheck.api;
 
+import healthcheck.dto.Application.ApplicationProcessed;
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.TimeSheet.TimeSheetResponse;
@@ -90,12 +91,12 @@ public class AppointmentApi {
         return appointmentService.getTheDoctorFreeTimeInTheCalendar(startDate,endDate,id);
     }
 
-    @DeleteMapping("/deleteAll")
+    @DeleteMapping("/deleteAll") //delete all
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @Operation(summary = "Delete appointment",
             description = "This method can be used by both administrators and patients")
-    public SimpleResponse delete(@RequestBody(required = false) List<AppointmentDeleteRequest> appointments) {
-        return appointmentService.deleteAllAppointmentById(appointments);
+    public SimpleResponse delete(List<Long> appointments) {
+        return appointmentService.deleteAllAppointmentsById(appointments);
     }
 
     @GetMapping("/all")
@@ -105,11 +106,17 @@ public class AppointmentApi {
         return appointmentService.getAllAppointmentDefault();
     }
 
-    @DeleteMapping("/deleteById")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Delete appointment by ID",
             description = "Delete an appointment by providing the appointment ID. " +
                     "The appointment must be inactive to be deleted.")
-    public SimpleResponse deleteAppointmentById(@RequestBody AppointmentDeleteRequest appointmentDeleteRequest) {
-        return appointmentService.deleteAppointmentById(appointmentDeleteRequest);
+    public SimpleResponse deleteAppointmentById(@PathVariable Long id) {
+        return appointmentService.deleteAppointmentById(id);
+    }
+    @PutMapping("update")
+    @Operation(summary = "update processed ", description = "Endpoint to update processed by id (Admin)")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public boolean processed(@RequestBody AppointmentProcessedRequest processed){
+        return appointmentService.updateProcessed(processed);
     }
 }

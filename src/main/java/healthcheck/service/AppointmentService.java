@@ -17,6 +17,8 @@ public interface AppointmentService {
     List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId);
     SimpleResponse appointmentConfirmationEmail();
     List<AppointmentResponse> getAllAppointmentDefault();
-    SimpleResponse deleteAppointmentById(AppointmentDeleteRequest appointmentDeleteRequest);
-    SimpleResponse deleteAllAppointmentById(List<AppointmentDeleteRequest> appointmentDeleteRequests);
+    SimpleResponse deleteAppointmentById(Long id);
+    boolean updateProcessed (AppointmentProcessedRequest request);
+    SimpleResponse deleteAllAppointmentsById(List<Long> listId);
+
 }
