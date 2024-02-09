@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ApplicationDelete {
+public class ApplicationProcessed {
     private Boolean isActive;
     @NotNull
     private Long id;
