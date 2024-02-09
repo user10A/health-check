@@ -15,12 +15,12 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
 import java.time.LocalTime;
 
 @Service
@@ -43,7 +43,6 @@ public class ResultServiceImpl implements ResultService {
                     .orElseThrow(() -> new NotFoundException(
                             String.format("Пользователь с ID: %d не найден", request.getUserId())
                     ));
-
             Result result = Result.builder()
                     .resultDate(request.getDataOfDelivery())
                     .pdfUrl(request.getUrl())
@@ -71,7 +70,6 @@ public class ResultServiceImpl implements ResultService {
             javaMailSender.send(mimeMessage);
 
             resultRepo.save(result);
-
             String successMessage = "Успешно сохранен!";
             log.info(successMessage);
             return new SimpleResponse(HttpStatus.OK, successMessage);
@@ -82,6 +80,12 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
+    @Override
+    public String getResultByResultNumberResult(Long resultNumber) {
+        String result = resultRepo.getResultByResultNumberResult(resultNumber);
+        log.info("результат найден {}", result);
+        return result;
+    }
     private static Long generateTenDigitNumber() {
         return (long) (Math.random() * 9000000000L) + 1000000000L;
     }

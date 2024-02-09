@@ -93,5 +93,17 @@ public class S3Service {
             throw new IllegalStateException("Error downloading file");
         }
     }
-
+    public byte[] getPdfFileByUrl(String fileUrl) {
+        try {
+            log.info("Поиск file...");
+            String key = fileUrl.substring(BUCKET_PATH.length());
+            ResponseInputStream<GetObjectResponse> s3Object = s3.getObject(GetObjectRequest.builder().bucket(BUCKET_NAME).key(key).build());
+            byte[] content = IOUtils.toByteArray(s3Object);
+            log.info("File успешно найден !");
+            return content;
+        } catch (S3Exception | IOException e) {
+            log.error("Ошибка file не найден: {}", e.getMessage());
+            throw new IllegalStateException("File не найден ! ");
+        }
+    }
 }

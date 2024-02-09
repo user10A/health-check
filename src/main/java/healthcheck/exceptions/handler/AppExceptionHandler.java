@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class AppExceptionHandler {
+
+    private NotFoundException e;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -86,4 +91,32 @@ public class AppExceptionHandler {
                 .message(e.getMessage())
                 .build();
     }
+    @ExceptionHandler(S3Exception.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionResponse notFoundFileException(NotFoundException e){
+        return ExceptionResponse.builder()
+                .httpStatus(HttpStatus.NOT_FOUND)
+                .exceptionClassName(e.getClass().getSimpleName())
+                .message(e.getMessage())
+                .build();
+    }
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionResponse handleNotFoundException(NotFoundException e){
+        return ExceptionResponse.builder()
+                .httpStatus(HttpStatus.NOT_FOUND)
+                .exceptionClassName(e.getClass().getSimpleName())
+                .message(e.getMessage())
+                .build();
+    }
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionResponse HandleConflictException(HttpClientErrorException.Conflict e){
+        return ExceptionResponse.builder()
+                .httpStatus(HttpStatus.CONFLICT)
+                .exceptionClassName(e.getClass().getSimpleName())
+                .message(e.getMessage())
+                .build();
+    }
+
 }
