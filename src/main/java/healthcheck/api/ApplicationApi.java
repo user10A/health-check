@@ -1,6 +1,6 @@
 package healthcheck.api;
 
-import healthcheck.dto.Application.ApplicationDelete;
+import healthcheck.dto.Application.ApplicationProcessed;
 import healthcheck.dto.Application.ApplicationRequest;
 import healthcheck.dto.Application.ApplicationResponse;
 import healthcheck.dto.SimpleResponse;
@@ -30,29 +30,34 @@ public class ApplicationApi {
     }
 
     @GetMapping("/getApplication")
-    @Operation(summary = "Get Application", description = "Endpoint to get application.")
+    @Operation(summary = "Get Application", description = "Endpoint to get application (Admin)")
     @PreAuthorize("hasAuthority('ADMIN')")
     public List<ApplicationResponse> getApplication(@RequestParam String word){
         return applicationService.getApplications(word);
     }
 
-    @DeleteMapping
-    @Operation(summary = "delete is processed", description = "Endpoint to delete is processed")
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    public SimpleResponse deleteProcessed(@RequestBody ApplicationDelete application){
-        return applicationService.deleteAllPressed(application);
+    @DeleteMapping("/{id}")
+    @Operation(summary = "delete by id", description = "Endpoint to delete by id (Admin)")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public SimpleResponse deleteById(@PathVariable Long id){
+        return applicationService.deleteById(id);
     }
     @DeleteMapping("all")
-    @Operation(summary = "delete All", description = "Endpoint to delete all")
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    public SimpleResponse deleteAll(@RequestBody List<ApplicationDelete>application){
-        return applicationService.deleteAll(application);
+    @Operation(summary = "delete All", description = "Endpoint to delete all (Admin)")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public SimpleResponse deleteAll(@RequestBody List<Long>listId){
+        return applicationService.deleteAll(listId);
     }
-
     @GetMapping("getAll")
-    @Operation(summary = "get all Application", description = "Endpoint to get all application")
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @Operation(summary = "get all Application", description = "Endpoint to get all application (Admin)")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<ApplicationResponse> getAllApplication(){
         return applicationService.getAllApplications();
+    }
+    @PutMapping("update")
+    @Operation(summary = "update processed ", description = "Endpoint to update processed by id (Admin)")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public boolean processed(@RequestBody ApplicationProcessed processed){
+        return applicationService.processedById(processed);
     }
 }
