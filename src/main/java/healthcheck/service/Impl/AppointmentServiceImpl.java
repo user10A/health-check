@@ -74,7 +74,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
-                    .status(status)
+                                        .status(appointment.isProcessed())
                     .build());
         }
         log.info("Возвращено {} записей о приемах", response.size());
@@ -283,6 +283,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
+                                             .status(appointment.isProcessed())
                     .build());
         }
         return response;
