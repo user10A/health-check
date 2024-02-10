@@ -307,16 +307,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 Optional<Appointment> appointmentOptional = appointmentRepo.findById(request.getId());
                 Appointment application = appointmentOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
                 log.info("Заявка найдена по ID: " + request.getId());
-                application.setProcessed(request.isActive());
+                application.setProcessed(true);
                 log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
                 appointmentRepo.save(application);
                 return application.isProcessed();
             } catch (NotFoundException e) {
                 log.error("Ошибка обработки заявки: " + e.getMessage());
                 throw e; // выбросить исключение
-
             }
-
     }
 
     @Override
