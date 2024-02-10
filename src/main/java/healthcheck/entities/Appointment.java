@@ -47,7 +47,6 @@ public class Appointment {
                 ", appointmentDate=" + appointmentDate +
                 ", appointmentTime=" + appointmentTime +
                 ", status=" + status +
-                ", processed=" + processed +
                 '}';
     }
 }
