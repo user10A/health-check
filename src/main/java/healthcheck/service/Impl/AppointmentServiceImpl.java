@@ -53,14 +53,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         List<Appointment> all = appointmentRepo.getAllAppointment(word);
         List<AppointmentResponse> response = new ArrayList<>();
-        boolean status = false;
         for (Appointment appointment : all) {
-            if (appointment.getStatus().equals(Status.CONFIRMED)) {
-                status = false;
-            } else if (appointment.getStatus().equals(Status.FINISHED)) {
-                status = true;
-            }
-
             String username = appointment.getUser().getFirstName() + " " +
                     appointment.getUser().getLastName();
 
@@ -73,7 +66,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
-                    .status(status)
                     .build());
         }
         log.info("Возвращено {} записей о приемах", response.size());
@@ -289,6 +281,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
+                    .status(appointment.isProcessed())
                     .build());
         }
         return response;
