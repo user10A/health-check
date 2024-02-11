@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -66,6 +67,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
+                    .status(appointment.isProcessed())
                     .build());
         }
         log.info("Возвращено {} записей о приемах", response.size());
@@ -288,42 +290,80 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public SimpleResponse deleteAppointmentById(AppointmentDeleteRequest appointmentDeleteRequest) {
-        Appointment appointment = appointmentRepo.findById(appointmentDeleteRequest.getId()).orElseThrow(() ->
+    public SimpleResponse deleteAppointmentById(Long id) {
+        Appointment appointment = appointmentRepo.findById(id).orElseThrow(() ->
                 new NotFoundException("Appointment не найден"));
-
-        if(appointmentDeleteRequest.isActive()) throw new RuntimeException("Вы не можете удалить пока не выберите");
-
-        appointmentRepo.delete(appointment);
-        return SimpleResponse.builder().message("Успешно удален").httpStatus(HttpStatus.OK).build();
+        if (appointment.isProcessed()) {
+            appointmentRepo.delete(appointment);
+            return SimpleResponse.builder().message("Успешно удален").httpStatus(HttpStatus.OK).build();
+        }else {
+            log.error("Appointment с ID: " + id + " не обработан");
+            return new SimpleResponse("Ошибка Appointment с ID: "+id +" не обработан", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
-    public SimpleResponse deleteAllAppointmentById(List<AppointmentDeleteRequest> appointmentDeleteRequests) {
-        List<Long> failedToDelete = appointmentDeleteRequests.stream()
-                .filter(deleteRequest -> !deleteRequest.isActive())
-                .map(AppointmentDeleteRequest::getId)
-                .toList();
-
-        if (!failedToDelete.isEmpty()) {
-            return SimpleResponse.builder()
-                    .message("Нельзя удалить записи с ID: " + failedToDelete + ", так как их статус 'active' не совпадает с указанным в запросе")
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .build();
-        }
-
-        appointmentDeleteRequests.stream()
-                .filter(AppointmentDeleteRequest::isActive)
-                .map(AppointmentDeleteRequest::getId)
-                .forEach(appointmentId -> {
-                    Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(() ->
-                            new NotFoundException("Appointment не найден"));
-                    appointmentRepo.delete(appointment);
-                });
-
-        return SimpleResponse.builder()
-                .message("Записи успешно удалены")
-                .httpStatus(HttpStatus.OK)
-                .build();
+    public boolean updateProcessed(AppointmentProcessedRequest request) {
+            try {
+                Optional<Appointment> appointmentOptional = appointmentRepo.findById(request.getId());
+                Appointment application = appointmentOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
+                log.info("Заявка найдена по ID: " + request.getId());
+                application.setProcessed(request.isActive());
+                log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
+                appointmentRepo.save(application);
+                return application.isProcessed();
+            } catch (NotFoundException e) {
+                log.error("Ошибка обработки заявки: " + e.getMessage());
+                throw e; // выбросить исключение
+            }
     }
+
+    @Override
+    public SimpleResponse deleteAllAppointmentsById(List<Long> listId) {
+        try {
+            log.info("Список ID в методе удаления всех: {}", listId);
+            List<Appointment> appointments = appointmentRepo.findAllById(listId);
+            log.info("Найдены заявки");
+            appointmentRepo.deleteAll(appointments);
+            log.info("Заявки успешно удалены");
+            return new SimpleResponse("Заявки успешно удалены", HttpStatus.OK);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("Ошибка удаления заявок: Некоторые заявки не найдены");
+            return new SimpleResponse("Ошибка удаления заявок: Некоторые заявки не найдены", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Ошибка удаления заявок: " + e.getMessage());
+            return new SimpleResponse("Ошибка удаления заявок: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+// deleteAllAppointmentById delete
+//    @Override
+//    public SimpleResponse deleteAllAppointmentById(List<AppointmentProcessedRequest> appointmentDeleteRequests) {
+//        List<Long> failedToDelete = appointmentDeleteRequests.stream()
+//                .filter(deleteRequest -> !deleteRequest.isActive())
+//                .map(AppointmentDeleteRequest::getId)
+//                .toList();
+//
+//        if (!failedToDelete.isEmpty()) {
+//            return SimpleResponse.builder()
+//                    .message("Нельзя удалить записи с ID: " + failedToDelete + ", так как их статус 'active' не совпадает с указанным в запросе")
+//                    .httpStatus(HttpStatus.BAD_REQUEST)
+//                    .build();
+//        }
+//
+//        appointmentDeleteRequests.stream()
+//                .filter(AppointmentDeleteRequest::isActive)
+//                .map(AppointmentDeleteRequest::getId)
+//                .forEach(appointmentId -> {
+//                    Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(() ->
+//                            new NotFoundException("Appointment не найден"));
+//                    appointmentRepo.delete(appointment);
+//                });
+//
+//        return SimpleResponse.builder()
+//                .message("Записи успешно удалены")
+//                .httpStatus(HttpStatus.OK)
+//                .build();
+//    }
 }

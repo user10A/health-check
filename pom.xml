@@ -200,7 +200,22 @@
             <artifactId>poi-ooxml</artifactId>
             <version>5.1.0</version>
         </dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-all -->
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-all</artifactId>
+			<version>6.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-all</artifactId>
+			<version>5.16.3</version>
+		</dependency>
 
+		<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-activemq</artifactId>-->
+<!--		</dependency>-->
     </dependencies>
 
 	<build>

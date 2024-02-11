@@ -21,7 +21,7 @@ public class JwtService {
         return JWT.create()
                 .withClaim("email", email)
                 .withIssuedAt(new Date())
-                .withExpiresAt(Date.from(ZonedDateTime.now().plusMinutes(60).toInstant()))
+                .withExpiresAt(Date.from(ZonedDateTime.now().plusDays(3).toInstant()))
                 .sign(Algorithm.HMAC256(SECRET_KEY));
     }
 

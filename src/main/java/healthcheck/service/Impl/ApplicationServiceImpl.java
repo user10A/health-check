@@ -1,6 +1,6 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Application.ApplicationDelete;
+import healthcheck.dto.Application.ApplicationProcessed;
 import healthcheck.dto.Application.ApplicationRequest;
 import healthcheck.dto.Application.ApplicationResponse;
 import healthcheck.dto.SimpleResponse;
@@ -12,10 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,55 +49,61 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public SimpleResponse deleteAllPressed(ApplicationDelete request) {
-        if (request.getIsActive()) {
-            Application application = applicationRepo.findById(request.getId())
-                    .orElseThrow(() -> new NotFoundException("Application not found with ID: " + request.getId()));
-            applicationRepo.delete(application);
-
-            return new SimpleResponse("Successfully deleted", HttpStatus.OK);
-        } else {
-            return new SimpleResponse("Deletion not performed as isActive is false", HttpStatus.OK);
-        }
-    }
-
-    @Override
     public List<ApplicationResponse> getAllApplications() {
         return applicationRepo.getAllApplications();
     }
 
     @Override
-    public SimpleResponse deleteAll(List<ApplicationDelete> request) {
-        List<Long> idsToDelete = request.stream()
-                .filter(ApplicationDelete::getIsActive)
-                .map(ApplicationDelete::getId)
-                .collect(Collectors.toList());
-
-        List<Application> applicationsToDelete = applicationRepo.findAllById(idsToDelete);
-        List<Long> foundIds = applicationsToDelete.stream()
-                .map(Application::getId)
-                .toList();
-
-        List<Long> notFoundIds = idsToDelete.stream()
-                .filter(id -> !foundIds.contains(id))
-                .toList();
-
-        StringBuilder message = new StringBuilder();
-        HttpStatus status = HttpStatus.OK;
-
-        if (!notFoundIds.isEmpty()) {
-            message.append("Applications not found: ").append(notFoundIds).append(". ");
-            status = HttpStatus.PARTIAL_CONTENT;
-        }
-
+    public SimpleResponse deleteAll(List<Long> request) {
         try {
+            log.info("list id in methods delete all : {}",request);
+            List<Application> applicationsToDelete = applicationRepo.findAllById(request);
+            log.info("applications found");
             applicationRepo.deleteAll(applicationsToDelete);
-            message.append("Successfully deleted applications.");
+            log.info("Successfully deleted applications");
+            return new SimpleResponse("Successfully deleted applications", HttpStatus.OK);
+        } catch (EmptyResultDataAccessException e) {
+            return new SimpleResponse("Error deleting applications: Some applications not found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             message.append("Error deleting applications: ").append(e.getMessage());
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
         return new SimpleResponse(message.toString(), status);
+    }
+
+    @Override
+    public boolean processedById(ApplicationProcessed request) {
+        try {
+            Optional<Application> applicationOptional = applicationRepo.findById(request.getId());
+            Application application = applicationOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
+
+            log.info("Заявка найдена по ID: " + request.getId());
+            application.setProcessed(request.getIsActive());
+            log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
+
+            applicationRepo.save(application);
+
+            return application.isProcessed();
+        } catch (NotFoundException e) {
+            log.error("Ошибка обработки заявки: " + e.getMessage());
+            throw e;
+        }
+    }
+
+
+    @Override
+    public SimpleResponse deleteById(Long request) {
+        Application application = applicationRepo.findById(request)
+                .orElseThrow(() -> new NotFoundException("Application not found with ID: " + request));
+        if(application.isProcessed()) {
+            log.info("Application found by id: " + request);
+            applicationRepo.delete(application);
+            log.info("Successfully deleted application");
+            return new SimpleResponse("Successfully deleted", HttpStatus.OK);
+        } else {
+            log.error("Application with ID: " + request + " is not processed, cannot delete.");
+            return new SimpleResponse("Error deleting application: Application not processed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
