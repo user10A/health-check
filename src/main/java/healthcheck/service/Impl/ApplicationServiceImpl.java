@@ -1,4 +1,5 @@
 package healthcheck.service.Impl;
+
 import healthcheck.dto.Application.ApplicationProcessed;
 import healthcheck.dto.Application.ApplicationRequest;
 import healthcheck.dto.Application.ApplicationResponse;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
       try {
             applicationRepo.save(application);
-            String successMessage = "Успешно сохранен!";
+            String successMessage = "Заявка успешно отправлена!";
             log.info(successMessage);
             return new SimpleResponse(HttpStatus.OK, successMessage);
       } catch (Exception e) {
@@ -66,7 +66,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (EmptyResultDataAccessException e) {
             return new SimpleResponse("Error deleting applications: Some applications not found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new SimpleResponse("Error deleting applications: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new SimpleResponse("Error deleting applications: ", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -104,6 +104,4 @@ public class ApplicationServiceImpl implements ApplicationService {
             return new SimpleResponse("Error deleting application: Application not processed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
-

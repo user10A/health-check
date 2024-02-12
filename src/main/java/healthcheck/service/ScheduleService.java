@@ -20,6 +20,5 @@ public interface ScheduleService {
     List<ResponseToGetSchedules> getAllSchedules();
     List<ResponseToGetSchedules> getScheduleByDate(String startDate, String endDate);
     List<ResponseToGetSchedules> getScheduleBySearch(String word);
-     List<Schedule> exportCustomerToExcel(HttpServletResponse response) throws IOException;
-
+    List<Schedule> exportCustomerToExcel(HttpServletResponse response) throws IOException;
 }

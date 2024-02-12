@@ -54,5 +54,4 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
     public DayOfWeek getDayOfWeek(LocalDate date) {
         return date.getDayOfWeek();
     }
-
 }

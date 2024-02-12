@@ -53,6 +53,7 @@ public class AppointmentApi {
     public OnlineAppointmentResponse addAppointment(@RequestParam Facility facility, @Valid @RequestBody AppointmentRequest request) throws MessagingException, IOException {
         return appointmentService.addAppointment(facility,request);
     }
+
     @PatchMapping()
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "check verification code", description = "Endpoint checking code appointment.")

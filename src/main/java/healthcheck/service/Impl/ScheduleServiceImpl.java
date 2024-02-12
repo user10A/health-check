@@ -1,9 +1,9 @@
 package healthcheck.service.Impl;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
+import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleGetResponse;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
-import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
@@ -32,7 +32,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +59,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         Doctor doctor = doctorRepo.findById(doctorId)
                 .filter(d -> department.getDoctors().contains(d))
                 .orElseThrow(() -> new NotFoundException("Доктор не в данном департаменте или не найден"));
+        doctor.setActive(true);
+        doctorRepo.save(doctor);
 
         if (doctor.getSchedule() != null) {
             throw new AlreadyExistsException("Врач с ID: " + doctorId + " уже имеет расписание");
@@ -188,7 +193,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
     }
 
-      public List<ResponseToGetSchedules> getAllSchedules() {
+    public List<ResponseToGetSchedules> getAllSchedules() {
         return scheduleDao.getAllSchedules();
     }
 

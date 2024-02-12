@@ -43,6 +43,7 @@ public class AuthApi {
     public AuthenticationResponse authWithGoogleAccount(@RequestParam String tokenId) throws FirebaseAuthException {
         return authenticationService.authWithGoogleAccount(tokenId);
     }
+
     @SneakyThrows
     @Operation(summary = "Send Email", description = "Sends an email to the user with a confirmation link. The user receives the message and clicks the confirmation button.")
     @PostMapping("/send-email")

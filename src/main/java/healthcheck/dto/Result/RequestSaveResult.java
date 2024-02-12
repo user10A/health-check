@@ -1,12 +1,10 @@
 package healthcheck.dto.Result;
 
-import healthcheck.entities.Department;
 import healthcheck.enums.Facility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 @Data

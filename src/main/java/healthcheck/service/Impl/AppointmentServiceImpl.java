@@ -54,14 +54,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         List<Appointment> all = appointmentRepo.getAllAppointment(word);
         List<AppointmentResponse> response = new ArrayList<>();
-        boolean status = false;
         for (Appointment appointment : all) {
-            if (appointment.getStatus().equals(Status.CONFIRMED)) {
-                status = false;
-            } else if (appointment.getStatus().equals(Status.FINISHED)) {
-                status = true;
-            }
-
             String username = appointment.getUser().getFirstName() + " " +
                     appointment.getUser().getLastName();
 
@@ -74,7 +67,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
-                                        .status(appointment.isProcessed())
+                    .status(appointment.isProcessed())
                     .build());
         }
         log.info("Возвращено {} записей о приемах", response.size());
@@ -153,6 +146,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Department found: " + department);
         Doctor doctor = doctorRepo.findById(request.getDoctorId())
                 .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
+        if (!department.getDoctors().contains(doctor)) throw new NotFoundException("This doctor does not work in this department");
         log.info("Doctor found: " + doctor);
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
@@ -245,6 +239,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepo.findById(id)
                 .orElseThrow(()-> new NotFoundException("not found appointment by id: "+id));
         appointmentRepo.delete(appointment);
+        updateAvailability(
+                appointment.getDoctor().getId(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime(),
+                timeSheetRepo.getTimeSheetByEndTimeOfConsultation(appointment.getDoctor().getId(),appointment.getAppointmentTime()),
+                true);
         return new SimpleResponse("успешно удален ", HttpStatus.OK);
     }
 
@@ -283,11 +283,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
-<<<<<<< Updated upstream
-                                             .status(appointment.isProcessed())
-=======
                     .status(appointment.isProcessed())
->>>>>>> Stashed changes
                     .build());
         }
         return response;
@@ -312,13 +308,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                 Optional<Appointment> appointmentOptional = appointmentRepo.findById(request.getId());
                 Appointment application = appointmentOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
                 log.info("Заявка найдена по ID: " + request.getId());
-                application.setProcessed(true);
+                application.setProcessed(request.isActive());
                 log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
                 appointmentRepo.save(application);
                 return application.isProcessed();
             } catch (NotFoundException e) {
                 log.error("Ошибка обработки заявки: " + e.getMessage());
-                throw e; // выбросить исключение
+                throw e;
             }
     }
 
