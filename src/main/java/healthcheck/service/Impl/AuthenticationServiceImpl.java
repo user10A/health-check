@@ -1,4 +1,5 @@
 package healthcheck.service.Impl;
+
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -112,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             FirebaseOptions firebaseOptions = FirebaseOptions.builder()
                     .setCredentials(googleCredentials)
                     .build();
-            FirebaseApp.initializeApp(firebaseOptions, "My First Project");
+            FirebaseApp.initializeApp(firebaseOptions);
 
             log.info("FirebaseApp успешно инициализирован");
         } catch (IOException e) {
@@ -123,29 +124,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authWithGoogleAccount(String tokenId) throws FirebaseAuthException {
-        try {
-            FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(tokenId);
-            User user;
-            if (!userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
-                User newUser = new User();
-                String[] name = firebaseToken.getName().split(" ");
-                newUser.setFirstName(name[0]);
-                newUser.setLastName(name[1]);
-                newUser.setUserAccount(new UserAccount(firebaseToken.getEmail(), firebaseToken.getEmail(), Role.USER));
-                userRepo.save(newUser);
-                log.info("Новый пользователь зарегистрирован с помощью Google: {}", firebaseToken.getEmail());
-            }
+        FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(tokenId);
 
-            user = userRepo.findUserByUserAccountEmail(firebaseToken.getEmail());
-
-            log.info("Пользователь успешно вошел в систему с помощью Google: {}", user.getUserAccount().getEmail());
-
-            return new AuthenticationResponse(user.getUserAccount().getEmail(),
-                    jwtService.generateToken(user.getUserAccount().getEmail()),
-                    user.getUserAccount().getRole());
-        } catch (Exception e) {
-            log.error("Ошибка во время аутентификации через Google: {}", e.getMessage(), e);
-            throw e;
+        if (userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
+            String message = "user with email: " + firebaseToken.getEmail() + " is already exists!!";
+            log.error(message);
+            throw new AlreadyExistsException(message);
         }
+
+        log.info("Creating a new user for email: {}", firebaseToken.getEmail());
+        User newUser = new User();
+        String[] name = firebaseToken.getName().split(" ");
+        newUser.setFirstName(name[0]);
+        newUser.setLastName(name[1]);
+        userRepo.save(newUser);
+
+        UserAccount userInfo = new UserAccount();
+        userInfo.setEmail(firebaseToken.getEmail());
+        userInfo.setPassword(firebaseToken.getEmail());
+        userInfo.setRole(Role.USER);
+        newUser.setUserAccount(userInfo);
+        userAccountRepo.save(userInfo);
+        log.info("User created successfully for email: {}", firebaseToken.getEmail());
+
+        UserAccount userInformation = newUser.getUserAccount();
+        String accessToken = jwtService.generateToken(String.valueOf(userInformation));
+
+        log.info("Authentication successful for email: {}", firebaseToken.getEmail());
+        return AuthenticationResponse.builder()
+                .token(accessToken)
+                .email(firebaseToken.getEmail())
+                .role(userInformation.getRole())
+                .build();
     }
 }
