@@ -283,7 +283,11 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .specialist(appointment.getDoctor().getFullNameDoctor())
                     .localDate(appointment.getAppointmentDate())
                     .localTime(appointment.getAppointmentTime())
+<<<<<<< Updated upstream
                                              .status(appointment.isProcessed())
+=======
+                    .status(appointment.isProcessed())
+>>>>>>> Stashed changes
                     .build());
         }
         return response;
