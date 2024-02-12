@@ -10,6 +10,7 @@ import healthcheck.repo.ApplicationRepo;
 import healthcheck.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -65,11 +66,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (EmptyResultDataAccessException e) {
             return new SimpleResponse("Error deleting applications: Some applications not found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            message.append("Error deleting applications: ").append(e.getMessage());
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            return new SimpleResponse("Error deleting applications: ", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new SimpleResponse(message.toString(), status);
     }
 
     @Override

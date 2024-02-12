@@ -2,9 +2,6 @@ package healthcheck.dto.Authentication;
 
 import healthcheck.validation.EmailValidation;
 import healthcheck.validation.ValidPassword;
-import healthcheck.validation.ValidPhoneNumber;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
