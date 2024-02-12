@@ -314,7 +314,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 return application.isProcessed();
             } catch (NotFoundException e) {
                 log.error("Ошибка обработки заявки: " + e.getMessage());
-                throw e; // выбросить исключение
+                throw e;
             }
     }
 
