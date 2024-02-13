@@ -73,20 +73,28 @@ public class S3Service {
                 "message", fileLink + " has been deleted");
     }
 
-    public <S3ObjectInputStream> ResponseEntity<ByteArrayResource> download(String fileLink) {
+    public ResponseEntity<ByteArrayResource> download(String fileLink) {
         try {
             log.info("Downloading file...");
             String key = fileLink.substring(BUCKET_PATH.length());
             ResponseInputStream<GetObjectResponse> s3Object = s3.getObject(GetObjectRequest.builder().bucket(BUCKET_NAME).key(key).build());
-            int s3ObjectInputStream = s3Object.read();
-            ByteArrayResource resource = new ByteArrayResource(IOUtils.toByteArray(String.valueOf(s3ObjectInputStream)));
+            byte[] fileContent = IOUtils.toByteArray(s3Object);
+            ByteArrayResource resource = new ByteArrayResource(fileContent);
+
+            // Determine the content type
+            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            if (key.toLowerCase().endsWith(".pdf")) {
+                mediaType = MediaType.APPLICATION_PDF;
+            }
+
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + key);
             headers.setContentLength(resource.contentLength());
+
             log.info("Download successfully completed!");
             return ResponseEntity.ok()
                     .headers(headers)
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentType(mediaType)
                     .body(resource);
         } catch (S3Exception | IOException e) {
             log.error("Error downloading file: {}", e.getMessage());

@@ -56,13 +56,12 @@ public class ResultServiceImpl implements ResultService {
             Context context = new Context();
             context.setVariable("patientName", user.getFirstName() + " " + user.getLastName());
             context.setVariable("departmentName", department.getFacility());
-            context.setVariable("generateNumber", generateTenDigitNumber());
+            context.setVariable("generateNumber", result.getResultNumber());
             emailSenderService.sendEmail(user.getUserAccount().getEmail(), "HealthCheck : Оповещение о результате", "result", context);
             log.info("Сообщение отправлено пользователю с email : %s".formatted(user.getUserAccount().getEmail()));
 
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-
             String emailContent = templateEngine.process("result", context);
             helper.setTo(user.getUserAccount().getEmail());
             helper.setText(emailContent, true);
