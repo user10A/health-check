@@ -42,7 +42,7 @@ public class S3Api {
 
     @Operation(summary = "Download file", description = "Download file from S3")
     @GetMapping("/download")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public ResponseEntity<ByteArrayResource> download(@RequestParam(name = "fileLink") String fileLink) {
         return s3Service.download(fileLink);
     }

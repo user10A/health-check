@@ -72,7 +72,7 @@ public class S3Service {
         return Map.of(
                 "message", fileLink + " has been deleted");
     }
-
+  
     public ResponseEntity<ByteArrayResource> download(String fileLink) {
         try {
             log.info("Downloading file...");
