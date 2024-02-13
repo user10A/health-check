@@ -127,11 +127,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(tokenId);
 
         if (userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
-            String message = "user with email: " + firebaseToken.getEmail() + " is already exists!!";
-            log.error(message);
-            throw new AlreadyExistsException(message);
+            log.info("user with email: " + firebaseToken.getEmail() + " is already exists!!");
+                UserAccount userAc =userAccountRepo.findUserAccountByEmail(firebaseToken.getEmail());
+                String accessToken = jwtService.generateToken(String.valueOf(userAc));
+                log.info("Authentication successful for email: {}", firebaseToken.getEmail());
+                return AuthenticationResponse.builder()
+                        .token(accessToken)
+                        .email(firebaseToken.getEmail())
+                        .role(userAc.getRole())
+                        .build();
         }
-
         log.info("Creating a new user for email: {}", firebaseToken.getEmail());
         User newUser = new User();
         String[] name = firebaseToken.getName().split(" ");
@@ -141,7 +146,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         UserAccount userInfo = new UserAccount();
         userInfo.setEmail(firebaseToken.getEmail());
-        userInfo.setPassword(firebaseToken.getEmail());
+        userInfo.setPassword(passwordEncoder.encode(firebaseToken.getEmail()));
         userInfo.setRole(Role.USER);
         newUser.setUserAccount(userInfo);
         userAccountRepo.save(userInfo);
