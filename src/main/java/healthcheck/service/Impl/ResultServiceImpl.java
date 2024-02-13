@@ -62,7 +62,6 @@ public class ResultServiceImpl implements ResultService {
 
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-
             String emailContent = templateEngine.process("result", context);
             helper.setTo(user.getUserAccount().getEmail());
             helper.setText(emailContent, true);
