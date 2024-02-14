@@ -37,7 +37,7 @@ public class AppointmentApi {
     @GetMapping("/getAppointment")
     @Operation(summary = "Get appointment", description = "Endpoint to get appointment.")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public List<AppointmentResponse> getAppointment(String word){
+    public List<AppointmentResponse> getAppointment(@RequestParam String word){
         return appointmentService.getAllAppointment(word);
     }
 
@@ -98,7 +98,7 @@ public class AppointmentApi {
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @Operation(summary = "Delete appointment",
             description = "This method can be used by both administrators and patients")
-    public SimpleResponse delete(List<Long> appointments) {
+    public SimpleResponse delete(@RequestBody List<Long> appointments) {
         return appointmentService.deleteAllAppointmentsById(appointments);
     }
 
