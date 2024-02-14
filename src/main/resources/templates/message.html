@@ -11,6 +11,9 @@
     <title>Сброс пароля</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        *{
+            color: black;
+        }
         body {
             font-family: "Montserrat", sans-serif;
             margin: 0;
@@ -19,7 +22,7 @@
         .main {
             margin: 20px 30px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-            border: 1px solid #048741;
+            border:none;
             border-radius: 6px 6px 0px 6px;
             width: 450px;
             background-color: #F9F8F6;
@@ -49,6 +52,14 @@
             height: 70px;
             font-size: 18px;
         }
+        .btn {
+            background-color: #048741;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -64,14 +75,14 @@
 
     <div class="container">
         <p class="description">
-            <span style="color: green; font-size: 28px;" th:text="${greeting}"></span>
+            <span style="color: #048741; font-size: 28px;" th:text="${greeting}"></span>
         </p>
         <p class="text" style="font-size: 18px;">Уважаемый(ая) <span style="font-size: 15px;" th:text="${userName}"></span>,</p>
         <hr />
         <div class="password-reset">
             <h2>СМЕНА ПАРОЛЯ</h2>
             <p>Для того чтобы сбросить пароль нажмите кнопку подветдить</p>
-            <button th:href="@{${link}}" class="btn">ПОДТВЕРДИТЬ</button>
+            <a th:href="@{${link}}"><button class="btn">ПОДТВЕРДИТЬ</button></a>
         </div>
     </div>
     <div>
