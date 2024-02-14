@@ -49,18 +49,26 @@
             height: 70px;
             font-size: 18px;
         }
+        .btn {
+            background-color: #048741;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+        }
     </style>
 </head>
 <body>
 <div class="main">
     <img src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg" alt="doctor" class="image" />
-   <div class="box">
-    <img
-            src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
-            alt="title"
-            class="title-image"
-    />
-   </div>
+    <div class="box">
+        <img
+                src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
+                alt="title"
+                class="title-image"
+        />
+    </div>
 
     <div class="container">
         <p class="description">
@@ -71,7 +79,7 @@
         <div class="password-reset">
             <h2>СМЕНА ПАРОЛЯ</h2>
             <p>Для того чтобы сбросить пароль нажмите кнопку подветдить</p>
-            <button th:href="@{${link}}" class="btn">ПОДТВЕРДИТЬ</button>
+            <a th:href="@{${link}}"><button class="btn">ПОДТВЕРДИТЬ</button></a>
         </div>
     </div>
     <div>

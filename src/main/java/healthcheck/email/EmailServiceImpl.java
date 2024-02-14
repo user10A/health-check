@@ -45,7 +45,7 @@ public class EmailServiceImpl implements EmailService {
     private final TemplateEngine templateEngine;
 
     @Override
-    public SimpleResponse forgotPassword(String email, String link) throws MessagingException, IOException {
+    public SimpleResponse forgotPassword(String email, String link) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
                         String.format("Пациент с таким email: %s не существует!", email)));
@@ -57,21 +57,19 @@ public class EmailServiceImpl implements EmailService {
         userAccountRepo.save(userAccount);
         Context context = new Context();
         context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
-        context.setVariable("greeting",getGreeting());
-        String linkAndToken= (link+"/"+userAccount.getTokenPassword());
-        context.setVariable("link",linkAndToken);
+        context.setVariable("greeting", getGreeting());
+        context.setVariable("link", link);
         String emailContent = templateEngine.process("message", context);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
         helper.setFrom(mailUsername);
         helper.setSubject("Сброс пароля");
         helper.setTo(email);
-        helper.setText(emailContent,true);
+        helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return new SimpleResponse(String.format("Ссылка для сброса пароля отправлена пользователю с email : %s", email + " token: " + userAccount.getTokenPassword()), HttpStatus.OK);
+        return new SimpleResponse(userAccount.getTokenPassword(), HttpStatus.OK);
     }
-
     @Override
     public ResponseEntity<String> passwordRecovery(String token, String newPassword) {
         UserAccount userAccount = userAccountRepo.getByUserAccountByTokenPassword(token).orElseThrow(
@@ -97,30 +95,22 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public SimpleResponse sendMassage(String email, String code, String subject) throws MessagingException, IOException {
+    public SimpleResponse sendMassage(String email, String code, String subject) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
                         String.format("Пациент с таким email: %s не существует!", email)));
         User user = userAccount.getUser();
-        String greeting = getGreeting();
-        String userName = user.getFirstName() + " " + user.getLastName();
-
-        Map<String, String> variables = new HashMap<>();
-        variables.put("greeting", greeting);
-        variables.put("userName", userName);
-        variables.put("localDate", LocalDate.now().toString());
+        Context context = new Context();
+        context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
+        context.setVariable("greeting", getGreeting());
+        context.setVariable("verificationCode", code);
+        String emailContent = templateEngine.process("registrationCode", context);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
         helper.setFrom(mailUsername);
         helper.setSubject(subject);
         helper.setTo(email);
-        Resource resource = new ClassPathResource("templates/registrationCode.html");
-        String htmlContent = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        for (Map.Entry<String, String> entry : variables.entrySet()) {
-            htmlContent = htmlContent.replace("{" + entry.getKey() + "}", entry.getValue());
-        }
-        String formattedHtmlContent = htmlContent.replace("%verificationCode%", code);
-        helper.setText(formattedHtmlContent, true);
+        helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
         return new SimpleResponse(String.format("Код для подтверждения онлайн записи отправлен: %s", email), HttpStatus.OK);
@@ -134,18 +124,17 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private static String getGreeting() {
-        LocalTime currentTime = LocalTime.now();
+        LocalTime time = LocalTime.now();
         String greeting;
-        if (currentTime.isBefore(LocalTime.NOON)) {
+        if (time.isBefore(LocalTime.NOON)) {
             greeting = "Доброе утро";
-        } else if (currentTime.isBefore(LocalTime.of(18, 0))) {
+        } else if (time.isBefore(LocalTime.of(18, 0))) {
             greeting = "Добрый день";
-        } else if (currentTime.isBefore(LocalTime.of(21, 0))) {
+        } else if (time.isBefore(LocalTime.of(21, 0))) {
             greeting = "Добрый вечер";
         } else {
             greeting = "Доброй ночи";
         }
-
         return greeting;
     }
 }
