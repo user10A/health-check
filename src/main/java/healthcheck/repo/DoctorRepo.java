@@ -53,4 +53,7 @@ public interface DoctorRepo extends JpaRepository<Doctor,Long> {
             "LOWER(d.lastName) LIKE LOWER(CONCAT('%', :word, '%')) OR " +
             "LOWER(p.facility) LIKE LOWER(CONCAT('%', :word, '%'))")
     List<SearchResponse> globalSearch(@Param("word") String word);
+    @Query("select d.department from Doctor d where d.id= :id")
+    Department getDepartmentByDoctorId(@Param("id") Long id);
+
 }

@@ -1,17 +1,30 @@
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>Java Techie Mail</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сброс пароля</title>
   <style>
-    body {
-      font-family: "Montserrat", sans-serif;
+    *{
+      color: black;
+    }
+    body{
+      color: black;
       margin: 0;
+      font-family: "Montserrat", sans-serif;
       padding: 0;
     }
+
+    .description {
+      font-size: 20px;
+      color: #048741;
+      font-weight: bold;
+    }
+
     .main {
       margin: 20px 30px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-      border: 1px solid #048741;
+      border: none;
       border-radius: 6px 6px 0px 6px;
       width: 450px;
       background-color: #F9F8F6;
@@ -21,61 +34,73 @@
       height: 16rem;
       border-radius: 6px 6px 0px 0px;
     }
-    .title-image {
-      width: 20rem;
-    }
     .container {
       padding: 2rem 4rem;
     }
-    .header-text {
-      font-family: "Inter", sans-serif;
-      font-style: normal;
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 150%;
-      color: #34453C;
-      padding-right: 50px;
-    }
-    .description {
-      font-size: 20px;
-      color: green;
-      font-weight: bold;
-    }
+
     .contacts {
       background-color: #048741;
       padding: 0.01rem;
       width: 17rem;
       text-align: center;
       border-radius: 0rem 1rem 0rem 0rem;
-      font-size: 14px;
+      height: 50px;
+      font-size: 18px;
     }
-    .result-number {
+    .box {
+      color:  #048741;
+      font-size: 70px;
+      font-weight: 600;
+      margin-left: 60px;
+    }
+
+    .check{
+      font-size: 50px;
+      color: black;
+      margin: 0 ;
+
+    }
+    .link{
+      color: white;
+      text-decoration: none;
+    }
+    .num1{
+      font-weight: 600;
+    }
+    .num{
       color: #048741;
+      font-size:30px;
+      font-weight: 600;
     }
+
   </style>
 </head>
 <body>
 <div class="main">
-  <img src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg" alt="doctor" class="image" />
   <img
-          src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
-          alt="title"
-          class="title-image"
+          src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg"
+          alt="doctor"
+          class="image"
   />
+  <div class="box">
+    HEALTH
+    <p class="check">CHECK </p>
+  </div>
   <div class="container">
+    <hr/>
     <p class="description">
-      <span style="color: green"> Ваш результат готов.</span>
+      <span style="color:  #048741"> Ваш результат готов.</span>
     </p>
-    <p class="result-number">
-      Номер результата: <span style="color: black" th:text="${generateNumber}"></span>
+    <p class="num1">
+      Номер результата: <span class="num" th:text="${generateNumber}"></span>
     </p>
-    <hr />
   </div>
   <div>
     <div class="contacts">
-      <p>
-        +996 709 095 524 <span style="color: white">www.healthCheck</span>
+      <a class="link" href="#"> <p style="color: white">
+        www.healthCheck
       </p>
+      </a>
     </div>
   </div>
 </div>

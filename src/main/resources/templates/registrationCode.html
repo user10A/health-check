@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./Header.jpg" />
-  <link
-          rel="stylesheet"
-          href="./Bok.png"
-  />
-  <title>Подтверждение записи</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сброс пароля</title>
   <style>
-    body {
-      font-family: "Montserrat", sans-serif;
+    *{
+      color: black;
+    }
+    body{
+      color: black;
       margin: 0;
+      font-family: "Montserrat", sans-serif;
       padding: 0;
     }
+
+    .description {
+      font-size: 20px;
+      color: #048741;
+      font-weight: bold;
+    }
+
     .main {
       margin: 20px 30px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-      border: 1px solid #048741;
+      border: none;
       border-radius: 6px 6px 0px 6px;
       width: 450px;
       background-color: #F9F8F6;
@@ -29,42 +34,68 @@
       height: 16rem;
       border-radius: 6px 6px 0px 0px;
     }
-    .title-image {
-      width: 20rem;
-    }
     .container {
       padding: 2rem 4rem;
     }
-    .description {
-      font-size: 20px;
-      color: green;
-      font-weight: bold;
-    }
+
     .contacts {
       background-color: #048741;
       padding: 0.01rem;
       width: 17rem;
       text-align: center;
       border-radius: 0rem 1rem 0rem 0rem;
-      height: 70px;
+      height: 50px;
       font-size: 18px;
     }
+    .box {
+      color:  #048741;
+      font-size: 70px;
+      font-weight: 600;
+      margin-left: 60px;
+    }
+
+    .check{
+      font-size: 50px;
+      color: black;
+      margin: 0 ;
+
+    }
+    .btn {
+      background-color: #048741;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      width: 200px;
+    }
+    .link{
+      color: white;
+      text-decoration: none;
+    }
+
   </style>
 </head>
 <body>
 <div class="main">
-  <img src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg" alt="doctor" class="image" />
   <img
-          src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
-          alt="title"
-          class="title-image"
+          src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg"
+          alt="doctor"
+          class="image"
   />
+  <div class="box">
+    HEALTH
+    <p class="check">CHECK </p>
+  </div>
   <div class="container">
     <p class="description">
+      <span style="color: #048741; font-size: 28px;" th:text="${greeting}"></span>
     </p>
-    <p class="text" style= "font-size: 18px; ">Ваша код для записи<span style="font-size: 15px;">{%verificationCode%}</span>.</p>
+    <p class="text" style="font-size: 18px;">Уважаемый(ая),<span style="font-size: 15px;" th:text="${userName}"></span></p>
     <hr />
-  </div>
+      <p>Код для онлайн записи</p>
+      <span style="color:  #048741; font-size: 28px;" th:text="${verificationCode}"></span>
+    </div>
+
   <div>
     <div class="contacts">
       <p>

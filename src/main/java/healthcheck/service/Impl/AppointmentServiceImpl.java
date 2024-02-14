@@ -25,13 +25,13 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.*;
 
 @Service
@@ -75,26 +75,26 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public SimpleResponse appointmentConfirmationEmail() {
+    public SimpleResponse appointmentConfirmationEmail(Long appointmentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() ->
                 new NotFoundException("User is not found !!!"));
-
+        Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("not found "));
         User user = userAccount.getUser();
-
         String greeting = getGreeting();
         String userName = user.getFirstName() + " " + user.getLastName();
-
         Map<String, String> variables = new HashMap<>();
         variables.put("greeting", greeting);
         variables.put("userName", userName);
-        variables.put("localDate", LocalDate.now().toString());
-
+        int day = appointment.getAppointmentDate().getDayOfMonth();
+        String month = appointment.getAppointmentDate().getMonth().getDisplayName(TextStyle.FULL, new Locale("ru"));
+        String time = appointment.getAppointmentTime().toString();
+        String dayOfMonth =(day+" "+month+" в "+time);
+        variables.put("dayOfMonth",dayOfMonth);
         sendEmail(userAccount.getEmail(), variables);
         return SimpleResponse.builder().message("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
     }
-
     private void sendEmail(String to, Map<String, String> variables) {
         try {
             String templatePath = "confirmation_email";
@@ -111,7 +111,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             helper.setTo(to);
             helper.setSubject("Подтверждение записи");
             helper.setText(content, true);
-
             mailSender.send(message);
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
@@ -147,6 +146,63 @@ public class AppointmentServiceImpl implements AppointmentService {
         Doctor doctor = doctorRepo.findById(request.getDoctorId())
                 .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
         if (!department.getDoctors().contains(doctor)) throw new NotFoundException("This doctor does not work in this department");
+        log.info("Doctor found: " + doctor);
+        LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
+        LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
+        log.info("startOfConsultation :"+startOfConsultation);
+        LocalTime endOfConsultation = timeSheetRepo.getTimeSheetByEndTimeOfConsultation(doctor.getId(),startOfConsultation);
+        log.info("endOfConsultation :" + endOfConsultation);
+        log.info("Creating appointment for user: " + userAccount.getUser().getFirstName() + " " +
+                userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
+                " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
+        Boolean booked = timeSheetRepo.booked(doctor.getSchedule().getId(),dateOfConsultation, startOfConsultation);
+        if (booked != null && booked) {
+            throw new AlreadyExistsException("Это время занято!");
+        } else if (booked == null) {
+            try {
+                throw new BadRequestException("Этот специалист не работает в этот день или в это время! Рабочие даты: с" + doctor.getSchedule().getStartDateWork() + " to " + doctor.getSchedule().getEndDateWork());
+            } catch (BadRequestException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Appointment appointment = Appointment.builder()
+                .user(userAccount.getUser())
+                .department(department)
+                .doctor(doctor)
+                .appointmentDate(dateOfConsultation)
+                .appointmentTime(startOfConsultation)
+                .status(Status.CONFIRMED)
+                .verificationCode(generateVerificationCode())
+                .build();
+        updateAvailability(doctor.getId(), dateOfConsultation, startOfConsultation,
+                endOfConsultation, false);
+        appointmentRepo.save(appointment);
+        log.info("успешно обновлен бронирование на true ");
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        log.info("Электронное письмо успешно отправлено на адрес: {}", email);
+        return OnlineAppointmentResponse.builder()
+                .id(appointment.getId())
+                .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
+                .dateOfAppointment(dateOfConsultation)
+                .startTimeOfConsultation(startOfConsultation)
+                .endTimeOfConsultation(endOfConsultation)
+                .imageDoctors(doctor.getImage())
+                .fullNameDoctors(doctor.getFullNameDoctor())
+                .facility(department.getFacility().name())
+                .verificationCode(appointment.getVerificationCode())
+                .build();
+    }
+
+    @Override
+    public OnlineAppointmentResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        log.info(email);
+        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+        log.info("User account found: " + userAccount);
+        Department department = doctorRepo.getDepartmentByDoctorId(request.getDoctorId());
+        Doctor doctor = doctorRepo.findById(request.getDoctorId())
+                .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
         log.info("Doctor found: " + doctor);
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
@@ -336,34 +392,4 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
-
-// deleteAllAppointmentById delete
-//    @Override
-//    public SimpleResponse deleteAllAppointmentById(List<AppointmentProcessedRequest> appointmentDeleteRequests) {
-//        List<Long> failedToDelete = appointmentDeleteRequests.stream()
-//                .filter(deleteRequest -> !deleteRequest.isActive())
-//                .map(AppointmentDeleteRequest::getId)
-//                .toList();
-//
-//        if (!failedToDelete.isEmpty()) {
-//            return SimpleResponse.builder()
-//                    .message("Нельзя удалить записи с ID: " + failedToDelete + ", так как их статус 'active' не совпадает с указанным в запросе")
-//                    .httpStatus(HttpStatus.BAD_REQUEST)
-//                    .build();
-//        }
-//
-//        appointmentDeleteRequests.stream()
-//                .filter(AppointmentDeleteRequest::isActive)
-//                .map(AppointmentDeleteRequest::getId)
-//                .forEach(appointmentId -> {
-//                    Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(() ->
-//                            new NotFoundException("Appointment не найден"));
-//                    appointmentRepo.delete(appointment);
-//                });
-//
-//        return SimpleResponse.builder()
-//                .message("Записи успешно удалены")
-//                .httpStatus(HttpStatus.OK)
-//                .build();
-//    }
 }
