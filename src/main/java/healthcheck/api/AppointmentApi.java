@@ -1,6 +1,5 @@
 package healthcheck.api;
 
-import healthcheck.dto.Application.ApplicationProcessed;
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.TimeSheet.TimeSheetResponse;
@@ -13,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +28,7 @@ import java.util.List;
 @RequestMapping("/api/appointment")
 @CrossOrigin
 @Tag(name = "Appointment api", description = "API's for appointments ")
+@Slf4j
 public class AppointmentApi {
 
     private final AppointmentService appointmentService;
@@ -40,24 +41,25 @@ public class AppointmentApi {
         return appointmentService.getAllAppointment(word);
     }
 
-    @GetMapping("/confirmation")
-    @Operation(summary = "Appointment Confirmation Email", description = "This API is used to send an appointment confirmation email. Requires USER authority.")
-    @PreAuthorize("hasAnyAuthority('USER')")
-    public SimpleResponse appointmentConfirmationEmail() {
-        return appointmentService.appointmentConfirmationEmail();
-    }
-
     @PostMapping("/add")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "add appointment", description = "Endpoint to add appointment.")
     public OnlineAppointmentResponse addAppointment(@RequestParam Facility facility, @Valid @RequestBody AppointmentRequest request) throws MessagingException, IOException {
         return appointmentService.addAppointment(facility,request);
     }
+    @PostMapping("/addByDoctorId")
+    @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @Operation(summary = "add appointment", description = "Endpoint to add appointment.")
+    public OnlineAppointmentResponse addAppointmentByDoctorId(@RequestBody AppointmentRequest request) throws MessagingException, IOException {
+        return appointmentService.addAppointmentByDoctorId(request);
+    }
 
     @PatchMapping()
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "check verification code", description = "Endpoint checking code appointment.")
     public SimpleResponse checkVerificationCode(@RequestParam Long appointmentId, @RequestParam String code) {
+        SimpleResponse result=appointmentService.appointmentConfirmationEmail(appointmentId);
+        log.info(String.valueOf(result));
         return appointmentService.verifyAppointment(appointmentId,code);
     }
 
