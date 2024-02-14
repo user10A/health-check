@@ -11,6 +11,9 @@
     <title>Сброс пароля</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        *{
+            color: black;
+        }
         body {
             font-family: "Montserrat", sans-serif;
             margin: 0;
@@ -19,7 +22,7 @@
         .main {
             margin: 20px 30px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-            border: 1px solid #048741;
+            border:none;
             border-radius: 6px 6px 0px 6px;
             width: 450px;
             background-color: #F9F8F6;
@@ -62,17 +65,17 @@
 <body>
 <div class="main">
     <img src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327637198photo_5341731833869620879_y.jpg" alt="doctor" class="image" />
-    <div class="box">
-        <img
-                src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
-                alt="title"
-                class="title-image"
-        />
-    </div>
+   <div class="box">
+    <img
+            src="https://healthcheck-10.s3.eu-central-1.amazonaws.com/1707327606668photo_5341731833869620878_x.jpg"
+            alt="title"
+            class="title-image"
+    />
+   </div>
 
     <div class="container">
         <p class="description">
-            <span style="color: green; font-size: 28px;" th:text="${greeting}"></span>
+            <span style="color: #048741; font-size: 28px;" th:text="${greeting}"></span>
         </p>
         <p class="text" style="font-size: 18px;">Уважаемый(ая) <span style="font-size: 15px;" th:text="${userName}"></span>,</p>
         <hr />
