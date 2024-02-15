@@ -1,6 +1,8 @@
 package healthcheck.email;
 
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
+import healthcheck.config.JwtService;
+import healthcheck.dto.Authentication.AuthenticationResponse;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
@@ -11,10 +13,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,13 +21,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -43,6 +37,7 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender javaMailSender;
     private final UserAccountRepo userAccountRepo;
     private final TemplateEngine templateEngine;
+    private final JwtService jwtService;
 
     @Override
     public SimpleResponse forgotPassword(String email, String link) throws MessagingException {
@@ -71,12 +66,11 @@ public class EmailServiceImpl implements EmailService {
         return new SimpleResponse(userAccount.getTokenPassword(), HttpStatus.OK);
     }
     @Override
-    public ResponseEntity<String> passwordRecovery(String token, String newPassword) {
+    public AuthenticationResponse passwordRecovery(String token, String newPassword) {
         UserAccount userAccount = userAccountRepo.getByUserAccountByTokenPassword(token).orElseThrow(
                 () -> new NotFoundException(
                         String.format("Пациент с таким email: %s не существует!", token)));
         log.info("аккаунт найден : " + userAccount);
-
         if (token.equals(userAccount.getTokenPassword())) {
             if (isVerificationCodeExpired(userAccount)) {
                 userAccount.setTokenPassword(null);
@@ -87,11 +81,16 @@ public class EmailServiceImpl implements EmailService {
                 userAccount.setTokenPassword(null);
                 userAccountRepo.save(userAccount);
                 log.info("пароль успешно изменен");
+                String jwt = jwtService.generateToken(userAccount.getEmail());
+                return AuthenticationResponse.builder()
+                        .email(userAccount.getEmail())
+                        .role(userAccount.getRole())
+                        .token(jwt)
+                        .build();
             }
         } else {
             throw new RuntimeException("Invalid verification code.");
         }
-        return null;
     }
 
     @Override

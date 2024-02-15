@@ -53,7 +53,7 @@ public class AuthApi {
 
     @Operation(summary = "Navigate to Forgot Password Page", description = "When the user clicks 'Confirm,' it redirects to the forgot password page. You need to provide the token and new password data.")
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> completePasswordRecovery(@RequestParam String token, @ValidPassword @RequestParam String newPassword) {
+    public AuthenticationResponse completePasswordRecovery(@RequestParam String token, @ValidPassword @RequestParam String newPassword) {
         return emailService.passwordRecovery(token, newPassword);
     }
 }
