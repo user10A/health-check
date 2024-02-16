@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalTime;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,40 +19,45 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
 
     @Override
     public List<TimeSheetResponse> getTimesheetDoctor(String facility) {
+        LocalDate start = LocalDate.now();
+        LocalDate end = start.plusDays(6);
+        LocalTime startTime = LocalTime.now();
         String sql =
-               """
-              SELECT
-                  doc.id,
-                  doc.image,
-                  CONCAT(doc.first_name, ' ', doc.last_name) AS doctor_full_name,
-                  t.date_of_consultation,
-                  t.start_time_of_consultation
-              FROM
-                  department d
-              JOIN doctor doc ON d.id = doc.department_id
-              JOIN schedule sched ON doc.id = sched.doctor_id
-              JOIN time_sheet t ON sched.id = t.schedule_id
-              WHERE d.facility = ? AND t.available = false
-              ORDER BY
-              doctor_full_name, 
-              t.date_of_consultation, 
-              t.start_time_of_consultation;
-               """;
-        return jdbcTemplate.query( sql, new Object[]{facility}, (rs, rowNum) -> {
-            LocalDate dateOfConsultation = rs.getDate(4).toLocalDate();
-            String dayOfWeek = getDayOfWeek(dateOfConsultation).name();
-                    TimeSheetResponse response = TimeSheetResponse.builder()
-                    .doctorId(rs.getLong(1))
+                """
+        SELECT
+            doc.id AS doctor_id,
+            doc.image AS image,
+            CONCAT(doc.first_name, ' ', doc.last_name) AS doctor_full_name,
+            t.date_of_consultation AS date_of_consultation,
+            STRING_AGG(t.start_time_of_consultation::TEXT, ', ' ORDER BY t.start_time_of_consultation) AS start_times
+        FROM
+            department d
+        JOIN
+            doctor doc ON d.id = doc.department_id
+        JOIN
+            schedule sched ON doc.id = sched.doctor_id
+        JOIN
+            time_sheet t ON sched.id = t.schedule_id
+        WHERE
+            d.facility = ? AND t.available = false AND t.date_of_consultation BETWEEN TO_DATE(?, 'YYYY-MM-DD') AND TO_DATE(?, 'YYYY-MM-DD') AND (
+            t.date_of_consultation > TO_DATE(?, 'YYYY-MM-DD') OR t.start_time_of_consultation > CAST(? AS TIME))
+        GROUP BY
+            doc.id, doc.image, doctor_full_name, t.date_of_consultation
+        ORDER BY
+            doctor_full_name, t.date_of_consultation;
+        """;
+         return jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) -> {
+             return TimeSheetResponse.builder()
+                    .doctorId(rs.getLong("doctor_id"))
                     .imageDoctor(rs.getString("image"))
                     .doctorFullName(rs.getString("doctor_full_name"))
-                    .dateOfConsultation(rs.getDate(4).toLocalDate())
-                    .dayOfWeek(dayOfWeek)
-                    .startTimeOfConsultation(rs.getTime(5).toLocalTime())
+                    .dayOfWeek(getDayOfWeek(rs.getDate("date_of_consultation").toLocalDate()).name())
+                    .dateOfConsultation(String.valueOf(rs.getDate("date_of_consultation").toLocalDate()))
+                    .startTimeOfConsultation(Arrays.asList(rs.getString("start_times").split(", ")))
                     .build();
-            return response;
         });
     }
-    public DayOfWeek getDayOfWeek(LocalDate date) {
-        return date.getDayOfWeek();
+        public DayOfWeek getDayOfWeek (LocalDate date){
+            return date.getDayOfWeek();
+        }
     }
-}

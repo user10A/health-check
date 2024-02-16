@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -12,7 +13,7 @@ public class TimeSheetResponse {
     Long doctorId;
     String imageDoctor;
     String doctorFullName;
-    LocalDate dateOfConsultation;
+    String dateOfConsultation;
     String dayOfWeek;
-    LocalTime startTimeOfConsultation;
+    List<String> startTimeOfConsultation;
 }
