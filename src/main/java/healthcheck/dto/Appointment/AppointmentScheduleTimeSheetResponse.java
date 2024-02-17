@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -12,5 +13,5 @@ import java.time.LocalTime;
 public class AppointmentScheduleTimeSheetResponse {
     private LocalDate dateOfConsultation;
     private String dayOfWeek;
-    private LocalTime startTimeOfConsultation;
+    private List<String> startTimeOfConsultation;
 }
