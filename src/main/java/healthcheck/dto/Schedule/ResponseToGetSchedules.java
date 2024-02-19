@@ -16,8 +16,11 @@ public class ResponseToGetSchedules {
     private LocalDate dateOfConsultation;
     private LocalTime startTimeOfConsultation;
     private LocalTime endTimeOfConsultation;
+    private Boolean isWorkingDay;
+    private Boolean availableTime;
 
-    public ResponseToGetSchedules(String image, String surname, String position, String dayOfWeek, LocalDate dateOfConsultation, LocalTime startTimeOfConsultation, LocalTime endTimeOfConsultation) {
+
+    public ResponseToGetSchedules(String image, String surname, String position, String dayOfWeek, LocalDate dateOfConsultation, LocalTime startTimeOfConsultation, LocalTime endTimeOfConsultation, Boolean isWorkingDay, Boolean availableTime) {
         this.image = image;
         this.surname = surname;
         this.position = position;
@@ -25,5 +28,11 @@ public class ResponseToGetSchedules {
         this.dateOfConsultation = dateOfConsultation;
         this.startTimeOfConsultation = startTimeOfConsultation;
         this.endTimeOfConsultation = endTimeOfConsultation;
+        this.isWorkingDay = isWorkingDay;
+        this.availableTime = availableTime;
+    }
+
+    public ResponseToGetSchedules() {
+
     }
 }
