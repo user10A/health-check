@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class DepartmentDaoImpl implements DepartmentDao {
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -25,7 +26,4 @@ public class DepartmentDaoImpl implements DepartmentDao {
             return departmentResponse;
         });
     }
-
-
-
 }

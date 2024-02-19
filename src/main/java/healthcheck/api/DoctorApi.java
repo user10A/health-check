@@ -53,7 +53,6 @@ public class DoctorApi {
         return doctorService.getDoctorsByDepartment(facility);
     }
 
-    // Специалисты. Методы: 1 - Search по именам. 2 - Вывод всех докторов. 3 - Удаление ->
     @GetMapping("/doctors/search")
     @Operation(summary = "Get doctors by search", description = "This API is used to retrieve a list of doctors based on the specified search term")
     @PreAuthorize("hasAuthority('ADMIN')")
