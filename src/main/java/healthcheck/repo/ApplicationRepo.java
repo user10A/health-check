@@ -10,10 +10,4 @@ import java.util.List;
 
 @Repository
 public interface ApplicationRepo extends JpaRepository<Application,Long> {
-    @Query("SELECT NEW healthcheck.dto.Application.ApplicationResponse(a.id, a.username, a.dateOfApplicationCreation, a.phoneNumber, a.processed) " +
-            "FROM Application a WHERE :word = '' OR a.username ILIKE concat('%', :word, '%')")
-    List<ApplicationResponse> getApplications(@Param("word")String word);
-
-    @Query("select new healthcheck.dto.Application.ApplicationResponse(a.id, a.username,a.dateOfApplicationCreation, a.phoneNumber, a.processed)from Application a order by a.id")
-    List<ApplicationResponse>getAllApplications();
 }

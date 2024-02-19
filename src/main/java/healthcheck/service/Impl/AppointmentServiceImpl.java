@@ -32,7 +32,13 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
-import java.util.*;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,27 +57,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
         log.info("Запрос на получение всех приемов для слова: {}", word);
-
-        List<Appointment> all = appointmentRepo.getAllAppointment(word);
-        List<AppointmentResponse> response = new ArrayList<>();
-        for (Appointment appointment : all) {
-            String username = appointment.getUser().getFirstName() + " " +
-                    appointment.getUser().getLastName();
-
-            response.add(AppointmentResponse.builder()
-                    .appointmentId(appointment.getId())
-                    .fullName(username)
-                    .phoneNumber(appointment.getUser().getPhoneNumber())
-                    .email(appointment.getUser().getUserAccount().getEmail())
-                    .facility(String.valueOf(appointment.getDepartment().getFacility()))
-                    .specialist(appointment.getDoctor().getFullNameDoctor())
-                    .localDate(appointment.getAppointmentDate())
-                    .localTime(appointment.getAppointmentTime())
-                    .status(appointment.isProcessed())
-                    .build());
-        }
-        log.info("Возвращено {} записей о приемах", response.size());
-        return response;
+        return appointmentDao.getAllAppointment(word);
     }
 
     @Override
@@ -322,27 +308,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAllAppointmentDefault() {
-        List<Appointment> all = appointmentRepo.getAllAppointmentDefault();
-        List<AppointmentResponse> response = new ArrayList<>();
-
-        for (Appointment appointment : all) {
-
-            String username = appointment.getUser().getFirstName() + " " +
-                    appointment.getUser().getLastName();
-
-            response.add(AppointmentResponse.builder()
-                    .appointmentId(appointment.getId())
-                    .fullName(username)
-                    .phoneNumber(appointment.getUser().getPhoneNumber())
-                    .email(appointment.getUser().getUserAccount().getEmail())
-                    .facility(String.valueOf(appointment.getDepartment().getFacility()))
-                    .specialist(appointment.getDoctor().getFullNameDoctor())
-                    .localDate(appointment.getAppointmentDate())
-                    .localTime(appointment.getAppointmentTime())
-                    .status(appointment.isProcessed())
-                    .build());
-        }
-        return response;
+       return appointmentDao.getAllAppointmentDefault();
     }
 
     @Override

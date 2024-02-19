@@ -17,5 +17,5 @@ public class AppointmentResponse {
     private String specialist;
     private LocalDate localDate;
     private LocalTime localTime;
-    private boolean status;
+    private String status;
 }

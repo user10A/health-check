@@ -1,12 +1,13 @@
 package healthcheck.repo.Dao.Impl;
 
+import healthcheck.dto.Appointment.AppointmentResponse;
 import healthcheck.dto.Appointment.AppointmentScheduleTimeSheetResponse;
 import healthcheck.repo.Dao.AppointmentDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.sql.Time;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -80,6 +81,83 @@ ORDER BY
             throw new RuntimeException(e);
         }
     }
+
+
+    @Override
+    public List<AppointmentResponse> getAllAppointment(String word) {
+        String sql = """
+                SELECT
+                    a.id,
+                    concat(u.first_name,' ',u.last_name) as full_name,
+                    u.phone_number,
+                    ua.email,
+                    dep.facility,
+                    concat(d.first_name,' ',d.last_name) as doctor_full_name,
+                    a.appointment_date,
+                    a.appointment_time,
+                    a.status
+                FROM Appointment a
+                    JOIN users u ON a.user_id = u.id
+                    JOIN Doctor d ON a.doctor_id = d.id
+                    JOIN User_Account ua on ua.id = u.user_account_id
+                    JOIN department dep ON d.department_id = dep.id
+                WHERE u.first_name LIKE concat('%', ?, '%') OR
+                    u.last_name LIKE concat('%', ?, '%') OR 
+                    d.first_name LIKE concat('%', ?, '%') OR
+                    d.last_name LIKE concat('%', ?, '%')
+                """;
+        return jdbcTemplate.query(sql, new Object[]{word,word,word,word}, (rs, rowNum) -> {
+            return AppointmentResponse.builder()
+                    .appointmentId(rs.getLong(1))
+                    .fullName(rs.getString(2))
+                    .phoneNumber(rs.getString(3))
+                    .email(rs.getString(4))
+                    .facility(rs.getString(5))
+                    .specialist(rs.getString(6))
+                    .localDate(rs.getDate(7).toLocalDate())
+                    .localTime(rs.getTime(8).toLocalTime())
+                    .status(rs.getString("status"))
+                    .build();
+        });
+
+    }
+
+    @Override
+    public List<AppointmentResponse> getAllAppointmentDefault() {
+        String sql = """
+                SELECT
+                    a.id,
+                    concat(u.first_name,' ',u.last_name) as full_name,
+                    u.phone_number,
+                    ua.email,
+                    dep.facility,
+                    concat(d.first_name,' ',d.last_name) as doctor_full_name,
+                    a.appointment_date,
+                    a.appointment_time,
+                    a.status
+                FROM Appointment a
+                    JOIN users u ON a.user_id = u.id
+                    JOIN Doctor d ON a.doctor_id = d.id
+                    JOIN User_Account ua on ua.id = u.user_account_id
+                    JOIN department dep ON d.department_id = dep.id
+                order by a.id
+                """;
+        return jdbcTemplate.query(sql,(rs, rowNum) -> {
+            return AppointmentResponse.builder()
+                    .appointmentId(rs.getLong(1))
+                    .fullName(rs.getString(2))
+                    .phoneNumber(rs.getString(3))
+                    .email(rs.getString(4))
+                    .facility(rs.getString(5))
+                    .specialist(rs.getString(6))
+                    .localDate(rs.getDate(7).toLocalDate())
+                    .localTime(rs.getTime(8).toLocalTime())
+                    .status(rs.getString("status"))
+                    .build();
+        });
+    }
+
+
     public DayOfWeek getDayOfWeek(LocalDate date) {
         return date.getDayOfWeek();
     }
