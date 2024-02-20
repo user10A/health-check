@@ -44,7 +44,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class AppointmentServiceImpl implements AppointmentService {
-
     private final AppointmentRepo appointmentRepo;
     private final UserAccountRepo userAccountRepo;
     private final JavaMailSender mailSender;

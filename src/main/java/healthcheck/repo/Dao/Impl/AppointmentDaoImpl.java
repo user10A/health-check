@@ -101,10 +101,11 @@ ORDER BY
                     JOIN Doctor d ON a.doctor_id = d.id
                     JOIN User_Account ua on ua.id = u.user_account_id
                     JOIN department dep ON d.department_id = dep.id
-                WHERE u.first_name LIKE concat('%', ?, '%') OR
-                    u.last_name LIKE concat('%', ?, '%') OR 
-                    d.first_name LIKE concat('%', ?, '%') OR
-                    d.last_name LIKE concat('%', ?, '%')
+                WHERE  LOWER(u.first_name) LIKE concat('%', LOWER(?), '%') OR
+                          LOWER(u.last_name) LIKE concat('%', LOWER(?), '%') OR
+                          LOWER(d.first_name) LIKE concat('%', LOWER(?), '%') OR
+                          LOWER(d.last_name) LIKE concat('%', LOWER(?), '%')
+                      
                 """;
         return jdbcTemplate.query(sql, new Object[]{word,word,word,word}, (rs, rowNum) -> {
             return AppointmentResponse.builder()

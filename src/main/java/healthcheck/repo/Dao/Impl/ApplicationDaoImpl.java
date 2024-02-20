@@ -17,9 +17,9 @@ public class ApplicationDaoImpl implements ApplicationDao {
         String sql = """
     SELECT a.id, a.username, a.date_of_application_creation, a.phone_number, a.processed
     FROM Application a 
-    WHERE a.username ILIKE concat(?, '%') OR a.username ILIKE concat('%', ?, '%')
+    WHERE LOWER(a.username) LIKE concat('%',LOWER (?), '%')
     """;
-        return jdbcTemplate.query(sql, new Object[]{word, word}, (rs, rowNum) ->
+        return jdbcTemplate.query(sql, new Object[]{word}, (rs, rowNum) ->
                 new ApplicationResponse(
                         rs.getLong("id"),
                         rs.getString("username"),

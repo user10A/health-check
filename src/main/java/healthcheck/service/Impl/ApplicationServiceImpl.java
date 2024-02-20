@@ -22,7 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class ApplicationServiceImpl implements ApplicationService {
-
     private final ApplicationRepo applicationRepo;
     private final ApplicationDao applicationDao;
     @Override
