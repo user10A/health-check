@@ -178,4 +178,29 @@ public class UserDaoImpl implements UserDao {
             throw new NotFoundException("User with this id not found");
         }
     }
+
+    @Override
+    public List<ResultUsersResponse> resultUsersBySearch(String word) {
+        var sql = """
+                SELECT
+                u.id,
+                concat(u.first_name, ' ', u.last_name),
+                u.phone_number,
+                ua.email,
+                r.result_date
+                FROM users u
+                JOIN user_account ua on u.user_account_id = ua.id
+                JOIN result r on u.id = r.user_id
+                WHERE concat(u.first_name, ' ', u.last_name) LIKE '%' || ? || '%'
+                   OR ua.email LIKE '%' || ? || '%'
+                ORDER BY u.first_name ,u.last_name""";
+
+        return jdbcTemplate.query(sql, new Object[]{word, word}, (rs, rowNum) -> ResultUsersResponse.builder()
+                .id(rs.getLong(1))
+                .surname(rs.getString(2))
+                .phoneNumber(rs.getString(3))
+                .email(rs.getString(4))
+                .resultDate(rs.getDate(5).toLocalDate())
+                .build());
+    }
 }

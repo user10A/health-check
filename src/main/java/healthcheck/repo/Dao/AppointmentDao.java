@@ -6,5 +6,4 @@ import java.util.List;
 
 public interface AppointmentDao {
     List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId);
-
 }
