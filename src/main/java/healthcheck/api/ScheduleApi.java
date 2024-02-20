@@ -73,8 +73,8 @@ public class ScheduleApi {
     @Operation(summary = "Get schedules by date range")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ResponseToGetSchedules>> getScheduleByDate(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
 
         try {
             List<ResponseToGetSchedules> schedules = scheduleService.getScheduleByDate(startDate, endDate);

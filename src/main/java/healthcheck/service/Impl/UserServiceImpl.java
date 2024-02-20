@@ -148,6 +148,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<ResultUsersResponse> getAllPatientsBySearch(String word) {
-        return userRepo.resultUsersBySearch(word);
+        return userDao.resultUsersBySearch(word);
     }
 }

@@ -198,9 +198,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public List<ResponseToGetSchedules> getScheduleByDate(String startDate, String endDate) {
+    public List<ResponseToGetSchedules> getScheduleByDate(LocalDate startDate, LocalDate endDate) {
         return scheduleDao.getScheduleByDate(startDate, endDate);
     }
+
 
     @Override
     public List<ResponseToGetSchedules> getScheduleBySearch(String word) {

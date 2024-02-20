@@ -9,6 +9,7 @@ import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.DoctorDao;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.service.DoctorService;
@@ -26,6 +27,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
+    private final DoctorDao doctorDao;
 
     @Override
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
@@ -106,12 +108,12 @@ public class DoctorServiceImpl implements DoctorService {
     // Специалисты. Методы: 1 - Search по именам. 2 - Вывод всех докторов. 3 - Удаление ->
     @Override
     public List<DoctorResponseByWord> getAllDoctorsBySearch(String word) {
-        return doctorRepo.getAllDoctorsBySearch(word);
+        return doctorDao.getAllDoctorsBySearch(word);
     }
 
     @Override
     public List<DoctorResponseByWord> getAllDoctors() {
-        return doctorRepo.getAllDoctors();
+        return doctorDao.getAllDoctors();
     }
 
     @Override
