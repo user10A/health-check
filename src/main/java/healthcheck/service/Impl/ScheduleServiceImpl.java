@@ -51,16 +51,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public SimpleResponse saveSchedule(@NonNull Facility facility, @NonNull Long doctorId,
-                                          @Valid @NonNull AddScheduleRequest addScheduleRequest
-    ) {
+                                       @Valid @NonNull AddScheduleRequest addScheduleRequest) {
         Department department = departmentRepo.getDepartmentByFacility(facility)
                 .orElseThrow(() -> new NotFoundException("Департамент не найден"));
 
         Doctor doctor = doctorRepo.findById(doctorId)
                 .filter(d -> department.getDoctors().contains(d))
                 .orElseThrow(() -> new NotFoundException("Доктор не в данном департаменте или не найден"));
-        doctor.setActive(true);
-        doctorRepo.save(doctor);
 
         if (doctor.getSchedule() != null) {
             throw new AlreadyExistsException("Врач с ID: " + doctorId + " уже имеет расписание");
@@ -91,42 +88,29 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRepo.save(schedule);
 
         LocalDate currentDate = addScheduleRequest.getCreateStartDate();
+        LocalDate endDate = addScheduleRequest.getCreateEndDate();
+        LocalTime startTime = LocalTime.parse(addScheduleRequest.getStartTime());
+        LocalTime endTime = LocalTime.parse(addScheduleRequest.getEndTime());
+        LocalTime startBreakTime = LocalTime.parse(addScheduleRequest.getStartBreak());
+        LocalTime endBreakTime = LocalTime.parse(addScheduleRequest.getEndBreak());
+        int intervalInMinutes = addScheduleRequest.getInterval().getValue();
 
-        while (!currentDate.isAfter(addScheduleRequest.getCreateEndDate())) {
+        while (!currentDate.isAfter(endDate)) {
             for (DaysOfRepetition day : DaysOfRepetition.values()) {
-                if (!currentDate.isAfter(addScheduleRequest.getCreateEndDate())) {
-                    if (days.getOrDefault(day, false)) {
-                        LocalTime startTime = LocalTime.parse(addScheduleRequest.getStartTime());
-                        LocalTime endTime = LocalTime.parse(addScheduleRequest.getEndTime());
-                        LocalTime currentStartTime = startTime;
-
-                        LocalTime startBreakTime = LocalTime.parse(addScheduleRequest.getStartBreak());
-                        LocalTime endBreakTime = LocalTime.parse(addScheduleRequest.getEndBreak());
-
-                        while (currentStartTime.plusMinutes(addScheduleRequest.getInterval().getValue()).isBefore(endTime)) {
-                            if (isConsultationTime(currentStartTime, startBreakTime, endBreakTime)) {
-                                TimeSheet timeSheet = TimeSheet.builder()
-                                        .dateOfConsultation(currentDate)
-                                        .startTimeOfConsultation(currentStartTime)
-                                        .endTimeOfConsultation(currentStartTime.plusMinutes(addScheduleRequest.getInterval().getValue()))
-                                        .schedule(schedule)
-                                        .available(false)
-                                        .build();
-                                timeSheetRepo.save(timeSheet);
-                            }
-                            currentStartTime = currentStartTime.plusMinutes(addScheduleRequest.getInterval().getValue());
-                        }
-                    }
-                    currentDate = currentDate.plusDays(1);
+                if (days.getOrDefault(day, false) && currentDate.getDayOfWeek().name().equals(day.name())) {
+                    generateTimeSlotsForDay(currentDate, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
                 }
             }
+            currentDate = currentDate.plusDays(1);
         }
+
+        generateTimeSheets(currentDate, addScheduleRequest.getCreateEndDate(), days, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
+
         return SimpleResponse.builder().message("Успешно создано расписание!").httpStatus(HttpStatus.OK).build();
     }
 
     @Override
-    public ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date,
-                                                        List<ScheduleUpdateRequest.TimeSlot> timeSlots) {
+    public ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest.TimeSlot> timeSlots) {
         try {
             Doctor doctor = doctorRepo.findById(doctorId)
                     .orElseThrow(() -> new NotFoundException("Доктор не найден"));
@@ -202,10 +186,41 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleDao.getScheduleByDate(startDate, endDate);
     }
 
-
     @Override
     public List<ResponseToGetSchedules> getScheduleBySearch(String word) {
         return scheduleDao.getScheduleBySearch(word);
+    }
+
+    private void generateTimeSheets(LocalDate currentDate, LocalDate endDate, Map<DaysOfRepetition, Boolean> days,
+                                    LocalTime startTime, LocalTime endTime, LocalTime startBreakTime,
+                                    LocalTime endBreakTime, int intervalInMinutes, Schedule schedule) {
+        if (currentDate.isAfter(endDate)) {
+            return;
+        }
+
+        for (DaysOfRepetition day : DaysOfRepetition.values()) {
+            if (days.getOrDefault(day, false)) {
+                generateTimeSlotsForDay(currentDate, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
+            }
+            currentDate = currentDate.plusDays(1);
+        }
+        generateTimeSheets(currentDate, endDate, days, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
+    }
+
+    private void generateTimeSlotsForDay(LocalDate currentDate, LocalTime startTime, LocalTime endTime, LocalTime startBreakTime, LocalTime endBreakTime, int intervalInMinutes, Schedule schedule) {
+        if (startTime.isBefore(endTime)) {
+            if (isConsultationTime(startTime, startBreakTime, endBreakTime)) {
+                TimeSheet timeSheet = TimeSheet.builder()
+                        .dateOfConsultation(currentDate)
+                        .startTimeOfConsultation(startTime)
+                        .endTimeOfConsultation(startTime.plusMinutes(intervalInMinutes))
+                        .schedule(schedule)
+                        .available(false)
+                        .build();
+                timeSheetRepo.save(timeSheet);
+            }
+            generateTimeSlotsForDay(currentDate, startTime.plusMinutes(intervalInMinutes), endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
+        }
     }
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
