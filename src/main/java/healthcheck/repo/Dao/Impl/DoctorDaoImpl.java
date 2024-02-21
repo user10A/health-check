@@ -1,14 +1,11 @@
 package healthcheck.repo.Dao.Impl;
 
 import healthcheck.dto.Doctor.DoctorResponseByWord;
-import healthcheck.dto.Doctor.ResponseToGetDoctorsByDepartment;
 import healthcheck.dto.GlobalSearch.SearchResponse;
-import healthcheck.entities.Department;
 import healthcheck.repo.Dao.DoctorDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
@@ -17,49 +14,24 @@ public class DoctorDaoImpl implements DoctorDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Override
-    public List<ResponseToGetDoctorsByDepartment> getDoctorsByDepartment() {
-        var sql = """
-                     SELECT
-                        dep.facility as department_name,
-                        d.id as doctor_id,
-                        CONCAT(d.first_name, ' ', d.last_name) as full_name,
-                        d.image,
-                        d.position
-                    FROM
-                        doctor d
-                            JOIN department dep ON d.department_id = dep.id
-                    GROUP BY dep.facility, d.id, full_name, d.image, d.position
-                    ORDER BY dep.facility;
-                   """;
-
-        return jdbcTemplate.query(sql, (rs, rowNum) -> ResponseToGetDoctorsByDepartment.builder()
-                .department(rs.getString("department_name"))
-                .doctorId(rs.getLong("doctor_id"))
-                .full_name(rs.getString("full_name"))
-                .image(rs.getString("image"))
-                .position(rs.getString("position")).build()
-        );
-    }
 
     @Override
     public List<DoctorResponseByWord> getAllDoctorsBySearch(String word) {
         var sql = """
-             SELECT
-                                                     d.id,
-                                                     d.image,
-                                                     d.is_active,
-                                                     d.first_name,
-                                                     d.last_name,
-                                                     d2.facility,
-                                                     s.end_date_work
-                                                 FROM Doctor d
-                                                 JOIN schedule s ON d.id = s.doctor_id
-                                                 JOIN department d2 on d.department_id = d2.id
-            WHERE CONCAT(d.first_name, ' ', d.last_name) LIKE '%' || ? || '%'
-            ORDER BY d.id
-            """;
-
+                 SELECT
+                                                         d.id,
+                                                         d.image,
+                                                         d.is_active,
+                                                         d.first_name,
+                                                         d.last_name,
+                                                         d2.facility,
+                                                         s.end_date_work
+                                                     FROM Doctor d
+                                                     JOIN schedule s ON d.id = s.doctor_id
+                                                     JOIN department d2 on d.department_id = d2.id
+                WHERE CONCAT(d.first_name, ' ', d.last_name) LIKE '%' || ? || '%'
+                ORDER BY d.id
+                """;
         return jdbcTemplate.query(sql, new Object[]{word}, (rs, rowNum) -> DoctorResponseByWord.builder()
                 .id(rs.getLong(1))
                 .image(rs.getString(2))
@@ -74,19 +46,19 @@ public class DoctorDaoImpl implements DoctorDao {
     @Override
     public List<DoctorResponseByWord> getAllDoctors() {
         var sql = """
-             SELECT
-                                                     d.id,
-                                                     d.image,
-                                                     d.is_active,
-                                                     d.first_name,
-                                                     d.last_name,
-                                                     d2.facility,
-                                                     s.end_date_work
-                                                 FROM Doctor d
-                                                 JOIN schedule s ON d.id = s.doctor_id
-                                                 JOIN department d2 on d.department_id = d2.id
-            ORDER BY d.id
-            """;
+                 SELECT
+                                                         d.id,
+                                                         d.image,
+                                                         d.is_active,
+                                                         d.first_name,
+                                                         d.last_name,
+                                                         d2.facility,
+                                                         s.end_date_work
+                                                     FROM Doctor d
+                                                     JOIN schedule s ON d.id = s.doctor_id
+                                                     JOIN department d2 on d.department_id = d2.id
+                ORDER BY d.id
+                """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> DoctorResponseByWord.builder()
                 .id(rs.getLong(1))
@@ -117,7 +89,7 @@ public class DoctorDaoImpl implements DoctorDao {
                 LOWER(d2.facility) LIKE LOWER(CONCAT('%', ?, '%'))
                 """;
 
-        return jdbcTemplate.query(sql, new Object[]{word, word, word} ,(rs, rowNum) -> SearchResponse.builder()
+        return jdbcTemplate.query(sql, new Object[]{word, word, word}, (rs, rowNum) -> SearchResponse.builder()
                 .doctorId(rs.getLong(1))
                 .departmentId(rs.getLong(2))
                 .doctorFirstName(rs.getString(3))
@@ -127,7 +99,4 @@ public class DoctorDaoImpl implements DoctorDao {
                 .build());
     }
 
-    public Department getDepartmentByDoctorId(Long id) {
-     return null;
-    }
 }

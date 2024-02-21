@@ -4,7 +4,6 @@ import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.enums.Facility;
 import jakarta.mail.MessagingException;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public interface AppointmentService {
     OnlineAppointmentResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException;
     SimpleResponse verifyAppointment(Long appointmentId, String verificationCode);
     SimpleResponse deleteAppointment(Long id);
-    FindByDoctorForAppointment findByDoctorId(Long id);
+    FindDoctorForAppointmentResponse findByDoctorId(Long id);
     List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId);
     SimpleResponse appointmentConfirmationEmail(Long id);
     List<AppointmentResponse> getAllAppointmentDefault();

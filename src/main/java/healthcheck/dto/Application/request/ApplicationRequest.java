@@ -1,4 +1,4 @@
-package healthcheck.dto.Application;
+package healthcheck.dto.Application.request;
 
 import healthcheck.validation.ValidPhoneNumber;
 import jakarta.validation.constraints.NotBlank;

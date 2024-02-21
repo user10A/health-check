@@ -14,7 +14,7 @@ public class AppointmentRequest {
     String fullName;
     @ValidPhoneNumber(message = "Неверный номер телефона!")
     String phoneNumber;
-    @EmailValidation(message = "Не верный фортмат почты")
+    @EmailValidation(message = "Неверный формат почты")
     String email;
 
 }

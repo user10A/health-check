@@ -1,6 +1,11 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.User.*;
+import healthcheck.dto.User.ProfileRequest;
+import healthcheck.dto.User.ResponseToGetUserAppointments;
+import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
+import healthcheck.dto.User.ResponseToGetUserById;
+import healthcheck.dto.User.ChangePasswordUserRequest;
+import healthcheck.dto.User.ResultUsersResponse;
 import healthcheck.entities.User;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
@@ -18,6 +23,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 import java.util.Optional;
@@ -33,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public SimpleResponse editUserProfile(ProfileRequest profileRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -72,7 +80,7 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
-            log.error(String.format("User with email is not found !!!",email));
+            log.error(String.format("User with email :%s is not found !!!",email));
             return new NotFoundException("User is not found !!!");
         });
         return userDao.getAllAppointmentsOfUser(user.getId());
@@ -84,11 +92,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public int clearMyAppointments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
-            log.error(String.format("User with email is not found !!!",email));
+            log.error(String.format("User with email %s is not found !!!",email));
             return new NotFoundException("User is not found !!!");
         });
         return userDao.clearMyAppointments(user.getId());
@@ -100,6 +109,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -130,6 +140,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse deletePatientsById(Long id) {
         Optional<User> optionalUser = userRepo.findById(id);
         if (optionalUser.isPresent()) {

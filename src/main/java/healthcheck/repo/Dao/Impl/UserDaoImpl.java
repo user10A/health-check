@@ -1,4 +1,5 @@
 package healthcheck.repo.Dao.Impl;
+
 import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetUserById;
@@ -8,7 +9,6 @@ import healthcheck.repo.Dao.UserDao;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.webjars.NotFoundException;
-
 import java.util.List;
 
 @Repository

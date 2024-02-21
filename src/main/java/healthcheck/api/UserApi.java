@@ -1,13 +1,26 @@
 package healthcheck.api;
 
 import healthcheck.dto.SimpleResponse;
-import healthcheck.dto.User.*;
+import healthcheck.dto.User.ResponseToGetUserAppointments;
+import healthcheck.dto.User.ProfileRequest;
+import healthcheck.dto.User.ResultUsersResponse;
+import healthcheck.dto.User.ResponseToGetUserById;
+import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
+import healthcheck.dto.User.ChangePasswordUserRequest;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import io.swagger.v3.oas.annotations.tags.Tag;
 

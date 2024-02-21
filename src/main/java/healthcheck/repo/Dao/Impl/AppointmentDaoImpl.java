@@ -7,11 +7,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Arrays;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,45 +27,41 @@ public class AppointmentDaoImpl implements AppointmentDao {
         LocalTime startTime = LocalTime.now();
         Map<LocalDate, List<AppointmentScheduleTimeSheetResponse>> scheduleMap = new LinkedHashMap<>();
         var sql = """
-SELECT
+    SELECT
     time_sheet.date_of_consultation,
     STRING_AGG(time_sheet.start_time_of_consultation::TEXT, ', ' ORDER BY time_sheet.start_time_of_consultation) AS start_times
-FROM
+    FROM
     doctor doc
-JOIN
+    JOIN
     schedule schedule ON doc.id = schedule.doctor_id
-JOIN
+    JOIN
     time_sheet time_sheet ON schedule.id = time_sheet.schedule_id
-WHERE
-time_sheet.date_of_consultation BETWEEN TO_DATE(?, 'YYYY-MM-DD') AND TO_DATE(?, 'YYYY-MM-DD') AND (
+    WHERE
+    time_sheet.date_of_consultation BETWEEN TO_DATE(?, 'YYYY-MM-DD') AND TO_DATE(?, 'YYYY-MM-DD') AND (
             time_sheet.date_of_consultation > TO_DATE(?, 'YYYY-MM-DD') OR time_sheet.start_time_of_consultation > CAST(? AS TIME))
     AND doc.id = ? AND time_sheet.available = false
-GROUP BY
+    GROUP BY
     time_sheet.date_of_consultation
-ORDER BY
+    ORDER BY
     time_sheet.date_of_consultation;
 """;
         try {
             List<AppointmentScheduleTimeSheetResponse> dbResults = jdbcTemplate.query(sql, new Object[]{startDate, endDate,startDate,startTime.toString(),doctorId}, (rs, rowNum) -> {
                 LocalDate dateOfConsultation = rs.getDate(1).toLocalDate();
-                String dayOfWeek = getDayOfWeek(dateOfConsultation).name();
                 return AppointmentScheduleTimeSheetResponse.builder()
                         .dateOfConsultation(dateOfConsultation)
-                        .dayOfWeek(dayOfWeek)
+                        .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
                         .startTimeOfConsultation(Arrays.asList(rs.getString("start_times").split(", ")))
                         .build();
             });
-
             List<LocalDate> allDates = new ArrayList<>();
             while (!start.isAfter(end)) {
                 allDates.add(start);
                 start = start.plusDays(1);
             }
-
             for (LocalDate date : allDates) {
                 scheduleMap.put(date, new ArrayList<>());
             }
-
             for (AppointmentScheduleTimeSheetResponse response : dbResults) {
                 scheduleMap.get(response.getDateOfConsultation()).add(response);
             }
@@ -95,7 +94,8 @@ ORDER BY
                     concat(d.first_name,' ',d.last_name) as doctor_full_name,
                     a.appointment_date,
                     a.appointment_time,
-                    a.status
+                    a.status,
+                    a.processed
                 FROM Appointment a
                     JOIN users u ON a.user_id = u.id
                     JOIN Doctor d ON a.doctor_id = d.id
@@ -107,8 +107,8 @@ ORDER BY
                           LOWER(d.last_name) LIKE concat('%', LOWER(?), '%')
                       
                 """;
-        return jdbcTemplate.query(sql, new Object[]{word,word,word,word}, (rs, rowNum) -> {
-            return AppointmentResponse.builder()
+        return jdbcTemplate.query(sql, new Object[]{word,word,word,word}, (rs, rowNum) ->
+                AppointmentResponse.builder()
                     .appointmentId(rs.getLong(1))
                     .fullName(rs.getString(2))
                     .phoneNumber(rs.getString(3))
@@ -118,9 +118,8 @@ ORDER BY
                     .localDate(rs.getDate(7).toLocalDate())
                     .localTime(rs.getTime(8).toLocalTime())
                     .status(rs.getString("status"))
-                    .build();
-        });
-
+                    .processed(rs.getBoolean(10))
+                    .build());
     }
 
     @Override
@@ -135,7 +134,8 @@ ORDER BY
                     concat(d.first_name,' ',d.last_name) as doctor_full_name,
                     a.appointment_date,
                     a.appointment_time,
-                    a.status
+                    a.status,
+                    a.processed
                 FROM Appointment a
                     JOIN users u ON a.user_id = u.id
                     JOIN Doctor d ON a.doctor_id = d.id
@@ -143,8 +143,8 @@ ORDER BY
                     JOIN department dep ON d.department_id = dep.id
                 order by a.id
                 """;
-        return jdbcTemplate.query(sql,(rs, rowNum) -> {
-            return AppointmentResponse.builder()
+        return jdbcTemplate.query(sql,(rs, rowNum) ->
+             AppointmentResponse.builder()
                     .appointmentId(rs.getLong(1))
                     .fullName(rs.getString(2))
                     .phoneNumber(rs.getString(3))
@@ -154,8 +154,9 @@ ORDER BY
                     .localDate(rs.getDate(7).toLocalDate())
                     .localTime(rs.getTime(8).toLocalTime())
                     .status(rs.getString("status"))
-                    .build();
-        });
+                    .processed(rs.getBoolean(10))
+                    .build()
+        );
     }
 
 

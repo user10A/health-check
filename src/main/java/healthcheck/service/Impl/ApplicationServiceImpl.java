@@ -1,8 +1,8 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Application.ApplicationProcessed;
-import healthcheck.dto.Application.ApplicationRequest;
-import healthcheck.dto.Application.ApplicationResponse;
+import healthcheck.dto.Application.request.ApplicationProcessedRequest;
+import healthcheck.dto.Application.request.ApplicationRequest;
+import healthcheck.dto.Application.response.ApplicationResponse;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Application;
 import healthcheck.exceptions.NotFoundException;
@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -25,13 +26,13 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepo applicationRepo;
     private final ApplicationDao applicationDao;
     @Override
+    @Transactional
     public SimpleResponse createApplication(ApplicationRequest applicationRequest) {
         Application application = Application.builder().username(applicationRequest.getUsername())
                 .dateOfApplicationCreation(LocalDate.now())
                 .phoneNumber(applicationRequest.getPhoneNumber())
                 .processed(false)
                 .build();
-
       try {
             applicationRepo.save(application);
             String successMessage = "Заявка успешно отправлена!";
@@ -54,6 +55,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applicationDao.getAllApplications();
     }
 
+    @Transactional
     @Override
     public SimpleResponse deleteAll(List<Long> request) {
         try {
@@ -71,11 +73,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public boolean processedById(ApplicationProcessed request) {
+    @Transactional
+    public boolean processedById(ApplicationProcessedRequest request) {
         try {
             Optional<Application> applicationOptional = applicationRepo.findById(request.getId());
             Application application = applicationOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
-
             log.info("Заявка найдена по ID: " + request.getId());
             application.setProcessed(request.getIsActive());
             log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
@@ -89,7 +91,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
-
+    @Transactional
     @Override
     public SimpleResponse deleteById(Long request) {
         Application application = applicationRepo.findById(request)

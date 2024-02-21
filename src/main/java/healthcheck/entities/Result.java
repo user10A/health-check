@@ -1,4 +1,5 @@
 package healthcheck.entities;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -6,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,6 +31,5 @@ public class Result {
     @ManyToOne(cascade = {CascadeType.DETACH})
     private Department department;
     @ManyToOne(cascade = {CascadeType.DETACH})
-    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

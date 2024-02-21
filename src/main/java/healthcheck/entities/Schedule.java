@@ -1,4 +1,5 @@
 package healthcheck.entities;
+
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Interval;
 import jakarta.persistence.Entity;
@@ -55,7 +56,6 @@ public class Schedule {
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
     private List<TimeSheet> timeSheets;
     @OneToOne(cascade = {CascadeType.DETACH})
-    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
     @ManyToOne
     private Department department;

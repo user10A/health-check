@@ -12,6 +12,6 @@ import java.time.LocalTime;
 public interface TimeSheetRepo extends JpaRepository<TimeSheet,Long> {
     @Query("select s.available from TimeSheet s where s.schedule.id = :Id and s.dateOfConsultation = :date and s.startTimeOfConsultation = :time")
     Boolean booked(Long Id, LocalDate date, LocalTime time);
-    @Query("select t.endTimeOfConsultation from TimeSheet  t where t.schedule.doctor.id = :id and t.startTimeOfConsultation = :startTimeOfConsultation")
-    LocalTime getTimeSheetByEndTimeOfConsultation(Long id ,LocalTime startTimeOfConsultation);
+    @Query("select t from TimeSheet  t where t.schedule.doctor.id = :doctorId and t.dateOfConsultation = :date and t.startTimeOfConsultation = :startTimeOfConsultation")
+    TimeSheet getTimeSheetByDoctorIdAndStartTime(Long doctorId ,LocalDate date,LocalTime startTimeOfConsultation);
 }

@@ -1,4 +1,5 @@
 package healthcheck.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -6,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.CascadeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +30,6 @@ public class TimeSheet {
     private LocalTime endTimeOfConsultation;
     private boolean available;
     @ManyToOne(cascade = {CascadeType.DETACH})
-    @JoinColumn(name = "schedule_id")
     @JsonIgnore
     private Schedule schedule;
 }

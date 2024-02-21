@@ -16,7 +16,6 @@ public class DoctorUpdateRequest {
     @NotNull(message = "Last name cannot be empty!")
     String lastName;
     @NotBlank(message = "Position cannot be empty!")
-    @NotNull(message = "Position cannot be empty!")
     String position;
     @NotBlank(message = "Image cannot be empty!")
     String image;

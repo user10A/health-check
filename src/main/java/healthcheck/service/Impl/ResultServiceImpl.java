@@ -15,10 +15,10 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import java.time.LocalTime;
@@ -35,6 +35,7 @@ public class ResultServiceImpl implements ResultService {
     private final TemplateEngine templateEngine;
 
     @Override
+    @Transactional
     public SimpleResponse saveResult(RequestSaveResult request) {
         try {
             Department department = departmentRepo.findByFacility(request.getFacility());

@@ -6,7 +6,6 @@ import healthcheck.repo.Dao.DoctorDao;
 import healthcheck.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.logging.Logger;
 

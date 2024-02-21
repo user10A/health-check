@@ -1,6 +1,10 @@
 package healthcheck.api;
 
-import healthcheck.dto.Appointment.*;
+import healthcheck.dto.Appointment.AppointmentScheduleTimeSheetResponse;
+import healthcheck.dto.Appointment.OnlineAppointmentResponse;
+import healthcheck.dto.Appointment.AppointmentRequest;
+import healthcheck.dto.Appointment.AppointmentProcessedRequest;
+import healthcheck.dto.Appointment.FindDoctorForAppointmentResponse;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.TimeSheet.TimeSheetResponse;
 import healthcheck.enums.Facility;
@@ -14,12 +18,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import java.io.IOException;
 import java.util.List;
 
@@ -80,7 +90,7 @@ public class AppointmentApi {
     @GetMapping("/getDoctor")
     @Operation(summary = "Get doctor for appointment", description = "Endpoint to get doctor for appointment.")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
-    public FindByDoctorForAppointment findByDoctorId(@RequestParam Long id){
+    public FindDoctorForAppointmentResponse findByDoctorId(@RequestParam Long id){
         return appointmentService.findByDoctorId(id);
     }
     @GetMapping("/{id}/getDoctorSchedule")

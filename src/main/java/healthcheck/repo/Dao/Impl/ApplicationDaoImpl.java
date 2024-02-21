@@ -1,6 +1,6 @@
 package healthcheck.repo.Dao.Impl;
 
-import healthcheck.dto.Application.ApplicationResponse;
+import healthcheck.dto.Application.response.ApplicationResponse;
 import healthcheck.repo.Dao.ApplicationDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;

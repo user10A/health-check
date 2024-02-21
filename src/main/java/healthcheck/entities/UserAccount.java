@@ -1,4 +1,5 @@
 package healthcheck.entities;
+
 import healthcheck.enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -40,12 +41,6 @@ public class UserAccount implements UserDetails {
     private Date VerificationCodeTime;
     @OneToOne(mappedBy = "userAccount",cascade = {CascadeType.ALL})
     private User user;
-
-    public UserAccount(String email, String password, Role role) {
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
