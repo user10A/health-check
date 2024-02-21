@@ -18,7 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -53,9 +60,8 @@ public class ScheduleApi {
     @Operation(summary = "Update schedule for a doctor")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ScheduleGetResponse updateTimeSheetDoctor(@RequestParam Long doctorId, @RequestParam LocalDate date,
-                                                     @RequestBody ScheduleUpdateRequest scheduleUpdateRequest) {
-        List<ScheduleUpdateRequest.TimeSlot> timeSlots = scheduleUpdateRequest.getTimeSlots();
-        return scheduleService.updateScheduleByDoctorId(doctorId, date, timeSlots);
+                                                     @RequestBody List<ScheduleUpdateRequest> scheduleUpdateRequest) {
+        return scheduleService.updateScheduleByDoctorId(doctorId, date, scheduleUpdateRequest);
     }
 
     @GetMapping("/all")

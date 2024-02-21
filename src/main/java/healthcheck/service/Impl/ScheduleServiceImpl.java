@@ -110,7 +110,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest.TimeSlot> timeSlots) {
+    public ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots) {
         try {
             Doctor doctor = doctorRepo.findById(doctorId)
                     .orElseThrow(() -> new NotFoundException("Доктор не найден"));
@@ -127,7 +127,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
             LocalTime endTimeOfWork = schedule.getEndDayTime();
 
-            for (ScheduleUpdateRequest.TimeSlot timeSlot : timeSlots) {
+            for (ScheduleUpdateRequest timeSlot : timeSlots) {
                 LocalTime startTimeOfConsultation = LocalTime.parse(timeSlot.getFromTime());
                 LocalTime endTimeOfConsultation = LocalTime.parse(timeSlot.getToTime());
 
