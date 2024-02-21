@@ -7,6 +7,7 @@ import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Application;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.ApplicationRepo;
+import healthcheck.repo.Dao.ApplicationDao;
 import healthcheck.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +22,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class ApplicationServiceImpl implements ApplicationService {
-
     private final ApplicationRepo applicationRepo;
-
+    private final ApplicationDao applicationDao;
     @Override
     public SimpleResponse createApplication(ApplicationRequest applicationRequest) {
         Application application = Application.builder().username(applicationRequest.getUsername())
@@ -46,12 +46,12 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<ApplicationResponse> getApplications(String word) {
-        return applicationRepo.getApplications(word);
+        return applicationDao.getApplications(word);
     }
 
     @Override
     public List<ApplicationResponse> getAllApplications() {
-        return applicationRepo.getAllApplications();
+        return applicationDao.getAllApplications();
     }
 
     @Override

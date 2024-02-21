@@ -10,12 +10,6 @@ import java.util.List;
 
 @Repository
 public interface AppointmentRepo extends JpaRepository<Appointment,Long> {
-    @Query("select a from Appointment a where " +
-            "(:word is null or :word = '' or a.user.firstName like concat('%', :word, '%') or " +
-            "a.user.lastName like concat('%', :word, '%') or a.doctor.firstName like concat('%', :word, '%') or " +
-            "a.doctor.lastName like concat('%', :word, '%'))")
-    List<Appointment> getAllAppointment(@Param("word") String word);
 
-    @Query("select a from Appointment a order by a.id")
-    List<Appointment> getAllAppointmentDefault();
+
 }
