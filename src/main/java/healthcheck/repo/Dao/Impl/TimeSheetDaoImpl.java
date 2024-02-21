@@ -5,11 +5,12 @@ import healthcheck.repo.Dao.TimeSheetDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
+import java.util.Arrays;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
     @Override
     public List<TimeSheetResponse> getTimesheetDoctor(String facility) {
         LocalDate start = LocalDate.now();
-        LocalDate end = start.plusDays(6);
+        LocalDate end = start.plusDays(7);
         LocalTime startTime = LocalTime.now();
         String sql =
                 """
@@ -46,16 +47,15 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
         ORDER BY
             doctor_full_name, t.date_of_consultation;
         """;
-         return jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) -> {
-             return TimeSheetResponse.builder()
+         return jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) ->
+              TimeSheetResponse.builder()
                     .doctorId(rs.getLong("doctor_id"))
                     .imageDoctor(rs.getString("image"))
                     .doctorFullName(rs.getString("doctor_full_name"))
                     .dayOfWeek(getDayOfWeek(rs.getDate("date_of_consultation").toLocalDate()).name())
                     .dateOfConsultation(String.valueOf(rs.getDate("date_of_consultation").toLocalDate()))
                     .startTimeOfConsultation(Arrays.asList(rs.getString("start_times").split(", ")))
-                    .build();
-        });
+                    .build());
     }
         public DayOfWeek getDayOfWeek (LocalDate date){
             return date.getDayOfWeek();

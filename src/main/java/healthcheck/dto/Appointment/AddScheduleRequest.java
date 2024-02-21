@@ -4,9 +4,7 @@ import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Interval;
 import jakarta.validation.constraints.FutureOrPresent;
 import lombok.Data;
-
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Map;
 
 @Data

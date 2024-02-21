@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.UUID;
@@ -122,7 +121,7 @@ public class EmailServiceImpl implements EmailService {
         return minutesDifference > verificationCodeExpirationMinutes;
     }
 
-    private static String getGreeting() {
+    public String getGreeting() {
         LocalTime time = LocalTime.now();
         String greeting;
         if (time.isBefore(LocalTime.NOON)) {

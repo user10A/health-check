@@ -1,6 +1,11 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Appointment.*;
+import healthcheck.dto.Appointment.AppointmentResponse;
+import healthcheck.dto.Appointment.OnlineAppointmentResponse;
+import healthcheck.dto.Appointment.AppointmentRequest;
+import healthcheck.dto.Appointment.FindDoctorForAppointmentResponse;
+import healthcheck.dto.Appointment.AppointmentScheduleTimeSheetResponse;
+import healthcheck.dto.Appointment.AppointmentProcessedRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.email.EmailService;
 import healthcheck.entities.*;
@@ -8,7 +13,11 @@ import healthcheck.enums.Facility;
 import healthcheck.enums.Status;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
-import healthcheck.repo.*;
+import healthcheck.repo.UserAccountRepo;
+import healthcheck.repo.DoctorRepo;
+import healthcheck.repo.AppointmentRepo;
+import healthcheck.repo.TimeSheetRepo;
+import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.Dao.AppointmentDao;
 import healthcheck.service.AppointmentService;
 import jakarta.mail.MessagingException;
@@ -25,6 +34,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,12 +43,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -67,10 +75,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 new NotFoundException("User is not found !!!"));
         Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("not found "));
         User user = userAccount.getUser();
-        String greeting = getGreeting();
         String userName = user.getFirstName() + " " + user.getLastName();
         Map<String, String> variables = new HashMap<>();
-        variables.put("greeting", greeting);
+        variables.put("greeting", emailService.getGreeting());
         variables.put("userName", userName);
         int day = appointment.getAppointmentDate().getDayOfMonth();
         String month = appointment.getAppointmentDate().getMonth().getDisplayName(TextStyle.FULL, new Locale("ru"));
@@ -86,11 +93,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             Resource resource = new ClassPathResource("templates/" + templatePath + ".html");
             String content = Files.readString(resource.getFile().toPath());
 
-
             for (Map.Entry<String, String> entry : variables.entrySet()) {
                 content = content.replace("{" + entry.getKey() + "}", entry.getValue());
             }
-
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
             helper.setTo(to);
@@ -98,28 +103,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             helper.setText(content, true);
             mailSender.send(message);
         } catch (MessagingException | IOException e) {
-            e.printStackTrace();
+            log.info("Ошибка из : MessagingException ");
         }
-    }
-
-    private static String getGreeting() {
-        LocalTime currentTime = LocalTime.now();
-        String greeting;
-
-        if (currentTime.isBefore(LocalTime.NOON)) {
-            greeting = "Доброе утро";
-        } else if (currentTime.isBefore(LocalTime.of(18, 0))) {
-            greeting = "Добрый день";
-        } else if (currentTime.isBefore(LocalTime.of(21, 0))) {
-            greeting = "Добрый вечер";
-        } else {
-            greeting = "Доброй ночи";
-        }
-
-        return greeting;
     }
 
     @Override
+    @Transactional
     public OnlineAppointmentResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -131,12 +120,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         Doctor doctor = doctorRepo.findById(request.getDoctorId())
                 .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
         if (!department.getDoctors().contains(doctor)) throw new NotFoundException("This doctor does not work in this department");
-        log.info("Doctor found: " + doctor);
+        log.info("Doctor found: %s"+ doctor);
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
         log.info("startOfConsultation :"+startOfConsultation);
-        LocalTime endOfConsultation = timeSheetRepo.getTimeSheetByEndTimeOfConsultation(doctor.getId(),startOfConsultation);
-        log.info("endOfConsultation :" + endOfConsultation);
         log.info("Creating appointment for user: " + userAccount.getUser().getFirstName() + " " +
                 userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
                 " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
@@ -150,6 +137,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 throw new RuntimeException(e);
             }
         }
+        TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(doctor.getId(), dateOfConsultation, startOfConsultation);
         Appointment appointment = Appointment.builder()
                 .user(userAccount.getUser())
                 .department(department)
@@ -159,9 +147,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
                 .build();
-        updateAvailability(doctor.getId(), dateOfConsultation, startOfConsultation,
-                endOfConsultation, false);
         appointmentRepo.save(appointment);
+        timeSheet.setAvailable(true);
+        timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
@@ -170,7 +158,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
                 .dateOfAppointment(dateOfConsultation)
                 .startTimeOfConsultation(startOfConsultation)
-                .endTimeOfConsultation(endOfConsultation)
+                .endTimeOfConsultation(timeSheet.getEndTimeOfConsultation())
                 .imageDoctors(doctor.getImage())
                 .fullNameDoctors(doctor.getFullNameDoctor())
                 .facility(department.getFacility().name())
@@ -179,6 +167,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
     public OnlineAppointmentResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -192,8 +181,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
         log.info("startOfConsultation :"+startOfConsultation);
-        LocalTime endOfConsultation = timeSheetRepo.getTimeSheetByEndTimeOfConsultation(doctor.getId(),startOfConsultation);
-        log.info("endOfConsultation :" + endOfConsultation);
         log.info("Creating appointment for user: " + userAccount.getUser().getFirstName() + " " +
                 userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
                 " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
@@ -207,6 +194,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 throw new RuntimeException(e);
             }
         }
+        TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(doctor.getId(), dateOfConsultation, startOfConsultation);
         Appointment appointment = Appointment.builder()
                 .user(userAccount.getUser())
                 .department(department)
@@ -216,9 +204,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
                 .build();
-        updateAvailability(doctor.getId(), dateOfConsultation, startOfConsultation,
-                endOfConsultation, false);
         appointmentRepo.save(appointment);
+        timeSheet.setAvailable(true);
+        timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
@@ -227,31 +215,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
                 .dateOfAppointment(dateOfConsultation)
                 .startTimeOfConsultation(startOfConsultation)
-                .endTimeOfConsultation(endOfConsultation)
+                .endTimeOfConsultation(timeSheet.getEndTimeOfConsultation())
                 .imageDoctors(doctor.getImage())
                 .fullNameDoctors(doctor.getFullNameDoctor())
                 .facility(department.getFacility().name())
                 .verificationCode(appointment.getVerificationCode())
                 .build();
     }
-
-    public void updateAvailability(Long doctorId, LocalDate date, LocalTime startTime, LocalTime endTime,boolean available) {
-        Doctor doctor = doctorRepo.findById(doctorId)
-                .orElseThrow(() -> new NotFoundException("Доктор с id: " + doctorId + " не найден"));
-        Schedule schedule = doctor.getSchedule();
-        List<TimeSheet> timeSheets = schedule.getTimeSheets();
-        for (LocalTime currentTime = startTime; currentTime.isBefore(endTime); currentTime = currentTime.plusMinutes(schedule.getIntervalInMinutes().getValue())) {
-            LocalTime finalCurrentTime = currentTime;
-            LocalTime finalCurrentTime1 = currentTime;
-            TimeSheet timeSheet = timeSheets.stream()
-                    .filter(sheet -> sheet.getDateOfConsultation().isEqual(date) && sheet.getStartTimeOfConsultation().equals(finalCurrentTime))
-                    .findFirst()
-                    .orElseThrow(() -> new NotFoundException("Не удалось найти TimeSheet для указанного времени: " + date + " " + finalCurrentTime1));
-            timeSheet.setAvailable(!available);
-            timeSheetRepo.save(timeSheet);
-        }
-    }
-
     public String generateVerificationCode() {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));
@@ -276,24 +246,24 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse deleteAppointment(Long id) {
         Appointment appointment = appointmentRepo.findById(id)
                 .orElseThrow(()-> new NotFoundException("not found appointment by id: "+id));
         appointmentRepo.delete(appointment);
-        updateAvailability(
-                appointment.getDoctor().getId(),
+        TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(appointment.getDoctor().getId(),
                 appointment.getAppointmentDate(),
-                appointment.getAppointmentTime(),
-                timeSheetRepo.getTimeSheetByEndTimeOfConsultation(appointment.getDoctor().getId(),appointment.getAppointmentTime()),
-                true);
+                appointment.getAppointmentTime());
+        timeSheet.setAvailable(false);
+        timeSheetRepo.save(timeSheet);
         return new SimpleResponse("успешно удален ", HttpStatus.OK);
     }
 
     @Override
-    public FindByDoctorForAppointment findByDoctorId(Long id) {
+    public FindDoctorForAppointmentResponse findByDoctorId(Long id) {
         Doctor doctor = doctorRepo
                 .findById(id).orElseThrow(()-> new NotFoundException("not found Doctor by Id: "+id));
-        return FindByDoctorForAppointment.builder()
+        return FindDoctorForAppointmentResponse.builder()
                 .image(doctor.getImage())
                 .fullNameDoctor(doctor.getFullNameDoctor())
                 .facility(doctor.getDepartment().getFacility().name())
@@ -324,15 +294,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
     public boolean updateProcessed(AppointmentProcessedRequest request) {
             try {
-                Optional<Appointment> appointmentOptional = appointmentRepo.findById(request.getId());
-                Appointment application = appointmentOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
+                Appointment appointment = appointmentRepo.findById(request.getId()).orElseThrow();
                 log.info("Заявка найдена по ID: " + request.getId());
-                application.setProcessed(request.isActive());
-                log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
-                appointmentRepo.save(application);
-                return application.isProcessed();
+                appointment.setProcessed(request.isActive());
+                log.info("Заявка успешно обновлена, статус обработки: " + appointment.isProcessed());
+                appointmentRepo.save(appointment);
+                return appointment.isProcessed();
             } catch (NotFoundException e) {
                 log.error("Ошибка обработки заявки: " + e.getMessage());
                 throw e;
@@ -340,6 +310,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse deleteAllAppointmentsById(List<Long> listId) {
         try {
             log.info("Список ID в методе удаления всех: {}", listId);

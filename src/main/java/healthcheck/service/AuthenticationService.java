@@ -1,4 +1,5 @@
 package healthcheck.service;
+
 import com.google.firebase.auth.FirebaseAuthException;
 import healthcheck.dto.Authentication.AuthenticationResponse;
 import healthcheck.dto.Authentication.SignInRequest;

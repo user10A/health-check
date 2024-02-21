@@ -1,6 +1,6 @@
 package healthcheck.repo.Dao;
 
-import healthcheck.dto.Application.ApplicationResponse;
+import healthcheck.dto.Application.response.ApplicationResponse;
 
 import java.util.List;
 

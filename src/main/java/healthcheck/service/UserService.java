@@ -1,7 +1,6 @@
 package healthcheck.service;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.*;
-
 import java.util.List;
 
 public interface UserService {

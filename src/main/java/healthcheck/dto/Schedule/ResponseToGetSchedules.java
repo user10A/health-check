@@ -1,13 +1,17 @@
 package healthcheck.dto.Schedule;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResponseToGetSchedules {
     private String image;
     private String surname;
@@ -18,21 +22,4 @@ public class ResponseToGetSchedules {
     private LocalTime endTimeOfConsultation;
     private Boolean isWorkingDay;
     private Boolean availableTime;
-
-
-    public ResponseToGetSchedules(String image, String surname, String position, String dayOfWeek, LocalDate dateOfConsultation, LocalTime startTimeOfConsultation, LocalTime endTimeOfConsultation, Boolean isWorkingDay, Boolean availableTime) {
-        this.image = image;
-        this.surname = surname;
-        this.position = position;
-        this.dayOfWeek = dayOfWeek;
-        this.dateOfConsultation = dateOfConsultation;
-        this.startTimeOfConsultation = startTimeOfConsultation;
-        this.endTimeOfConsultation = endTimeOfConsultation;
-        this.isWorkingDay = isWorkingDay;
-        this.availableTime = availableTime;
-    }
-
-    public ResponseToGetSchedules() {
-
-    }
 }

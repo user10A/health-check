@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorDao doctorDao;
 
     @Override
+    @Transactional
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
         Department department = departmentRepo.findById(request.getDepartmentId())
                 .orElseThrow(() -> new NotFoundException(
@@ -84,6 +86,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse updateDoctor(Facility facility, Long id,DoctorUpdateRequest request) {
         Department department = departmentRepo.getDepartmentByFacility(facility).orElseThrow(() ->
                 new NotFoundException("Department не найден"));
@@ -117,6 +120,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse deleteDoctorById(Long doctorId) {
         Doctor doctor = doctorRepo.findById(doctorId).orElseThrow(() ->
                 new NotFoundException("Doctor не найден!"));

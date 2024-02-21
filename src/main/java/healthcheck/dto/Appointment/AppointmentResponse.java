@@ -2,7 +2,6 @@ package healthcheck.dto.Appointment;
 
 import lombok.Builder;
 import lombok.Data;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -18,4 +17,5 @@ public class AppointmentResponse {
     private LocalDate localDate;
     private LocalTime localTime;
     private String status;
+    private boolean processed;
 }

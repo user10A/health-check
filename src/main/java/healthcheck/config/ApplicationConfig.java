@@ -1,4 +1,5 @@
 package healthcheck.config;
+
 import healthcheck.repo.UserAccountRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -9,5 +9,6 @@ public interface EmailService {
     SimpleResponse forgotPassword(String email, String link) throws MessagingException, IOException;
     AuthenticationResponse passwordRecovery(String token, String newPassword);
     SimpleResponse sendMassage(String email, String link,String subject) throws MessagingException, IOException;
+    String getGreeting();
 
 }

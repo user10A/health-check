@@ -1,4 +1,5 @@
 package healthcheck.entities;
+
 import healthcheck.enums.Status;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -9,7 +10,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,7 +36,6 @@ public class Appointment {
     @ManyToOne(cascade = {CascadeType.DETACH})
     private User user;
     @ManyToOne(cascade = {CascadeType.DETACH})
-    @JoinColumn(name = "department_id")
     private Department department;
     @ManyToOne(cascade = {CascadeType.DETACH})
     private Doctor doctor;

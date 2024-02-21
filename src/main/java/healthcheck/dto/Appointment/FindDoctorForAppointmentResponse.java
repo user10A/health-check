@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class FindByDoctorForAppointment {
+public class FindDoctorForAppointmentResponse {
     String image;
     String fullNameDoctor;
     String facility;
