@@ -90,12 +90,16 @@ public class ScheduleApi {
         }
     }
 
+
     @GetMapping("/search")
     @Operation(summary = "Search schedules by keyword")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<ResponseToGetSchedules>> getScheduleBySearch(@RequestParam String word) {
+    public ResponseEntity<List<ResponseToGetSchedules>> getScheduleBySearch(
+            @RequestParam String word,
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end) {
         try {
-            List<ResponseToGetSchedules> schedules = scheduleService.getScheduleBySearch(word);
+            List<ResponseToGetSchedules> schedules = scheduleService.getScheduleBySearch(word,start,end);
             return new ResponseEntity<>(schedules, HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

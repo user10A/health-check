@@ -15,8 +15,11 @@ import java.util.List;
 
 public interface ScheduleService {
     SimpleResponse saveSchedule(Facility facility, Long doctorId, AddScheduleRequest addScheduleRequest);
-    ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots);    List<ResponseToGetSchedules> getAllSchedules();
+    ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots);
+    List<ResponseToGetSchedules> getAllSchedules();
+
     List<ResponseToGetSchedules> getScheduleByDate(LocalDate startDate, LocalDate endDate);
-    List<ResponseToGetSchedules> getScheduleBySearch(String word);
+
+    List<ResponseToGetSchedules> getScheduleBySearch(String word,LocalDate startDate, LocalDate endDate);
     List<Schedule> exportCustomerToExcel(HttpServletResponse response) throws IOException;
 }
