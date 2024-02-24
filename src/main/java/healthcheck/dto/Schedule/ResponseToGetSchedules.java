@@ -4,22 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseToGetSchedules {
+    private Long id;
     private String image;
     private String surname;
     private String position;
-    private String dayOfWeek;
-    private LocalDate dateOfConsultation;
-    private LocalTime startTimeOfConsultation;
-    private LocalTime endTimeOfConsultation;
-    private Boolean isWorkingDay;
-    private Boolean availableTime;
+    private List<ScheduleDate> dates;
 }

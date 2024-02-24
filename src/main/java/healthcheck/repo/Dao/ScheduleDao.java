@@ -10,5 +10,5 @@ public interface ScheduleDao {
 
     List<ResponseToGetSchedules> getScheduleByDate(LocalDate startDate, LocalDate endDate);
 
-    List<ResponseToGetSchedules> getScheduleBySearch(String word);
+    List<ResponseToGetSchedules> getScheduleBySearch(String word,LocalDate startDate, LocalDate endDate);
 }
