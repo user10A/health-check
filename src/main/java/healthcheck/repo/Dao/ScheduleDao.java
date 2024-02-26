@@ -1,7 +1,6 @@
 package healthcheck.repo.Dao;
 
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
-
 import java.time.LocalDate;
 import java.util.List;
 
