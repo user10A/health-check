@@ -16,4 +16,5 @@ public class ResponseToGetSchedules {
     private String surname;
     private String position;
     private List<ScheduleDate> dates;
+
 }
