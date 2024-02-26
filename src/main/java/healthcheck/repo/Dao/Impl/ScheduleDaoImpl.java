@@ -2,6 +2,7 @@ package healthcheck.repo.Dao.Impl;
 
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleDate;
+import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.ScheduleDao;
 import healthcheck.repo.Dao.TimeSheetDao;
 import healthcheck.repo.ScheduleRepo;
