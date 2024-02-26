@@ -8,7 +8,6 @@ import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Schedule;
 import healthcheck.enums.Facility;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
