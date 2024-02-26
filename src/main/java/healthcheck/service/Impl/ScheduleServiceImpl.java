@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ScheduleServiceImpl implements ScheduleService {
-
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
     private final ScheduleRepo scheduleRepo;
