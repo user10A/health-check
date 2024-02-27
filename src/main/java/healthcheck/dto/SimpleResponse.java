@@ -19,4 +19,8 @@ public class SimpleResponse {
         this.httpStatus=httpStatus;
         this.message=successMessage;
     }
+
+
+    public SimpleResponse(boolean b, String verificationCodeCheckedSuccessfully) {
+    }
 }
