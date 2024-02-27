@@ -1,28 +1,14 @@
 package healthcheck.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Interval;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Column;
-import jakarta.persistence.MapKeyColumn;
-import jakarta.persistence.MapKeyEnumerated;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -54,6 +40,7 @@ public class Schedule {
     @Column(name = "is_working_day")
     private Map<DaysOfRepetition, Boolean> dayOfWeek;
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
+    @JsonIgnore
     private List<TimeSheet> timeSheets;
     @OneToOne(cascade = {CascadeType.DETACH})
     private Doctor doctor;
@@ -63,5 +50,19 @@ public class Schedule {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Schedule{" +
+                "id=" + id +
+                ", startDateWork=" + startDateWork +
+                ", endDateWork=" + endDateWork +
+                ", startDayTime=" + startDayTime +
+                ", endDayTime=" + endDayTime +
+                ", startBreakTime=" + startBreakTime +
+                ", endBreakTime=" + endBreakTime +
+                ", intervalInMinutes=" + intervalInMinutes +
+                '}';
     }
 }
