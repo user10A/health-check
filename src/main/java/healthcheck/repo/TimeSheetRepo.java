@@ -13,4 +13,6 @@ public interface TimeSheetRepo extends JpaRepository<TimeSheet,Long> {
     Boolean booked(Long Id, LocalDate date, LocalTime time);
     @Query("select t from TimeSheet  t where t.schedule.doctor.id = :doctorId and t.dateOfConsultation = :date and t.startTimeOfConsultation = :startTimeOfConsultation")
     TimeSheet getTimeSheetByDoctorIdAndStartTime(Long doctorId ,LocalDate date,LocalTime startTimeOfConsultation);
+    @Query("select t from TimeSheet t where t.schedule.doctor.id = :doctorId and t.dateOfConsultation = :date")
+    TimeSheet getTimeSheetByDoctorIdAndStartTime1(Long doctorId, LocalDate date);
 }

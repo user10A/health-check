@@ -4,18 +4,15 @@ import healthcheck.HealthCheckJava11Application;
 import healthcheck.dto.Authentication.SignInRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.*;
-import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.repo.UserAccountRepo;
-import healthcheck.repo.UserRepo;
 import healthcheck.service.UserService;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -29,11 +26,10 @@ import static io.restassured.RestAssured.given;
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = HealthCheckJava11Application.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
 public class UserServiceTest {
     private static final String BASE_URI = "http://localhost:2024/api/user";
@@ -41,19 +37,16 @@ public class UserServiceTest {
     private static final String ADMIN_PASSWORD = "Abcd123!@";
     private final UserService userService;
     private final UserAccountRepo userAccount;
-    private final UserRepo userRepo;
     private final UserDao userDao;
 
     @Autowired
-    public UserServiceTest(UserService userService, UserAccountRepo userAccount, UserRepo userRepo, UserDao userDao) {
+    public UserServiceTest(UserService userService, UserAccountRepo userAccount, UserDao userDao) {
         this.userService = userService;
         this.userAccount = userAccount;
-        this.userRepo = userRepo;
         this.userDao = userDao;
     }
 
     // МЕТОД public SimpleResponse editUserProfile(ProfileRequest profileRequest);
-
     @Test
     @DisplayName("Редактирование профиля user")
     public void editUserProfile() {
@@ -82,77 +75,119 @@ public class UserServiceTest {
     }
 
     @Test
-    void testEditUserProfile_EmailNotEqual() {
+    @Order(1)
+    @DisplayName("Редактирование профиля: изменение Email")
+    public void testEditUserProfileChangeEmail() {
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setEmail("newemail@example.com");
+        profileRequest.setNumberPhone("+996999999999");
+        profileRequest.setEmail("newEmail@gmail.com");
+        profileRequest.setFirstName("newFirstName");
+        profileRequest.setLastName("newLastName");
 
-        UserAccount userAccount = new UserAccount();
-        userAccount.setEmail("oldemail@example.com");
+        Authentication authentication = new UsernamePasswordAuthenticationToken("sarah.miller@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        userService.editUserProfile(profileRequest);
+        SimpleResponse response = userService.editUserProfile(profileRequest);
 
-        assertEquals(profileRequest.getEmail(), userAccount.getEmail());
-        verify(userAccount).setUser(userAccount.getUser());
+        assertEquals("Успешно изменено!", response.getMessage());
+        assertEquals(HttpStatus.OK, response.getHttpStatus());
+
+        UserAccount updatedUserAccount = userAccount.findUserAccountByEmail("newEmail@gmail.com");
+        assertNotNull(updatedUserAccount);
+        assertEquals("newEmail@gmail.com", updatedUserAccount.getEmail());
     }
 
     @Test
-    void testEditUserProfile_NumberPhoneNotEqual() {
+    @Order(2)
+    @DisplayName("Редактирование профиля: изменение PhoneNumber")
+    public void testEditUserProfileChangePhoneNumber() {
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setNumberPhone("1234567890");
+        profileRequest.setEmail("newEmail@gmail.com");
+        profileRequest.setNumberPhone("+996123456789");
+        profileRequest.setFirstName("newFirstName");
+        profileRequest.setLastName("newLastName");
 
-        UserAccount userAccount = new UserAccount();
-        User user = new User();
-        user.setPhoneNumber("0987654321");
-        userAccount.setUser(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken("newEmail@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        userService.editUserProfile(profileRequest);
+        SimpleResponse response = userService.editUserProfile(profileRequest);
 
-        assertEquals(profileRequest.getNumberPhone(), user.getPhoneNumber());
-        verify(userRepo).save(user);
+        assertEquals("Успешно изменено!", response.getMessage());
+        assertEquals(HttpStatus.OK, response.getHttpStatus());
+
+        UserAccount updatedUserAccount = userAccount.findUserAccountByEmail("newEmail@gmail.com");
+        assertNotNull(updatedUserAccount);
+
+        assertNotNull(updatedUserAccount.getUser());
+
+        assertEquals("+996123456789", updatedUserAccount.getUser().getPhoneNumber());
     }
 
     @Test
-    void testEditUserProfile_FirstNameNotEqual() {
+    @Order(3)
+    @DisplayName("Редактирование профиля: изменение Имени")
+    public void testEditUserProfileChangeFirstName() {
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setFirstName("John");
+        profileRequest.setNumberPhone("+996123456789");
+        profileRequest.setFirstName("newFirstName");
+        profileRequest.setLastName("newLastName");
+        profileRequest.setEmail("newEmail@gmail.com");
 
-        UserAccount userAccount = new UserAccount();
-        User user = new User();
-        user.setFirstName("Jane");
-        userAccount.setUser(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken("newEmail@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        userService.editUserProfile(profileRequest);
+        SimpleResponse response = userService.editUserProfile(profileRequest);
 
-        assertEquals(profileRequest.getFirstName(), user.getFirstName());
-        verify(userRepo).save(user);
+        assertEquals("Успешно изменено!", response.getMessage());
+        assertEquals(HttpStatus.OK, response.getHttpStatus());
+
+        UserAccount userAccount1 = userAccount.findUserAccountByEmail(authentication.getName());
+
+        assertEquals("newFirstName", userAccount1.getUser().getFirstName());
     }
 
     @Test
-    void testEditUserProfile_LastNameNotEqual() {
+    @Order(4)
+    @DisplayName("Редактирование профиля: изменение Фамилии")
+    public void testEditUserProfileChangeLastName() {
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setLastName("Doe");
+        profileRequest.setEmail("newEmail@gmail.com");
+        profileRequest.setNumberPhone("+996123456789");
+        profileRequest.setFirstName("newFirstName");
+        profileRequest.setLastName("newLastName");
 
-        UserAccount userAccount = new UserAccount();
-        User user = new User();
-        user.setLastName("Smith");
-        userAccount.setUser(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken("newEmail@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        userService.editUserProfile(profileRequest);
+        SimpleResponse response = userService.editUserProfile(profileRequest);
 
-        assertEquals(profileRequest.getLastName(), user.getLastName());
-        verify(userRepo).save(user);
+        assertEquals("Успешно изменено!", response.getMessage());
+        assertEquals(HttpStatus.OK, response.getHttpStatus());
+
+        UserAccount userAccount1 = userAccount.findUserAccountByEmail(authentication.getName());
+
+        assertEquals("newLastName", userAccount1.getUser().getLastName());
+
+        SecurityContextHolder.clearContext();
     }
 
     @Test
-    void testEditUserProfile_DataUpdateException() {
-        ProfileRequest profilerequest = new ProfileRequest();
-        assertThrows(DataUpdateException.class, () -> userService.editUserProfile(profilerequest));
+    @DisplayName("Редактирование профиля: исключение")
+    public void testEditUserProfile_DataUpdateException() {
+        ProfileRequest profileRequest = new ProfileRequest();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken("jasona.miller@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        DataUpdateException exception = assertThrows(DataUpdateException.class, () ->
+            userService.editUserProfile(profileRequest));
+
+        assertEquals("Ошибка при редактировании профиля пользователя", exception.getMessage());
     }
 
 
 
     // МЕТОД public List<ResponseToGetUserAppointments> getAllAppointmentsOfUser();
-
     @Test
     @DisplayName("Получение всех назначений user")
     public void getAllAppointmentsOfUser() {
@@ -200,6 +235,23 @@ public class UserServiceTest {
         }
     }
     // МЕТОД public ResponseToGetAppointmentByUserId getUserAppointmentById();
+    @Test
+    @DisplayName("Получение онлайн записей по user: исключение")
+    public void testGetAllAppointment_NotFoundException() {
+        ProfileRequest profileRequest = new ProfileRequest();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken("jasona.miller@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        DataUpdateException exception = assertThrows(DataUpdateException.class, () ->
+                userService.editUserProfile(profileRequest));
+
+        assertEquals("Ошибка при редактировании профиля пользователя", exception.getMessage());
+    }
+
+
+
+
     @Test
     @DisplayName("Получение записей по id user")
     public void getUserAppointmentById() {
@@ -352,7 +404,7 @@ public class UserServiceTest {
 
             SimpleResponse simpleResponse = userService.deletePatientsById(id);
 
-            assertEquals("Пользователь успешно удален", simpleResponse.getMessage());
+            assertEquals("User successfully deleted", simpleResponse.getMessage());
             assertEquals(HttpStatus.OK, simpleResponse.getHttpStatus());
 
             log.info("Тест удаления пациента по идентификатору пройден успешно");
