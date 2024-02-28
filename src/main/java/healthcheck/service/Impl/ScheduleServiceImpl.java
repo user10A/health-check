@@ -121,10 +121,6 @@ public class ScheduleServiceImpl implements ScheduleService {
                     .filter(timeSheet -> timeSheet.getDateOfConsultation().equals(date))
                     .toList());
 
-            if (timeSheets.size() + timeSlots.size() > 8) {
-                throw new RuntimeException("Достигнуто максимальное количество окошек для доктора");
-            }
-
             LocalTime endTimeOfWork = schedule.getEndDayTime();
 
             for (ScheduleUpdateRequest timeSlot : timeSlots) {

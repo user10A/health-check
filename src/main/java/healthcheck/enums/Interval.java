@@ -1,7 +1,6 @@
 package healthcheck.enums;
 
 public enum Interval {
-    FIFTEEN(15),
     THIRTY(30),
     FOURTYFIVE(45),
     SIXTY(60),
