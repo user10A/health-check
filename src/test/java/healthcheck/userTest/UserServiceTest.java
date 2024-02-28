@@ -7,6 +7,7 @@ import healthcheck.dto.User.*;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
+import healthcheck.exceptions.InvalidPasswordException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
@@ -198,7 +199,7 @@ public class UserServiceTest {
             throw e;
         }
     }
-
+    // МЕТОД public ResponseToGetAppointmentByUserId getUserAppointmentById();
     @Test
     @DisplayName("Получение записей по id user")
     public void getUserAppointmentById() {
@@ -226,6 +227,9 @@ public class UserServiceTest {
         }
     }
 
+
+
+    // МЕТОД public SimpleResponse changePassword();
     @Test
     @DisplayName("Смена пароля")
     public void changePassword() {
@@ -247,6 +251,54 @@ public class UserServiceTest {
             throw e;
         }
     }
+
+    @Test
+    @DisplayName("Смена пароля: исключение (старый пароль)")
+    public void testChangeOldPassword_InvalidPasswordException() {
+        ChangePasswordUserRequest request = new ChangePasswordUserRequest();
+        request.setOldPassword("Abcd123!");
+        request.setNewPassword("Abcd123!@@");
+        request.setResetNewPassword("Abcd123!@@");
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken("david.thomas@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        try {
+            log.info("Executing testChangeOldPassword_InvalidPasswordException");
+            InvalidPasswordException exception = assertThrows(InvalidPasswordException.class, () ->
+                    userService.changePassword(request));
+            assertEquals("Ошибка в старом пароле", exception.getMessage());
+        } catch (Exception e) {
+            log.error("An unexpected exception occurred in testChangeOldPassword_InvalidPasswordException", e);
+            throw e;
+        }
+    }
+
+    @Test
+    @DisplayName("Смена пароля: исключение (новый пароль)")
+    public void testChangeNewPassword_InvalidPasswordException() {
+        ChangePasswordUserRequest request = new ChangePasswordUserRequest();
+        request.setOldPassword("Abcd123!@");
+        request.setNewPassword("Abcd123!@1");
+        request.setResetNewPassword("DifferentPassword");
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken("david.thomas@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        try {
+            log.info("Executing testChangeNewPassword_InvalidPasswordException");
+            userService.changePassword(request);
+            fail("Ожидалось выбрасывание исключения InvalidPasswordException");
+        } catch (InvalidPasswordException exception) {
+            log.info("Expected exception: InvalidPasswordException. Message: " + exception.getMessage());
+            assertEquals("Ошибка в новом пароле", exception.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected exception: " + e.getMessage(), e);
+            fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+
 
     @Test
     @DisplayName("Получение user-а по id")
