@@ -2,7 +2,6 @@ package healthcheck.api;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
-import healthcheck.dto.Schedule.ScheduleGetResponse;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
@@ -59,7 +58,7 @@ public class ScheduleApi {
     @PatchMapping("/update-time-sheet-doctor")
     @Operation(summary = "Update schedule for a doctor")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ScheduleGetResponse updateTimeSheetDoctor(@RequestParam Long doctorId, @RequestParam LocalDate date,
+    public SimpleResponse updateTimeSheetDoctor(@RequestParam Long doctorId, @RequestParam LocalDate date,
                                                      @RequestBody List<ScheduleUpdateRequest> scheduleUpdateRequest) {
         return scheduleService.updateScheduleByDoctorId(doctorId, date, scheduleUpdateRequest);
     }

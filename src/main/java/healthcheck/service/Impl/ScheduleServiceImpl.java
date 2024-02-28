@@ -2,7 +2,6 @@ package healthcheck.service.Impl;
 
 import healthcheck.dto.Appointment.AddScheduleRequest;
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
-import healthcheck.dto.Schedule.ScheduleGetResponse;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
@@ -28,6 +27,9 @@ import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -108,7 +110,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public ScheduleGetResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots) {
+    public SimpleResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots) {
         try {
             Doctor doctor = doctorRepo.findById(doctorId)
                     .orElseThrow(() -> new NotFoundException("Доктор не найден"));
@@ -160,11 +162,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             doctorRepo.save(doctor);
             log.info("Расписание доктора успешно обновлено: {}", doctorId);
 
-            return ScheduleGetResponse.builder()
-                    .department(doctor.getDepartment())
-                    .timeSheets(timeSheets)
-                    .doctorFullName(doctor.getFullNameDoctor())
-                    .localDateConsultation(date)
+            return SimpleResponse.builder()
+                    .message("Успешно обновлено")
+                    .httpStatus(HttpStatus.OK)
                     .build();
         } catch (NotFoundException e) {
             log.error("Ошибка в методе updateScheduleByDoctorId: {}", e.getMessage(), e);
@@ -250,7 +250,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         Doctor doctor = doctorRepo.findById(request.getDoctorId()).orElseThrow(() ->
                 new NotFoundException("Doctor не найден"));
 
-        TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime1(doctor.getId(), request.getDateOfConsultation());
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<TimeSheet> result = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime1(doctor.getId()
+                ,request.getDateOfConsultation()
+                ,pageable);
+        TimeSheet timeSheet = result.getContent().isEmpty() ? null : result.getContent().get(0);
 
         log.info("TimeSheet: {}", timeSheet);
 
