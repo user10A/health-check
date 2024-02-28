@@ -9,10 +9,12 @@ import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
 import healthcheck.entities.Schedule;
 import healthcheck.entities.TimeSheet;
+import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
 import healthcheck.excel.ExcelExportUtils;
 import healthcheck.exceptions.AlreadyExistsException;
+import healthcheck.exceptions.BadCredentialsException;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.ScheduleDao;
@@ -28,20 +30,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ScheduleServiceImpl implements ScheduleService {
-
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
     private final ScheduleRepo scheduleRepo;
@@ -186,7 +185,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleDao.getScheduleByDate(startDate, endDate);
     }
 
-
     @Override
     public List<ResponseToGetSchedules> getScheduleBySearch(String word,LocalDate startDate, LocalDate endDate) {
         return scheduleDao.getScheduleBySearch(word,startDate,endDate);
@@ -245,5 +243,47 @@ public class ScheduleServiceImpl implements ScheduleService {
         ExcelExportUtils exportUtils = new ExcelExportUtils(schedules);
         exportUtils.exportDataToExcel(response);
         return schedules;
+    }
+
+    @Override
+    public SimpleResponse savePatternTimeSheet(PatternTimeSheetRequest request) {
+        Doctor doctor = doctorRepo.findById(request.getDoctorId()).orElseThrow(() ->
+                new NotFoundException("Doctor не найден"));
+
+        TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime1(doctor.getId(), request.getDateOfConsultation());
+
+        log.info("TimeSheet: {}", timeSheet);
+
+        if (timeSheet != null) {
+            log.error("Уже есть данные");
+            throw new AlreadyExistsException("Уже есть данные");
+        }
+
+        Schedule schedule = doctor.getSchedule();
+        LocalDate dateOfConsultation = request.getDateOfConsultation();
+
+        if (dateOfConsultation.isBefore(schedule.getStartDateWork()) || dateOfConsultation.isAfter(schedule.getEndDateWork())) {
+            log.error("В этот день доктор не работает");
+            throw new BadCredentialsException("В этот день доктор не работает");
+        }
+
+        String days = request.getDateOfConsultation().getDayOfWeek().toString();
+        DaysOfRepetition daysOfRepetition = DaysOfRepetition.valueOf(days);
+
+        Map<DaysOfRepetition, Boolean> daysMap = new HashMap<>();
+        daysMap.put(daysOfRepetition, true);
+        schedule.setDayOfWeek(daysMap);
+        scheduleRepo.save(schedule);
+
+        generateTimeSlotsForDay(dateOfConsultation, schedule.getStartDayTime(), schedule.getEndDayTime(),
+                schedule.getStartBreakTime(), schedule.getEndBreakTime(), schedule.getIntervalInMinutes().getValue(),
+                schedule);
+
+        log.info("Паттерн расписания успешно сохранен");
+
+        return SimpleResponse.builder()
+                .message("Успешно сохранен")
+                .httpStatus(HttpStatus.OK)
+                .build();
     }
 }

@@ -6,6 +6,7 @@ import healthcheck.dto.Schedule.ScheduleGetResponse;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
+import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
@@ -113,6 +114,12 @@ public class ScheduleApi {
         String headerValue = "attachment; filename=Doctors Schedule.xlsx";
         response.setHeader(headerKey, headerValue);
         scheduleService.exportCustomerToExcel(response);
+    }
 
+    @PostMapping("/save-pattern-time-sheet")
+    @Operation(summary = "Save Pattern Time Sheet")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public SimpleResponse savePatternTimeSheet(@RequestBody PatternTimeSheetRequest request) {
+        return scheduleService.savePatternTimeSheet(request);
     }
 }
