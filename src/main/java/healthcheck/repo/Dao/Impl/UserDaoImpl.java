@@ -21,16 +21,32 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<ResultUsersResponse> getAllPatients() {
-        var sql = """
-                    SELECT
-                    u.id,
-                    concat(u.first_name,' ',u.last_name) as full_name,
-                    u.phone_number,
-                    ua.email ,
-                    r.result_date  from users u
-                    join public.result r on r.user_id = u.id
-                    join public.user_account ua on ua.id = u.user_account_id
-                    order by full_name;
+        var sql =
+                """
+                SELECT
+                       u.id,
+                       CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                       u.phone_number,
+                       ua.email,
+                       r.result_date
+                   FROM
+                       users u
+                   JOIN
+                       (
+                       SELECT
+                       user_id,
+                       result_date,
+                       ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY result_date DESC) AS rn
+                       FROM
+                       result
+                       )
+                       r_max ON r_max.user_id = u.id AND r_max.rn = 1
+                   JOIN
+                       result r ON r.user_id = u.id AND r.result_date = r_max.result_date
+                   JOIN
+                       user_account ua ON ua.id = u.user_account_id
+                   ORDER BY
+                  full_name;
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
