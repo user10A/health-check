@@ -9,6 +9,7 @@ import java.time.LocalTime;
 @Data
 @Builder
 public class ResultsUserResponse {
+
     private String Facility;
     private LocalDate date;
     private LocalTime localTime;
