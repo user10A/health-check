@@ -57,7 +57,7 @@ public class ResultApi {
     }
     @GetMapping("{id}")
     @Operation(summary = "Get result by user Id",description = "This method get result by userID")
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<ResultsUserResponse> getResultByUserId(@PathVariable Long id){
         return resultService.getAllResultsByUserId(id);
     }
