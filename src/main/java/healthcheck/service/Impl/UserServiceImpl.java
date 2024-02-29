@@ -49,29 +49,33 @@ public class UserServiceImpl implements UserService {
 
             UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
 
-            if (!userAccount.getEmail().equals(profileRequest.getEmail())) {
-                userAccount.setEmail(profileRequest.getEmail());
-            }
-            if (!userAccount.getUser().getPhoneNumber().equals(profileRequest.getNumberPhone())) {
-                userAccount.getUser().setPhoneNumber(profileRequest.getNumberPhone());
-            }
+            if (userAccount != null) {
+                if (!userAccount.getEmail().equals(profileRequest.getEmail())) {
+                    userAccount.setEmail(profileRequest.getEmail());
+                }
+                if (!userAccount.getUser().getPhoneNumber().equals(profileRequest.getNumberPhone())) {
+                    userAccount.getUser().setPhoneNumber(profileRequest.getNumberPhone());
+                }
 
-            if (!userAccount.getUser().getFirstName().equals(profileRequest.getFirstName())) {
-                userAccount.getUser().setFirstName(profileRequest.getFirstName());
+                if (!userAccount.getUser().getFirstName().equals(profileRequest.getFirstName())) {
+                    userAccount.getUser().setFirstName(profileRequest.getFirstName());
+                }
+                if (!userAccount.getUser().getLastName().equals(profileRequest.getLastName())) {
+                    userAccount.getUser().setLastName(profileRequest.getLastName());
+                }
+
+                userRepo.save(userAccount.getUser());
+                userAccountRepo.save(userAccount);
+
+                log.info("Профиль пользователя успешно изменен");
+
+                return SimpleResponse.builder().message("Успешно изменено!").httpStatus(HttpStatus.OK).build();
+            } else {
+                throw new DataUpdateException("Пользователь не найден");
             }
-            if (!userAccount.getUser().getLastName().equals(profileRequest.getLastName())) {
-                userAccount.getUser().setLastName(profileRequest.getLastName());
-            }
-
-            userRepo.save(userAccount.getUser());
-            userAccountRepo.save(userAccount);
-
-            log.info("Профиль пользователя успешно изменен");
-
-            return SimpleResponse.builder().message("Успешно изменено!").httpStatus(HttpStatus.OK).build();
         } catch (DataUpdateException e) {
             log.error("Ошибка при редактировании профиля пользователя", e);
-            throw new RuntimeException("Ошибка при редактировании профиля пользователя", e);
+            throw new DataUpdateException("Ошибка при редактировании профиля пользователя");
         }
     }
 
@@ -119,10 +123,11 @@ public class UserServiceImpl implements UserService {
             String oldPassword = changePasswordUserRequest.getOldPassword();
 
             if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
-                if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
-                    throw new InvalidPasswordException("Ошибка в новом пароле");
-                }
                 throw new InvalidPasswordException("Ошибка в старом пароле");
+            }
+
+            if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
+                throw new InvalidPasswordException("Ошибка в новом пароле");
             }
 
             String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
