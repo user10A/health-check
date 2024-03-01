@@ -7,6 +7,7 @@ import healthcheck.entities.Department;
 import healthcheck.entities.Result;
 import healthcheck.entities.User;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.ResultDao;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.ResultRepo;
 import healthcheck.repo.UserRepo;
@@ -30,6 +31,7 @@ import java.util.List;
 @Slf4j
 public class ResultServiceImpl implements ResultService {
     private final ResultRepo resultRepo;
+    private final ResultDao resultDao;
     private final DepartmentRepo departmentRepo;
     private final UserRepo userRepo;
     private final EmailSenderService emailSenderService;
@@ -88,6 +90,11 @@ public class ResultServiceImpl implements ResultService {
         }
         log.info("результат найден {}", result);
         return result;
+    }
+
+    @Override
+    public List<ResultsUserResponse> getAllResultsByUserId(Long id) {
+        return resultDao.getAllResultsByUserId(id);
     }
 
 
