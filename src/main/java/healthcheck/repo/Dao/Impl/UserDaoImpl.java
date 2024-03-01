@@ -22,31 +22,23 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<ResultUsersResponse> getAllPatients() {
         var sql =
-                """
-                SELECT
-                       u.id,
-                       CONCAT(u.first_name, ' ', u.last_name) AS full_name,
-                       u.phone_number,
-                       ua.email,
-                       r.result_date
-                   FROM
-                       users u
-                   JOIN
-                       (
-                       SELECT
-                       user_id,
-                       result_date,
-                       ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY result_date DESC) AS rn
-                       FROM
-                       result
-                       )
-                       r_max ON r_max.user_id = u.id AND r_max.rn = 1
-                   JOIN
-                       result r ON r.user_id = u.id AND r.result_date = r_max.result_date
-                   JOIN
-                       user_account ua ON ua.id = u.user_account_id
-                   ORDER BY
-                  full_name;
+                """     
+                SELECT DISTINCT
+                 u.id,
+                 CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                 u.phone_number,
+                 ua.email,
+                 r.result_date
+                FROM
+                 users u
+                JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id) 
+                 r_max ON r_max.user_id = u.id
+                JOIN 
+                 result r ON r.user_id = u.id AND r.result_date = r_max.max_result_date
+                JOIN 
+                 user_account ua ON ua.id = u.user_account_id
+                ORDER BY
+                 full_name;
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
@@ -163,27 +155,26 @@ public class UserDaoImpl implements UserDao {
     @Override
     public ResponseToGetUserById getUserById(Long id) {
         var sql = """
-                       
-                         SELECT
+                SELECT
                     u.id,
-                   u.first_name,
-                   u.last_name ,
+                    CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+                    u.first_name,
+                    u.last_name,
                     u.phone_number,
-                    ua.email,
-                    r.result_date
+                    ua.email
                 FROM
                     users u
-                        JOIN
-                    public.result r ON r.user_id = u.id
-                        JOIN
+                JOIN
                     public.user_account ua ON ua.id = u.user_account_id
                 WHERE
-                        u.id = ?;
-                         """;
+                    u.id = ?;
+                
+                """;
 
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> ResponseToGetUserById.builder()
                     .id(rs.getLong("id"))
+                    .fullName(rs.getString("full_name"))
                     .last_name(rs.getString("last_name"))
                     .first_name(rs.getString("first_name"))
                     .phone_number(rs.getString("phone_number"))

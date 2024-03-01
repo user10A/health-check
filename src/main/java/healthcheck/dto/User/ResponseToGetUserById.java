@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Builder
 public class ResponseToGetUserById {
     private Long id;
+    private String fullName;
     private String first_name;
     private String last_name;
     private String email;
