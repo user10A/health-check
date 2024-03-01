@@ -9,7 +9,6 @@ import java.util.List;
 public interface ResultService {
     SimpleResponse saveResult(RequestSaveResult request);
     String getResultByResultNumberResult(Long resultNumber);
-    List<ResultsUserResponse> getAllResultsByUserId(Long id);
 
 }
 
