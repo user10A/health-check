@@ -1,5 +1,6 @@
 package healthcheck.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -29,6 +30,7 @@ public class TimeSheet {
     private LocalTime endTimeOfConsultation;
     private boolean available;
     @ManyToOne(cascade = {CascadeType.DETACH})
+    @JsonIgnore
     private Schedule schedule;
 
     @Override

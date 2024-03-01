@@ -2,6 +2,7 @@ package healthcheck.api;
 
 import healthcheck.S3.S3Service;
 import healthcheck.dto.Result.RequestSaveResult;
+import healthcheck.dto.Result.ResultsUserResponse;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.jms.JmsService;
 import healthcheck.service.ResultService;
@@ -12,13 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -57,6 +54,12 @@ public class ResultApi {
     public byte[] getPdf(){
         String message= jmsService.receiveMessage("pdfQueue");
         return s3Service.getPdfFileByUrl(message);
+    }
+    @GetMapping("{id}")
+    @Operation(summary = "Get result by user Id",description = "This method get result by userID")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<ResultsUserResponse> getResultByUserId(@PathVariable Long id){
+        return resultService.getAllResultsByUserId(id);
     }
 
 }

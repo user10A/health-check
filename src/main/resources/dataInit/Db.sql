@@ -116,11 +116,11 @@ VALUES(1, 'Logan', 'Wells', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd
       (24, 'Samuel', 'Russell', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq30eWo_CwBXLL18h0IboRqFcKnOcQ9g_JinigHj9L2ErhMt_m_9VIgCuimVgLCE7qfI8&usqp=CAU', 'Sleep Medicine Specialist', 'Dedicated to diagnosing and treating sleep disorders.', true,  4),
       (25, 'Victoria', 'Foster', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq30eWo_CwBXLL18h0IboRqFcKnOcQ9g_JinigHj9L2ErhMt_m_9VIgCuimVgLCE7qfI8&usqp=CAU', 'Podiatrist', 'Expert in foot and ankle conditions and surgeries.', true,  5);
 INSERT INTO schedule (id, start_date_work, end_date_work, start_day_time, end_day_time, start_break_time, end_break_time, interval_in_minutes, department_id,doctor_id)
-VALUES(1, '2024-01-15', '2024-02-15', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FIFTEEN', 1, 1),
-      (2, '2024-01-16', '2024-02-16', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FIFTEEN', 2, 2),
-      (3, '2024-01-17', '2024-01-17', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FIFTEEN', 3, 3),
-      (4, '2024-01-18', '2024-02-18', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FIFTEEN', 4, 4),
-      (5, '2024-01-19', '2024-02-19', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FIFTEEN', 5, 5),
+VALUES(1, '2024-01-15', '2024-02-15', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'THIRTY', 1, 1),
+      (2, '2024-01-16', '2024-02-16', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'SIXTY', 2, 2),
+      (3, '2024-01-17', '2024-01-17', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'THIRTY', 3, 3),
+      (4, '2024-01-18', '2024-02-18', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'SIXTY', 4, 4),
+      (5, '2024-01-19', '2024-02-19', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FOURTYFIVE', 5, 5),
       (6, '2024-01-19', '2024-02-20', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FOURTYFIVE', 6, 6),
       (7, '2024-01-19', '2024-02-21', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FOURTYFIVE', 7, 7),
       (8, '2024-01-22', '2024-02-22', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'FOURTYFIVE', 8, 8),
