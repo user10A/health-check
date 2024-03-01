@@ -3,6 +3,7 @@ package healthcheck.service.Impl;
 import healthcheck.dto.Appointment.AddScheduleRequest;
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
+import healthcheck.dto.Schedule.TimeSheetDeleteRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
@@ -285,5 +286,54 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .message("Успешно сохранен")
                 .httpStatus(HttpStatus.OK)
                 .build();
+    }
+
+    @Override
+    public SimpleResponse deleteTimeSheetByDoctorIdAndDate(Long doctorId, LocalDate date, List<TimeSheetDeleteRequest> request) {
+        try {
+            Doctor doctor = doctorRepo.findById(doctorId)
+                    .orElseThrow(() -> new NotFoundException("Doctor не найден"));
+
+            Schedule schedule = doctor.getSchedule();
+            List<TimeSheet> timeSheets = schedule.getTimeSheets();
+
+            List<TimeSheet> timeSheetsToDelete = timeSheets.stream()
+                    .filter(timeSheet ->
+                            timeSheet.getDateOfConsultation().equals(date) &&
+                                    containsTimeSheetDeleteRequest(request, timeSheet)
+                    )
+                    .collect(Collectors.toList());
+
+            if (timeSheetsToDelete.isEmpty()) {
+                return SimpleResponse.builder()
+                        .message("Нет записей для удаления")
+                        .httpStatus(HttpStatus.OK)
+                        .build();
+            }
+
+            timeSheets.removeAll(timeSheetsToDelete);
+            timeSheetRepo.deleteAll(timeSheetsToDelete);
+
+            doctorRepo.save(doctor);
+            log.info("Записи о приёме успешно удалены для доктора: {}", doctorId);
+
+            return SimpleResponse.builder()
+                    .message("Успешно удалено")
+                    .httpStatus(HttpStatus.OK)
+                    .build();
+        } catch (NotFoundException e) {
+            log.error("Ошибка в методе deleteTimeSheetByDoctorIdAndDate: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception ex) {
+            log.error("Ошибка удаления записей о приёме: {}", ex.getMessage(), ex);
+            throw new DataUpdateException("Ошибка удаления записей о приёме");
+        }
+    }
+
+    private boolean containsTimeSheetDeleteRequest(List<TimeSheetDeleteRequest> request, TimeSheet timeSheet) {
+        return request.stream()
+                .anyMatch(deleteRequest ->
+                        deleteRequest.getFromTime().equals(timeSheet.getStartTimeOfConsultation().toString())
+                );
     }
 }
