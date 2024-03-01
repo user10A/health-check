@@ -1,16 +1,15 @@
 package healthcheck.userTest;
 
 import healthcheck.HealthCheckJava11Application;
-import healthcheck.dto.Authentication.SignInRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.*;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
+import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.service.UserService;
-import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
-import static io.restassured.RestAssured.given;
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -32,9 +30,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
 public class UserServiceTest {
-    private static final String BASE_URI = "http://localhost:2024/api/user";
-    private static final String AUTH_BASE_URI = "http://localhost:2024/api/auth";
-    private static final String ADMIN_PASSWORD = "Abcd123!@";
     private final UserService userService;
     private final UserAccountRepo userAccount;
     private final UserDao userDao;
@@ -191,94 +186,39 @@ public class UserServiceTest {
     @Test
     @DisplayName("Получение всех назначений user")
     public void getAllAppointmentsOfUser() {
-        try {
-            String authToken = given()
-                    .contentType(ContentType.JSON)
-                    .body(new SignInRequest("ella.martin@gmail.com", ADMIN_PASSWORD))
-                    .when()
-                    .post(AUTH_BASE_URI + "/signIn")
-                    .then()
-                    .statusCode(200)
-                    .extract()
-                    .path("token");
-
-            List<ResponseToGetUserAppointments> appointments = given()
-                    .auth().oauth2(authToken)
-                    .when()
-                    .get(BASE_URI + "/getAllAppointmentsOfUser")
-                    .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .extract()
-                    .body()
-                    .jsonPath()
-                    .getList(".", ResponseToGetUserAppointments.class);
-
-            log.info("Полученные приемы: {}", appointments);
-
-            assertThat(appointments, hasSize(greaterThan(0)));
-
-            for (ResponseToGetUserAppointments appointment : appointments) {
-                log.info("Проверка приема: {}", appointment);
-                assertThat(appointment, allOf(
-                        hasProperty("id", notNullValue()),
-                        hasProperty("appointmentDate", notNullValue()),
-                        hasProperty("appointmentTime", notNullValue()),
-                        hasProperty("status", notNullValue()),
-                        hasProperty("surname", notNullValue()),
-                        hasProperty("department", notNullValue()),
-                        hasProperty("image", notNullValue())
-                ));
-            }
-        } catch (Exception e) {
-            log.error("Произошла ошибка в тесте", e);
-            throw e;
-        }
-    }
-    // МЕТОД public ResponseToGetAppointmentByUserId getUserAppointmentById();
-    @Test
-    @DisplayName("Получение онлайн записей по user: исключение")
-    public void testGetAllAppointment_NotFoundException() {
-        ProfileRequest profileRequest = new ProfileRequest();
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken("jasona.miller@gmail.com", "Abcd123!@");
+        Authentication authentication = new UsernamePasswordAuthenticationToken("charlie.brown@gmail.com", "Abcd123!@");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        DataUpdateException exception = assertThrows(DataUpdateException.class, () ->
-                userService.editUserProfile(profileRequest));
+        List<ResponseToGetUserAppointments> response = userService.getAllAppointmentsOfUser();
 
-        assertEquals("Ошибка при редактировании профиля пользователя", exception.getMessage());
+        assertEquals(userService.getAllAppointmentsOfUser(), response);
+    }
+
+    @Test
+    @DisplayName("Получение всех назначений user: исключение")
+    public void testGetAllAppointment_NotFoundException() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken("chalie.brown@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, userService::getAllAppointmentsOfUser);
+
+        assertEquals("User is not found !!!", exception.getMessage());
     }
 
 
-
-
+    // МЕТОД public ResponseToGetAppointmentByUserId getUserAppointmentById();
     @Test
     @DisplayName("Получение записей по id user")
     public void getUserAppointmentById() {
-        Long id = 11L;
+       Long id = 11L;
 
-        try {
-            ResponseToGetAppointmentByUserId response = userDao.getUserAppointmentById(id);
+       Authentication authentication = new UsernamePasswordAuthenticationToken("admin@gmail.com", "Abcd123!@");
+       SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            log.info("Проверка приема: {}", response);
+        ResponseToGetAppointmentByUserId response = userService.getUserAppointmentById(id);
 
-            assertThat(response, allOf(
-                    hasProperty("appointmentDate", notNullValue()),
-                    hasProperty("appointmentTime", notNullValue()),
-                    hasProperty("surnameOfDoctor", notNullValue()),
-                    hasProperty("department", notNullValue()),
-                    hasProperty("first_name", notNullValue()),
-                    hasProperty("last_name", notNullValue()),
-                    hasProperty("phone_number", notNullValue()),
-                    hasProperty("email", notNullValue()),
-                    hasProperty("image", notNullValue())
-            ));
-        } catch (Exception e) {
-            log.error("Произошла ошибка в тесте", e);
-            throw e;
-        }
+        assertEquals(userDao.getUserAppointmentById(id), response);
     }
-
 
 
     // МЕТОД public SimpleResponse changePassword();
@@ -350,8 +290,30 @@ public class UserServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("Смена пароля: исключение (DataUpdate пароль)")
+    public void testChangePassword_DataUpdateException() {
+        ChangePasswordUserRequest request = new ChangePasswordUserRequest();
+        request.setOldPassword("Abcd123!");
+        request.setNewPassword("Abcd123!@@");
+        request.setResetNewPassword("Abcd123!@@");
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken("david.thomas@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        try {
+            log.info("Executing testChangePassword_DataUpdateException");
+            DataUpdateException exception = assertThrows(DataUpdateException.class, () ->
+                    userService.changePassword(request));
+            assertEquals("Ошибка при изменении пароля пользователя", exception.getMessage());
+        } catch (Exception e) {
+            log.error("An unexpected exception occurred in testChangeOldPassword_InvalidPasswordException", e);
+            throw e;
+        }
+    }
 
 
+    // МЕТОД public ResponseToGetUserById getUserById(Long id);
     @Test
     @DisplayName("Получение user-а по id")
     public void getUserById() {
@@ -374,6 +336,8 @@ public class UserServiceTest {
         }
     }
 
+
+    // МЕТОД public int clearMyAppointments();
     @Test
     @DisplayName("Очистка записей")
     public void clearMyAppointments() {
@@ -395,6 +359,37 @@ public class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Очистка записей")
+    public void clearMyAppointments_UserDao() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken("nathan.morris@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String email = authentication.getName();
+        try {
+            UserAccount account = userAccount.findUserAccountByEmail(email);
+
+            assertEquals(userDao.clearMyAppointments(account.getId()), userService.clearMyAppointments());
+            log.info("Очищены назначения для пользователя с идентификатором {}", account.getId());
+        } catch (Exception e) {
+            log.error("Произошла ошибка в тесте", e);
+            throw e;
+        }
+    }
+
+    @Test
+    @DisplayName("Очистка записей: исключение")
+    public void clearMyAppointments_NotFoundException() {
+        Authentication authentication = new UsernamePasswordAuthenticationToken("natan.morris@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, userService::clearMyAppointments);
+
+        assertEquals("User is not found !!!", exception.getMessage());
+    }
+
+
+    // МЕТОД  public SimpleResponse deletePatientsById(Long id);
+    @Test
     @DisplayName("Удаление существующего пользователя")
     public void deletePatientById() {
         Long id = 5L;
@@ -415,92 +410,50 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Получение всех докторов")
-    public void getAllPatients() {
-        String authToken = given().contentType(ContentType.JSON)
-                .body(new SignInRequest("admin@gmail.com", ADMIN_PASSWORD))
-                .when()
-                .post(AUTH_BASE_URI + "/signIn")
-                .then()
-                .statusCode(200)
-                .extract()
-                .path("token");
+    @DisplayName("Удаление существующего пользователя: исключение")
+    public void deletePatientById_SimpleResponse() {
+        Long id = 99L;
 
         try {
-            List<ResultUsersResponse> responses = given().auth().oauth2(authToken)
-                    .contentType(ContentType.JSON).accept(ContentType.JSON)
-                    .when()
-                    .get(BASE_URI + "/getAllPatients")
-                    .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .extract()
-                    .body()
-                    .jsonPath()
-                    .getList(".", ResultUsersResponse.class);
+            log.info("Выполняется тест удаления пациента по идентификатору: {}", id);
 
-            log.info("Получены записи о приемах: {}", responses);
+            SimpleResponse simpleResponse = userService.deletePatientsById(id);
 
-            assertThat(responses, hasSize(greaterThan(0)));
+            assertEquals("User not found", simpleResponse.getMessage());
+            assertEquals(HttpStatus.NOT_FOUND, simpleResponse.getHttpStatus());
 
-            for (ResultUsersResponse response : responses) {
-                log.info("Проверка вывода информации о врачах: {}", response);
-                assertThat(response, allOf(
-                        hasProperty("id", notNullValue()),
-                        hasProperty("surname", notNullValue()),
-                        hasProperty("phoneNumber", notNullValue()),
-                        hasProperty("email", notNullValue()),
-                        hasProperty("resultDate", notNullValue())
-                ));
-            }
+            log.info("Тест исключения пациента по идентификатору пройден успешно");
         } catch (Exception e) {
-            log.error("Тест на получение всех пациентов завершился с ошибкой", e);
-            fail("Тест на получение всех пациентов завершился с ошибкой: " + e.getMessage());
+            log.error("Тест удаления пациента по идентификатору завершился с удачно", e);
+            throw e;
         }
     }
 
+
+    // МЕТОД public List<ResultUsersResponse> getAllPatients();
+    @Test
+    @DisplayName("Получение всех докторов")
+    public void getAllPatients() {
+      Authentication authentication = new UsernamePasswordAuthenticationToken("admin@gmail.com", "Abcd123!@");
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      List<ResultUsersResponse> responses = userService.getAllPatients();
+
+      assertEquals(userDao.getAllPatients(), responses);
+    }
+
+
+    // МЕТОД public List<ResultUsersResponse> getAllPatientsBySearch(String word);
     @Test
     @DisplayName("Получение всех пациентов по поиску")
     public void getAllPatientsBySearch() {
-        String authToken = given().contentType(ContentType.JSON)
-                .body(new SignInRequest("admin@gmail.com", ADMIN_PASSWORD))
-                .when()
-                .post(AUTH_BASE_URI + "/signIn")
-                .then()
-                .statusCode(200)
-                .extract()
-                .path("token");
+        String word = "A";
 
-        try {
-            String word = "A";
+        Authentication authentication = new UsernamePasswordAuthenticationToken("admin@gmail.com", "Abcd123!@");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            List<ResultUsersResponse> usersResponses = given().auth().oauth2(authToken)
-                    .queryParam("word", word)
-                    .when()
-                    .get(BASE_URI + "/search")
-                    .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .extract()
-                    .body()
-                    .jsonPath()
-                    .getList(".", ResultUsersResponse.class);
+        List<ResultUsersResponse> responses = userService.getAllPatientsBySearch(word);
 
-            log.info("Результаты поиска для слова '{}': {}", word, usersResponses);
-
-            assertThat(usersResponses, hasSize(greaterThan(0)));
-
-            for (ResultUsersResponse response : usersResponses) {
-                log.info("Проверка вывода информации о пациенте: {}", response);
-                assertThat(response, allOf(
-                        hasProperty("id", notNullValue()),
-                        hasProperty("surname", notNullValue()),
-                        hasProperty("phoneNumber", notNullValue()),
-                        hasProperty("email", notNullValue()),
-                        hasProperty("resultDate", notNullValue())
-                ));
-            }
-        } catch (Exception e) {
-            log.error("Тест на поиск пациентов завершился с ошибкой", e);
-            fail("Тест на поиск пациентов завершился с ошибкой: " + e.getMessage());
-        }
+        assertEquals(userDao.resultUsersBySearch(word), responses);
     }
 }

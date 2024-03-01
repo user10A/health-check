@@ -4,6 +4,7 @@ import healthcheck.HealthCheckJava11Application;
 import healthcheck.dto.Doctor.DoctorSaveRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
+import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.service.DoctorService;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = HealthCheckJava11Application.class)
 @Slf4j
@@ -77,11 +79,10 @@ public class DoctorServiceTest {
             Long nonExistingDepartmentId = 99L;
             request.setDepartmentId(nonExistingDepartmentId);
 
-            SimpleResponse response = doctorService.saveDoctor(request);
+            NotFoundException response = assertThrows(NotFoundException.class, () ->
+                    doctorService.saveDoctor(request));
 
-            log.info("Результат сохранения врача с несуществующим отделением: HttpStatus - {}, Message - {}", response.getHttpStatus(), response.getMessage());
-
-            assertEquals(String.format("Отделение с ID: %d не найдено", nonExistingDepartmentId), response.getMessage());
+            assertEquals(response.getMessage(), String.format("Отделение с ID: %d не найдено", nonExistingDepartmentId));
 
         } catch (Exception e) {
             log.error("Ошибка при сохранении врача с несуществующим отделением: " + e.getMessage());
