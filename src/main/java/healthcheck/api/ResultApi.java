@@ -63,4 +63,5 @@ public class ResultApi {
         return resultService.getAllResultsByUserId(id);
     }
 
+
 }
