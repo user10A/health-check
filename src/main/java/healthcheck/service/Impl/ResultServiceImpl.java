@@ -85,6 +85,9 @@ public class ResultServiceImpl implements ResultService {
     @Override
     public String getResultByResultNumberResult(Long resultNumber) {
         String result = resultRepo.getResultByResultNumberResult(resultNumber);
+        if (result == null) {
+            throw new NotFoundException(String.format("Результат с номером %d не найден", resultNumber));
+        }
         log.info("результат найден {}", result);
         return result;
     }

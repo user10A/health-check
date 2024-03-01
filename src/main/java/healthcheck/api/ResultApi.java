@@ -55,6 +55,7 @@ public class ResultApi {
         String message= jmsService.receiveMessage("pdfQueue");
         return s3Service.getPdfFileByUrl(message);
     }
+
     @GetMapping("{id}")
     @Operation(summary = "Get result by user Id",description = "This method get result by userID")
     @PreAuthorize("hasAuthority('ADMIN')")
