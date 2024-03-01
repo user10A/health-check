@@ -11,7 +11,6 @@ public interface ResultService {
     String getResultByResultNumberResult(Long resultNumber);
     List<ResultsUserResponse> getAllResultsByUserId(Long id);
 
-    List<ResultsUserResponse> getAllResultsByUserId(Long id);
 
 }
 
