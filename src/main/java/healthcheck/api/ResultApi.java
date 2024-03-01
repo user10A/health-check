@@ -47,6 +47,7 @@ public class ResultApi {
         jmsService.sendMessage(pdfQueue, result);
         return result;
     }
+
     @JmsListener(destination = "pdfQueue")
     @GetMapping("/pdf")
     @Operation(summary = "Get PDF file by methods get result",description = "This method get pdf file")
