@@ -1,8 +1,8 @@
 package healthcheck.dto.Schedule;
+
 import lombok.Data;
 
 @Data
-public class ScheduleUpdateRequest {
+public class TimeSheetDeleteRequest {
     private String fromTime;
-    private String toTime;
 }

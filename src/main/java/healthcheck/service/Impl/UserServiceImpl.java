@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
             }
         } catch (DataUpdateException e) {
             log.error("Ошибка при редактировании профиля пользователя", e);
-            throw new DataUpdateException("Ошибка при редактировании профиля пользователя");
+            throw new RuntimeException("Ошибка при редактировании профиля пользователя", e);
         }
     }
 
@@ -140,7 +140,7 @@ public class UserServiceImpl implements UserService {
             return SimpleResponse.builder().message("Успешно изменен пароль!").httpStatus(HttpStatus.OK).build();
         } catch (DataUpdateException e) {
             log.error("Ошибка при изменении пароля пользователя", e);
-            throw new RuntimeException("Ошибка при изменении пароля пользователя", e);
+            throw new DataUpdateException("Ошибка при изменении пароля пользователя");
         }
     }
 

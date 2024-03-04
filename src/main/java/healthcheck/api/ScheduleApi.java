@@ -3,6 +3,7 @@ package healthcheck.api;
 import healthcheck.dto.Appointment.AddScheduleRequest;
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
+import healthcheck.dto.Schedule.TimeSheetDeleteRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.entities.additional.PatternTimeSheetRequest;
@@ -104,6 +105,7 @@ public class ScheduleApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
     @GetMapping("/export-to-excel")
     @Operation(summary = "export schedule to excel")
     @PostAuthorize("hasAuthority('ADMIN')")
@@ -120,5 +122,14 @@ public class ScheduleApi {
     @PreAuthorize("hasAuthority('ADMIN')")
     public SimpleResponse savePatternTimeSheet(@RequestBody PatternTimeSheetRequest request) {
         return scheduleService.savePatternTimeSheet(request);
+    }
+
+    @PostMapping("/delete-time-sheets")
+    @Operation(summary = "Delete time sheet by doctor ID and date")
+    @PostAuthorize("hasAuthority('ADMIN')")
+    public SimpleResponse deleteTimeSheetByDoctorIdAndDate(@RequestParam Long doctorId,
+                                                           @RequestParam LocalDate date,
+                                                           @RequestBody List<TimeSheetDeleteRequest> requests) {
+        return scheduleService.deleteTimeSheetByDoctorIdAndDate(doctorId, date, requests);
     }
 }
