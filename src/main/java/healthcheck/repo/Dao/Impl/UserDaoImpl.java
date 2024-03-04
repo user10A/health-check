@@ -189,18 +189,25 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<ResultUsersResponse> resultUsersBySearch(String word) {
         var sql = """
-                SELECT
+                SELECT DISTINCT
                 u.id,
-                concat(u.first_name, ' ', u.last_name),
+                CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                 u.phone_number,
                 ua.email,
                 r.result_date
-                FROM users u
-                JOIN user_account ua on u.user_account_id = ua.id
-                JOIN result r on u.id = r.user_id
+                FROM
+                users u
+                JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
+                r_max ON r_max.user_id = u.id
+                JOIN
+                result r ON r.user_id = u.id AND r.result_date = r_max.max_result_date
+                JOIN
+                user_account ua ON ua.id = u.user_account_id
                 WHERE concat(u.first_name, ' ', u.last_name) LIKE '%' || ? || '%'
-                   OR ua.email LIKE '%' || ? || '%'
-                ORDER BY u.first_name ,u.last_name""";
+                OR ua.email LIKE '%' || ? || '%'
+                ORDER BY
+                full_name;
+                """;
 
         return jdbcTemplate.query(sql, new Object[]{word, word}, (rs, rowNum) -> ResultUsersResponse.builder()
                 .id(rs.getLong(1))
