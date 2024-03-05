@@ -17,4 +17,9 @@ public class TimeSheetServiceImpl implements TimeSheetService {
     public List<TimeSheetResponse> getTimesheetDoctor(@RequestParam String facility) {
         return timeSheetDao.getTimesheetDoctor(facility);
     }
+
+    @Override
+    public List<TimeSheetResponse> getTimesheetDoctorById(Long id) {
+        return timeSheetDao.getTimesheetDoctorById(id);
+    }
 }

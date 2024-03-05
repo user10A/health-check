@@ -87,6 +87,13 @@ public class AppointmentApi {
         return timeSheetService.getTimesheetDoctor(facility);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get available timesheet doctors by ID", description = "Endpoint to get available timesheet doctors by doctor ID.")
+    @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
+    public List<TimeSheetResponse> getTimeSheetDoctors(@PathVariable Long id) {
+        return timeSheetService.getTimesheetDoctorById(id);
+    }
+
     @GetMapping("/getDoctor")
     @Operation(summary = "Get doctor for appointment", description = "Endpoint to get doctor for appointment.")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")

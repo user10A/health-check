@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -42,8 +43,9 @@ public class ResultServiceImpl implements ResultService {
     @Transactional
     public SimpleResponse saveResult(RequestSaveResult request) {
         try {
+            LocalDate startDate = LocalDate.now();
+            LocalDate endDate = startDate.plusDays(7);
             Department department = departmentRepo.findByFacility(request.getFacility());
-
             User user = userRepo.findById(request.getUserId())
                     .orElseThrow(() -> new NotFoundException(
                             String.format("Пользователь с ID: %d не найден", request.getUserId())
@@ -56,25 +58,27 @@ public class ResultServiceImpl implements ResultService {
                     .resultNumber(generateTenDigitNumber())
                     .user(user)
                     .build();
-
-            log.info("Результат с полным именем пациента: %s успешно добавлен!".formatted(user.getFirstName() + " " + user.getLastName()));
-            Context context = new Context();
-            context.setVariable("patientName", user.getFirstName() + " " + user.getLastName());
-            context.setVariable("departmentName", department.getFacility());
-            context.setVariable("generateNumber", result.getResultNumber());
-            emailSenderService.sendEmail(user.getUserAccount().getEmail(), "HealthCheck : Оповещение о результате", "result", context);
-            log.info("Сообщение отправлено пользователю с email : %s".formatted(user.getUserAccount().getEmail()));
-
-            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-            String emailContent = templateEngine.process("result", context);
-            helper.setTo(user.getUserAccount().getEmail());
-            helper.setText(emailContent, true);
-
-            resultRepo.save(result);
-            String successMessage = "Успешно сохранен!";
-            log.info(successMessage);
-            return new SimpleResponse(HttpStatus.OK, successMessage);
+            if (request.getDataOfDelivery().isEqual(startDate) || (request.getDataOfDelivery().isAfter(startDate) && request.getDataOfDelivery().isBefore(endDate))) {
+                resultRepo.save(result);
+                log.info("Результат с полным именем пациента: %s успешно добавлен!".formatted(user.getFirstName() + " " + user.getLastName()));
+                Context context = new Context();
+                context.setVariable("patientName", user.getFirstName() + " " + user.getLastName());
+                context.setVariable("departmentName", department.getFacility());
+                context.setVariable("generateNumber", result.getResultNumber());
+                emailSenderService.sendEmail(user.getUserAccount().getEmail(), "HealthCheck : Оповещение о результате", "result", context);
+                log.info("Сообщение отправлено пользователю с email : %s".formatted(user.getUserAccount().getEmail()));
+                MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+                String emailContent = templateEngine.process("result", context);
+                helper.setTo(user.getUserAccount().getEmail());
+                helper.setText(emailContent, true);
+                String successMessage = "Успешно сохранен!";
+                log.info(successMessage);
+                return new SimpleResponse(HttpStatus.OK, successMessage);
+            } else {
+                log.info("Результат не сохранен! :"+request);
+                return new SimpleResponse(HttpStatus.BAD_REQUEST, String.format("%s : Текущая дата находится вне заданного диапазона. Добавление результата в течении 7 дней!", request.getDataOfDelivery()));
+            }
         } catch (Exception e) {
             String errorMessage = "Ошибка при сохранении заявки: " + e.getMessage();
             log.error(errorMessage, e);

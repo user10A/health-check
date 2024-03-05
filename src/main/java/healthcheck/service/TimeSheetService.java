@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface TimeSheetService {
     List<TimeSheetResponse> getTimesheetDoctor(String facility);
+    List<TimeSheetResponse> getTimesheetDoctorById(Long id);
+
 }
