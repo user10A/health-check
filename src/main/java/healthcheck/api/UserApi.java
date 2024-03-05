@@ -1,12 +1,7 @@
 package healthcheck.api;
 
 import healthcheck.dto.SimpleResponse;
-import healthcheck.dto.User.ResponseToGetUserAppointments;
-import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ResultUsersResponse;
-import healthcheck.dto.User.ResponseToGetUserById;
-import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
-import healthcheck.dto.User.ChangePasswordUserRequest;
+import healthcheck.dto.User.*;
 import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -63,6 +58,14 @@ public class UserApi {
             description = "Edit")
     public SimpleResponse editUserProfile(@Valid @RequestBody ProfileRequest profileRequest){
         return userService.editUserProfile(profileRequest);
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PostMapping("/getResponse")
+    @Operation(summary = "Response information user by token",
+            description = "Information")
+    public GetUserResponseByToken responseUserProfile(@Valid @RequestBody String token){
+        return userService.responseUserInfo(token);
     }
 
     @PreAuthorize("hasAuthority('USER')")

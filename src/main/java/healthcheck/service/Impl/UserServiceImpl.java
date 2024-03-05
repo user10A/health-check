@@ -1,18 +1,13 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.User.ProfileRequest;
-import healthcheck.dto.User.ResponseToGetUserAppointments;
-import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
-import healthcheck.dto.User.ResponseToGetUserById;
-import healthcheck.dto.User.ChangePasswordUserRequest;
-import healthcheck.dto.User.ResultUsersResponse;
-import healthcheck.entities.User;
-import healthcheck.exceptions.NotFoundException;
-import healthcheck.repo.Dao.UserDao;
 import healthcheck.dto.SimpleResponse;
+import healthcheck.dto.User.*;
+import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
+import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.UserDao;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
 import healthcheck.service.UserService;
@@ -26,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
 import java.util.Optional;
 
 @Service
@@ -77,6 +71,30 @@ public class UserServiceImpl implements UserService {
             log.error("Ошибка при редактировании профиля пользователя", e);
             throw new RuntimeException("Ошибка при редактировании профиля пользователя", e);
         }
+    }
+
+    @Override
+    public GetUserResponseByToken responseUserInfo(String token) {
+        UserAccount userAccount = findByToken();
+
+        return GetUserResponseByToken.builder()
+                .firstName(userAccount.getUser().getFirstName())
+                .lastName(userAccount.getUser().getLastName())
+                .number(userAccount.getUser().getPhoneNumber())
+                .email(userAccount.getEmail())
+                .build();
+    }
+
+    private UserAccount findByToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        String email = authentication.getName();
+
+        return userAccountRepo.findUserAccountByEmail(email);
     }
 
     @Override

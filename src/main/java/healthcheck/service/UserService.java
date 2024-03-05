@@ -5,6 +5,7 @@ import java.util.List;
 
 public interface UserService {
     SimpleResponse editUserProfile(ProfileRequest profileRequest);
+    GetUserResponseByToken responseUserInfo(String token);
     SimpleResponse changePassword(ChangePasswordUserRequest changePasswordUserRequest);
     SimpleResponse deletePatientsById(Long id);
     List<ResultUsersResponse> getAllPatients() ;
