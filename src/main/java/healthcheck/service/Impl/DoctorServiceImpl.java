@@ -128,5 +128,15 @@ public class DoctorServiceImpl implements DoctorService {
         doctorRepo.delete(doctor);
         return SimpleResponse.builder().message("Doctor успешно удален").httpStatus(HttpStatus.OK).build();
     }
+
+    @Override
+    public SimpleResponse updateDoctorStatusById(Long id, boolean b) {
+        Doctor doctor =
+                doctorRepo.findById(id)
+                        .orElseThrow(()-> new NotFoundException("Доктор c таким id :"+id+" не найден"));
+        doctor.setActive(b);
+        doctorRepo.save(doctor);
+        return SimpleResponse.builder().message("Статус Доктора успешно обновлен").httpStatus(HttpStatus.OK).build();
+    }
     // <-
 }

@@ -18,4 +18,6 @@ public interface DoctorService {
     List<DoctorResponseByWord> getAllDoctorsBySearch(String word);
     List<DoctorResponseByWord> getAllDoctors();
     SimpleResponse deleteDoctorById(Long doctorId);
+    SimpleResponse updateDoctorStatusById(Long id,boolean b);
+
 }
