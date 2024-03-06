@@ -26,7 +26,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         LocalDate end = LocalDate.parse(endDate);
         LocalTime startTime = LocalTime.now();
         Map<LocalDate, List<AppointmentScheduleTimeSheetResponse>> scheduleMap = new LinkedHashMap<>();
-        var sql = """
+        var sql =
+        """
     SELECT
     time_sheet.date_of_consultation,
     STRING_AGG(time_sheet.start_time_of_consultation::TEXT, ', ' ORDER BY time_sheet.start_time_of_consultation) AS start_times
@@ -44,7 +45,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     time_sheet.date_of_consultation
     ORDER BY
     time_sheet.date_of_consultation;
-""";
+    """;
         try {
             List<AppointmentScheduleTimeSheetResponse> dbResults = jdbcTemplate.query(sql, new Object[]{startDate, endDate,startDate,startTime.toString(),doctorId}, (rs, rowNum) -> {
                 LocalDate dateOfConsultation = rs.getDate(1).toLocalDate();
