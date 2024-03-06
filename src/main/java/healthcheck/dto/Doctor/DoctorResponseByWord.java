@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Builder
 public class DoctorResponseByWord {
     private Long id;
+    private String position;
     private String image;
     private Boolean isActive;
     private String firstName;
