@@ -54,6 +54,12 @@ public class DoctorApi {
     public SimpleResponse updateDoctor(@RequestParam Facility facility, @RequestParam Long id,@RequestBody DoctorUpdateRequest request) {
         return doctorService.updateDoctor(facility, id,request);
     }
+    @PatchMapping("{id}")
+    @Operation(summary = "Update Status doctor by id", description = "This endpoint allows an admin to update doctor Status doctor by id.")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public SimpleResponse updateStatusDoctorById(@PathVariable Long id,@RequestParam boolean b){
+        return doctorService.updateDoctorStatusById(id,b);
+    }
 
     @GetMapping("/byDepartment")
     @Operation(summary = "Get doctors by department", description = "This API is used to retrieve a list of doctors based on the specified facility")
