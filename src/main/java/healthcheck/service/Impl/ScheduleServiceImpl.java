@@ -61,7 +61,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .orElseThrow(() -> new NotFoundException("Доктор не в данном департаменте или не найден"));
 
         if (doctor.getSchedule() != null) {
-            throw new AlreadyExistsException("Врач с ID: " + doctorId + " уже имеет расписание");
+            throw new AlreadyExistsException("У данного врача уже имеет расписание");
         }
 
         validateDateRange(addScheduleRequest.getCreateStartDate(), addScheduleRequest.getCreateEndDate());
