@@ -41,6 +41,7 @@ public class ChatBotApi {
     private long blockTimestamp = 0;
 
     public ChatBotApi(RestTemplate template, DoctorRepo doctorRepository, DepartmentRepo departmentRepo) {
+        this.template = template;
         this.doctorRepository = doctorRepository;
         this.departmentRepo = departmentRepo;
         diseaseTypes.add("Анестезиология");
@@ -63,7 +64,6 @@ public class ChatBotApi {
         diseaseTypes.add("Пульмонология");
         diseaseTypes.add("Ревматология");
         diseaseTypes.add("Нейрохирургия");
-        this.template = template;
     }
 
     @GetMapping("/chat")
