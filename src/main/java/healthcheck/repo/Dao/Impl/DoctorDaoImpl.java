@@ -53,7 +53,8 @@ public class DoctorDaoImpl implements DoctorDao {
                                                          d.first_name,
                                                          d.last_name,
                                                          d2.facility,
-                                                         s.end_date_work
+                                                         s.end_date_work,
+                                                         d.position
                                                      FROM Doctor d
                                                      JOIN schedule s ON d.id = s.doctor_id
                                                      JOIN department d2 on d.department_id = d2.id
@@ -68,6 +69,7 @@ public class DoctorDaoImpl implements DoctorDao {
                 .lastName(rs.getString(5))
                 .department(rs.getString(6))
                 .endDateWork(rs.getDate(7).toLocalDate())
+                .position(rs.getString(8))
                 .build());
     }
 
