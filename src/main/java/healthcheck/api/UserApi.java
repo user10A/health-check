@@ -64,8 +64,8 @@ public class UserApi {
     @PostMapping("/getResponse")
     @Operation(summary = "Response information user by token",
             description = "Information")
-    public GetUserResponseByToken responseUserProfile(@Valid @RequestBody String token){
-        return userService.responseUserInfo(token);
+    public GetUserResponseByToken responseUserProfile(){
+        return userService.responseUserInfo();
     }
 
     @PreAuthorize("hasAuthority('USER')")

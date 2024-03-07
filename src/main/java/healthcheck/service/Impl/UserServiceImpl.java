@@ -74,27 +74,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public GetUserResponseByToken responseUserInfo(String token) {
-        UserAccount userAccount = findByToken();
-
+    public GetUserResponseByToken responseUserInfo(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        log.info("Редактирование профиля пользователя с email: {}", email);
+        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
         return GetUserResponseByToken.builder()
                 .firstName(userAccount.getUser().getFirstName())
                 .lastName(userAccount.getUser().getLastName())
                 .number(userAccount.getUser().getPhoneNumber())
                 .email(userAccount.getEmail())
                 .build();
-    }
-
-    private UserAccount findByToken() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotFoundException("Пользователь не найден");
-        }
-
-        String email = authentication.getName();
-
-        return userAccountRepo.findUserAccountByEmail(email);
     }
 
     @Override
