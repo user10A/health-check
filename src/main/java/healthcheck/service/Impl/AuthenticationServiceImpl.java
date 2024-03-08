@@ -128,11 +128,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (userAccountRepo.existsUserAccountByEmail(firebaseToken.getEmail())) {
             log.info("user with email: " + firebaseToken.getEmail() + " is already exists!!");
                 UserAccount userAc =userAccountRepo.findUserAccountByEmail(firebaseToken.getEmail());
-                String accessToken = jwtService.generateToken(String.valueOf(userAc));
+                String accessToken = jwtService.generateToken(userAc.getEmail());
                 log.info("Authentication successful for email: {}", firebaseToken.getEmail());
                 return AuthenticationResponse.builder()
                         .token(accessToken)
-                        .email(firebaseToken.getEmail())
+                        .email(userAc.getEmail())
                         .role(userAc.getRole())
                         .build();
         }
@@ -141,6 +141,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String[] name = firebaseToken.getName().split(" ");
         newUser.setFirstName(name[0]);
         newUser.setLastName(name[1]);
+        newUser.setPhoneNumber("+996000000000");
         userRepo.save(newUser);
 
         UserAccount userInfo = new UserAccount();
@@ -152,12 +153,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("User created successfully for email: {}", firebaseToken.getEmail());
 
         UserAccount userInformation = newUser.getUserAccount();
-        String accessToken = jwtService.generateToken(String.valueOf(userInformation));
-
-        log.info("Authentication successful for email: {}", firebaseToken.getEmail());
+        String accessToken = jwtService.generateToken(userInformation.getEmail());
+        log.info("Authentication successful for email: {}", userInformation.getEmail());
         return AuthenticationResponse.builder()
                 .token(accessToken)
-                .email(firebaseToken.getEmail())
+                .email(userInformation.getEmail())
                 .role(userInformation.getRole())
                 .build();
     }
