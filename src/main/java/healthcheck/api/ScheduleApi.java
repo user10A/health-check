@@ -95,11 +95,10 @@ public class ScheduleApi {
     @Operation(summary = "Search schedules by keyword")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ResponseToGetSchedules>> getScheduleBySearch(
-            @RequestParam String word,
-            @RequestParam LocalDate start,
-            @RequestParam LocalDate end) {
+            @RequestParam String word
+    ) {
         try {
-            List<ResponseToGetSchedules> schedules = scheduleService.getScheduleBySearch(word,start,end);
+            List<ResponseToGetSchedules> schedules = scheduleService.getScheduleBySearch(word);
             return new ResponseEntity<>(schedules, HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

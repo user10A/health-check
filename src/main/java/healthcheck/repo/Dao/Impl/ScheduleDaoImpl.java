@@ -90,7 +90,9 @@ public class ScheduleDaoImpl implements ScheduleDao {
 
 
     @Override
-    public List<ResponseToGetSchedules> getScheduleBySearch(String word, LocalDate startDate, LocalDate endDate) {
+    public List<ResponseToGetSchedules> getScheduleBySearch(String word) {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = scheduleRepo.getByEndDateWorkSchedule();
         String sql =
                 """
                 SELECT
