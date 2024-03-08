@@ -18,7 +18,7 @@ public interface ScheduleService {
     SimpleResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots);
     List<ResponseToGetSchedules> getAllSchedules();
     List<ResponseToGetSchedules> getScheduleByDate(LocalDate startDate, LocalDate endDate);
-    List<ResponseToGetSchedules> getScheduleBySearch(String word,LocalDate startDate, LocalDate endDate);
+    List<ResponseToGetSchedules> getScheduleBySearch(String word);
     List<Schedule> exportCustomerToExcel(HttpServletResponse response) throws IOException;
     SimpleResponse savePatternTimeSheet(PatternTimeSheetRequest request);
     SimpleResponse deleteTimeSheetByDoctorIdAndDate(Long doctorId, LocalDate date, List<TimeSheetDeleteRequest> request);

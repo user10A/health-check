@@ -183,8 +183,8 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public List<ResponseToGetSchedules> getScheduleBySearch(String word,LocalDate startDate, LocalDate endDate) {
-        return scheduleDao.getScheduleBySearch(word,startDate,endDate);
+    public List<ResponseToGetSchedules> getScheduleBySearch(String word) {
+        return scheduleDao.getScheduleBySearch(word);
     }
 
     private void generateTimeSheets(LocalDate currentDate, LocalDate endDate, Map<DaysOfRepetition, Boolean> days,
