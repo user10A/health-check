@@ -8,6 +8,7 @@ import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
+import healthcheck.excel.ExcelExportUtils;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
 import healthcheck.service.ScheduleService;
@@ -109,12 +110,15 @@ public class ScheduleApi {
     @Operation(summary = "export schedule to excel")
     @PostAuthorize("hasAuthority('ADMIN')")
     public void exportToExcel(HttpServletResponse response) throws IOException {
-        response.setContentType("application/octet-stream");
+        List<ResponseToGetSchedules> schedules = scheduleService.getAllSchedules();
+        ExcelExportUtils exportUtils = new ExcelExportUtils(schedules);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=Doctors Schedule.xlsx";
+        String headerValue = "attachment; filename=DoctorsSchedule.xlsx";
         response.setHeader(headerKey, headerValue);
-        scheduleService.exportCustomerToExcel(response);
+        exportUtils.exportDataToExcel(response);
     }
+
 
     @PostMapping("/save-pattern-time-sheet")
     @Operation(summary = "Save Pattern Time Sheet")
