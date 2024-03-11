@@ -13,6 +13,7 @@ import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
 import healthcheck.excel.ExcelExportUtils;
+import healthcheck.excel.ExcelExportUtilsImpl;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.BadCredentialsException;
 import healthcheck.exceptions.DataUpdateException;
@@ -237,7 +238,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     public ExcelExportUtils exportCustomerToExcel(HttpServletResponse response) throws IOException {
         List<ResponseToGetSchedules> schedules=scheduleDao.getAllSchedules();
-        ExcelExportUtils exportUtils = new ExcelExportUtils(schedules);
+        ExcelExportUtilsImpl exportUtils = new ExcelExportUtilsImpl(schedules);
         return exportUtils;
     }
 
