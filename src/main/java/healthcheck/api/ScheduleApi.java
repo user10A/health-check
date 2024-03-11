@@ -9,6 +9,7 @@ import healthcheck.entities.Doctor;
 import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
 import healthcheck.excel.ExcelExportUtils;
+import healthcheck.excel.ExcelExportUtilsImpl;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
 import healthcheck.service.ScheduleService;
@@ -111,7 +112,7 @@ public class ScheduleApi {
     @PostAuthorize("hasAuthority('ADMIN')")
     public void exportToExcel(HttpServletResponse response) throws IOException {
         List<ResponseToGetSchedules> schedules = scheduleService.getAllSchedules();
-        ExcelExportUtils exportUtils = new ExcelExportUtils(schedules);
+        ExcelExportUtilsImpl exportUtils = new ExcelExportUtilsImpl(schedules);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String headerKey = "Content-Disposition";
         String headerValue = "attachment; filename=DoctorsSchedule.xlsx";
