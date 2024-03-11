@@ -235,11 +235,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         return currentTime.isBefore(startBreakTime) || currentTime.isAfter(endBreakTime);
     }
 
-    public List<Schedule> exportCustomerToExcel(HttpServletResponse response) throws IOException {
-        List<Schedule> schedules = scheduleRepo.findAll();
+    public ExcelExportUtils exportCustomerToExcel(HttpServletResponse response) throws IOException {
+        List<ResponseToGetSchedules> schedules=scheduleDao.getAllSchedules();
         ExcelExportUtils exportUtils = new ExcelExportUtils(schedules);
-        exportUtils.exportDataToExcel(response);
-        return schedules;
+        return exportUtils;
     }
 
     @Override

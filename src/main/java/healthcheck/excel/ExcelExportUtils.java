@@ -1,5 +1,7 @@
 package healthcheck.excel;
 
+import healthcheck.dto.Schedule.ResponseToGetSchedules;
+import healthcheck.dto.Schedule.ScheduleDate;
 import healthcheck.entities.Schedule;
 import healthcheck.entities.TimeSheet;
 import jakarta.servlet.ServletOutputStream;
@@ -12,16 +14,18 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExcelExportUtils {
     private XSSFWorkbook workbook;
     private XSSFSheet sheet;
-    private List<Schedule> scheduleList;
+    private List<ResponseToGetSchedules> schedules;
 
-    public ExcelExportUtils(List<Schedule> customerList) {
-        this.scheduleList = customerList;
+    public ExcelExportUtils(List<ResponseToGetSchedules> customerList) {
+        this.schedules = customerList;
         workbook = new XSSFWorkbook();
     }
 
@@ -48,6 +52,8 @@ public class ExcelExportUtils {
     private void createHeaderRow() {
         sheet = workbook.createSheet("Doctor schedule");
         Row row = sheet.createRow(0);
+        int rowIndex = 2; // Start row index
+
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setBold(true);
@@ -63,14 +69,11 @@ public class ExcelExportUtils {
         font.setFontHeight(16);
         style.setFont(font);
         createCell(row, 0, "ID", style);
-        createCell(row, 1, "First Name", style);
-        createCell(row, 2, "Last Name", style);
-        createCell(row, 3, "image", style);
-        createCell(row, 4, "position", style);
+        createCell(row, 1, "Full Name", style);
+        createCell(row, 2, "position", style);
+        createCell(row, 3, "date ", style);
+        createCell(row, 4, "time sheet ", style);
         createCell(row, 5, "day of week", style);
-        createCell(row, 6, "date of consultation", style);
-        createCell(row, 7, "start time of consultation", style);
-        createCell(row, 8, "end time of consultation", style);
     }
 
     private void writeCustomerData() {
@@ -80,22 +83,20 @@ public class ExcelExportUtils {
         font.setFontHeight(14);
         style.setFont(font);
 
-
-        for (Schedule schedule : scheduleList) {
+        for (ResponseToGetSchedules schedule : schedules) {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
             createCell(row, columnCount++, schedule.getId(), style);
-            createCell(row, columnCount++, schedule.getDoctor().getFirstName(), style);
-            createCell(row, columnCount++, schedule.getDoctor().getLastName(), style);
-            createCell(row, columnCount++, schedule.getDoctor().getImage(), style);
-            createCell(row, columnCount++, schedule.getDoctor().getPosition(), style);
-            createCell(row, columnCount++, schedule.getDayOfWeek(), style);
-            for (TimeSheet timeSheet : schedule.getTimeSheets()) {
+            createCell(row, columnCount++, schedule.getSurname(), style);
+            createCell(row, columnCount++, schedule.getPosition(), style);
+            for (ScheduleDate timeSheet : schedule.getDates()) {
                 createCell(row, columnCount++, timeSheet.getDateOfConsultation(), style);
                 createCell(row, columnCount++, timeSheet.getStartTimeOfConsultation(), style);
-                createCell(row, columnCount++, timeSheet.getEndTimeOfConsultation(), style);
+                createCell(row, columnCount++, timeSheet.getDayOfWeek(), style);
+
 
             }
+
         }
     }
 
