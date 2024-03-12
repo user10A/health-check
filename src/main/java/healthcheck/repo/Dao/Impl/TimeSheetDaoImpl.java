@@ -25,11 +25,12 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
         LocalDate end = start.plusDays(7);
         LocalTime startTime = LocalTime.now();
         String sql =
-                """
+        """
         SELECT
             doc.id AS doctor_id,
             doc.image AS image,
             CONCAT(doc.first_name, ' ', doc.last_name) AS doctor_full_name,
+            d.facility AS facility,
             t.date_of_consultation AS date_of_consultation,
             STRING_AGG(t.start_time_of_consultation::TEXT, ', ' ORDER BY t.start_time_of_consultation) AS start_times
         FROM
@@ -53,6 +54,7 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
                     .doctorId(rs.getLong("doctor_id"))
                     .imageDoctor(rs.getString("image"))
                     .doctorFullName(rs.getString("doctor_full_name"))
+                    .department(rs.getString("facility"))
                     .dayOfWeek(getDayOfWeek(rs.getDate("date_of_consultation").toLocalDate()).name())
                     .dateOfConsultation(String.valueOf(rs.getDate("date_of_consultation").toLocalDate()))
                     .startTimeOfConsultation(Arrays.asList(rs.getString("start_times").split(", ")))
@@ -134,6 +136,7 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
             doc.id AS doctor_id,
             doc.image AS image,
             CONCAT(doc.first_name, ' ', doc.last_name) AS doctor_full_name,
+            d.facility AS facility,
             t.date_of_consultation AS date_of_consultation,
             STRING_AGG(t.start_time_of_consultation::TEXT, ', ' ORDER BY t.start_time_of_consultation) AS start_times
         FROM
@@ -157,6 +160,7 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
                         .doctorId(rs.getLong("doctor_id"))
                         .imageDoctor(rs.getString("image"))
                         .doctorFullName(rs.getString("doctor_full_name"))
+                        .department(rs.getString("facility"))
                         .dayOfWeek(getDayOfWeek(rs.getDate("date_of_consultation").toLocalDate()).name())
                         .dateOfConsultation(String.valueOf(rs.getDate("date_of_consultation").toLocalDate()))
                         .startTimeOfConsultation(Arrays.asList(rs.getString("start_times").split(", ")))
