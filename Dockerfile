@@ -9,11 +9,6 @@ FROM openjdk:17 as build
 WORKDIR /app
 COPY --from=wrapper /app .
 RUN chmod +x mvnw
-
-# Install libfreetype
-RUN apt-get update && apt-get install -y libfreetype6
-
-# Build the application
 RUN ./mvnw clean package -DskipTests
 
 # Third stage: Runtime stage
