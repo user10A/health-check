@@ -5,7 +5,7 @@ COPY . ./
 RUN mvn -N io.takari:maven:0.7.7:wrapper -Dmaven=3.8.4
 
 # Second stage: Build stage
-FROM openjdk:17 as build
+FROM openjdk:17.0.2-jdk-slim as build
 WORKDIR /app
 COPY --from=wrapper /app .
 RUN chmod +x mvnw
