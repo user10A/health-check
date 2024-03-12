@@ -96,7 +96,7 @@ public class EmailServiceImpl implements EmailService {
     public SimpleResponse sendMassage(String email, String code, String subject) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
-                        String.format("Пациент с таким email: %s не существует!", email)));
+                        String.format("Пользователь с таким email: %s не существует!", email)));
         User user = userAccount.getUser();
         Context context = new Context();
         context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
