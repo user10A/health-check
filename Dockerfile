@@ -1,6 +1,7 @@
 # First stage: Generate Maven wrapper
 FROM maven:3.8.4 as wrapper
 WORKDIR /app
+RUN apk add --no-cache fontconfig ttf-dejavu 
 COPY . ./
 RUN mvn -N io.takari:maven:0.7.7:wrapper -Dmaven=3.8.4
 
