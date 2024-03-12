@@ -40,7 +40,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -240,6 +239,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         List<ResponseToGetSchedules> schedules=scheduleDao.getAllSchedules();
         ExcelExportUtilsImpl exportUtils = new ExcelExportUtilsImpl(schedules);
         return exportUtils;
+
     }
 
     @Override

@@ -4,6 +4,7 @@ import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleDate;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -15,6 +16,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
+
+@Slf4j
 @Service
 public class ExcelExportUtilsImpl implements ExcelExportUtils{
 
@@ -43,9 +46,9 @@ public class ExcelExportUtilsImpl implements ExcelExportUtils{
             } else {
                 cell.setCellValue(value.toString());
             }
-
             cell.setCellStyle(style);
         } catch (Exception e) {
+            log.info("1");
             e.printStackTrace();
             // throw new RuntimeException("Error occurred while creating cell", e);
         }
@@ -78,7 +81,10 @@ public class ExcelExportUtilsImpl implements ExcelExportUtils{
             createCell(row, 3, "date ", style);
             createCell(row, 4, "time sheet ", style);
             createCell(row, 5, "day of week", style);
+
         } catch (Exception e) {
+            log.info("2");
+
             // Handle the exception, log it or re-throw it if necessary
             e.printStackTrace();
             // throw new RuntimeException("Error occurred while creating header row", e);
@@ -107,6 +113,7 @@ public class ExcelExportUtilsImpl implements ExcelExportUtils{
                 }
             }
         } catch (Exception e) {
+            log.info("3");
             // Handle the exception, log it or re-throw it if necessary
             e.printStackTrace();
             // throw new RuntimeException("Error occurred while writing customer data", e);
@@ -123,6 +130,8 @@ public class ExcelExportUtilsImpl implements ExcelExportUtils{
             workbook.close();
             outputStream.close();
         } catch (IOException e) {
+            log.info("4");
+
             // Handle the exception, log it or re-throw it if necessary
             e.printStackTrace();
             throw e;
