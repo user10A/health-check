@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/schedule")
@@ -118,6 +119,9 @@ public class ScheduleApi {
         String headerValue = "attachment; filename=DoctorsSchedule.xlsx";
         response.setHeader(headerKey, headerValue);
         exportUtils.exportDataToExcel(response);
+        log.info("успешно");
+        scheduleService.exportCustomerToExcel(response);
+
     }
 
 
