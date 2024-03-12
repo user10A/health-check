@@ -1,7 +1,8 @@
 # First stage: Generate Maven wrapper
 FROM maven:3.8.4 as wrapper
 WORKDIR /app
-RUN apk add --no-cache fontconfig ttf-dejavu 
+RUN apt-get update && apt-get install -y fontconfig ttf-dejavu  # Using apt-get to install fontconfig and ttf-dejavu
+
 COPY . ./
 RUN mvn -N io.takari:maven:0.7.7:wrapper -Dmaven=3.8.4
 
