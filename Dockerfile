@@ -9,6 +9,11 @@ FROM openjdk:17 as build
 WORKDIR /app
 COPY --from=wrapper /app .
 RUN chmod +x mvnw
+
+# Install libfreetype
+RUN apt-get update && apt-get install -y libfreetype6
+
+# Build the application
 RUN ./mvnw clean package -DskipTests
 
 # Third stage: Runtime stage
@@ -17,4 +22,3 @@ WORKDIR /app
 COPY --from=build /app/target/health-check-java11-0.0.1-SNAPSHOT.jar .
 EXPOSE 2024
 CMD ["java", "-jar", "health-check-java11-0.0.1-SNAPSHOT.jar"]
-
