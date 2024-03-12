@@ -1,7 +1,7 @@
 INSERT INTO user_account (id, email, password, role)
 VALUES
     (0,'admin@gmail.com','$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K','ADMIN'),
-    (1, 'mia.brown@gmail.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
+    (1, 'tunukzhumabekova07@gmail.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (2, 'john.doe@gmail.com',  '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (3, 'alice.smith@gmail.com','$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (4, 'charlie.brown@gmail.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
