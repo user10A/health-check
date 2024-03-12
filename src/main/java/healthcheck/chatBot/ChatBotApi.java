@@ -19,7 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +38,6 @@ public class ChatBotApi {
     private final DoctorRepo doctorRepository;
     private final DepartmentRepo departmentRepo;
     private boolean chatStarted = false;
-    private String selectedDisease = "";
     private final List<String> diseaseTypes = new ArrayList<>();
     private int incorrectQueryCount = 0;
     private long blockTimestamp = 0;
@@ -79,7 +81,7 @@ public class ChatBotApi {
 
     @GetMapping("/chat-api")
     @ResponseBody
-    public String postChat(@RequestParam("message") String message, HttpSession session) {
+    public Object postChat(@RequestParam("message") String message, HttpSession session) {
         if (blockTimestamp > System.currentTimeMillis()) {
             return "Вы временно заблокированы. Пожалуйста, подождите 10 секунд, прежде чем отправлять новый запрос.";
         }
@@ -90,8 +92,9 @@ public class ChatBotApi {
                 chatStarted = true;
             }
 
+            String selectedDisease = (String) session.getAttribute("selectedDisease");
+
             if ("симптомы".equalsIgnoreCase(message.trim())) {
-                String selectedDisease = (String) session.getAttribute("selectedDisease");
                 if (selectedDisease == null || selectedDisease.isEmpty()) {
                     session.setAttribute("collectingSymptoms", true);
                     return "Пожалуйста, опишите ваши симптомы.";
@@ -106,36 +109,19 @@ public class ChatBotApi {
                 return diagnoseAndRecommendField(message);
             }
 
-            if (selectedDisease.isEmpty()) {
-                if (diseaseTypes.contains(message)) {
-                    selectedDisease = message;
-                    session.setAttribute("selectedDisease", selectedDisease);
-                } else {
-                    return "Выберите один из следующих типов направления: " + String.join(", ", diseaseTypes);
-                }
-            } else if ("докторс".equalsIgnoreCase(message.trim())) {
-                String selectedDiseaseFromSession = (String) session.getAttribute("selectedDisease");
-                if (selectedDiseaseFromSession != null && !selectedDiseaseFromSession.isEmpty()) {
-                    return getDoctorsInfo(selectedDiseaseFromSession);
-                } else {
-                    return "Пожалуйста, сначала выберите медицинское направление.";
-                }
-            }
-
-            if (selectedDisease.isEmpty()) {
-                if (diseaseTypes.contains(message)) {
-                    selectedDisease = message;
-                    session.setAttribute("prompt", "Выберите тип болезни");
-                    String query = sendOpenAiRequest("Напиши какой-то интересный и в то же время " +
-                            "позитивный факт, связанный с этим направлением медицины: " + message);
-                    return "А вы знали что: " + query + "Вы выбрали " + selectedDisease + ". Что вы хотите узнать о " + selectedDisease + "?";
-                } else {
-                    return "Выберите один из следующих типов направления: " + String.join(", ", diseaseTypes);
-                }
-            } else if (message.equalsIgnoreCase("menu")) {
-                selectedDisease = "";
+            if ("menu".equalsIgnoreCase(message.trim())) {
+                session.removeAttribute("selectedDisease");
                 session.removeAttribute("prompt");
                 return "Выберите один из следующих типов направления: " + String.join(", ", diseaseTypes);
+            }
+
+            if (selectedDisease == null || selectedDisease.isEmpty()) {
+                if (diseaseTypes.contains(message)) {
+                    session.setAttribute("selectedDisease", message);
+                    return "Вы выбрали " + message + ". Что вы хотите узнать о " + message + "?";
+                } else {
+                    return "Выберите один из следующих типов направления: " + String.join(", ", diseaseTypes);
+                }
             } else {
                 return processDiseaseKeywords(selectedDisease, message);
             }
@@ -145,48 +131,68 @@ public class ChatBotApi {
     }
 
     private String processOtherKeywords(@NotNull String serviceType, String message) {
-        String query = switch (serviceType.toLowerCase()) {
-            case "анестезиология" ->
-                    "Этот запрос должен касаться только медицинской анестезиологии или любых вопросов, связанных с ней. Если он не относится к медицине в области анестезиологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "терапия" ->
-                    "Этот запрос должен быть в рамках только медицинской терапии или любых вопросов, связанных с ней. Если он не относится к медицине в области терапии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "ортопедия" ->
-                    "Этот запрос должен быть в рамках только медицинской ортопедии или любых вопросов, связанных с ней. Если он не относится к медицине в области ортопедии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "урология" ->
-                    "Этот запрос должен быть в рамках только медицинской урологии или любых вопросов, связанных с ней. Если он не относится к медицине в области урологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "вакцинация" ->
-                    "Этот запрос должен быть в рамках только медицинской вакцинации или любых вопросов, связанных с ней. Если он не относится к медицине в области вакцинации, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "оториноларингология" ->
-                    "Этот запрос должен быть в рамках только медицинской оториноларингологии или любых вопросов, связанных с ней. Если он не относится к медицине в области оториноларингологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "флебология" ->
-                    "Этот запрос должен быть в рамках только медицинской флебологии или любых вопросов, связанных с ней. Если он не относится к медицине в области флебологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "гинекология" ->
-                    "Этот запрос должен быть в рамках только медицинской гинекологии или любых вопросов, связанных с ней. Если он не относится к медицине в области гинекологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "офтальмология" ->
-                    "Этот запрос должен быть в рамках только медицинской офтальмологии или любых вопросов, связанных с ней. Если он не относится к медицине в области офтальмологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "эндокринология" ->
-                    "Этот запрос должен быть в рамках только медицинской эндокринологии или любых вопросов, связанных с ней. Если он не относится к медицине в области эндокринологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "дерматология" ->
-                    "Этот запрос должен быть в рамках только медицинской дерматологии или любых вопросов, связанных с ней. Если он не относится к медицине в области дерматологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "проктология" ->
-                    "Этот запрос должен быть в рамках только медицинской проктологии или любых вопросов, связанных с ней. Если он не относится к медицине в области проктологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "физиотерапия" ->
-                    "Этот запрос должен быть в рамках только медицинской физиотерапии или любых вопросов, связанных с ней. Если он не относится к медицине в области физиотерапии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "кардиология" ->
-                    "Этот запрос должен быть в рамках только медицинской кардиологии или любых вопросов, связанных с ней. Если он не относится к медицине в области кардиологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "психотерапия" ->
-                    "Этот запрос должен быть в рамках только медицинской психотерапии связанных с ней. Если он не относится к медицине в области психотерапии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "невропатия" ->
-                    "Этот запрос должен быть в рамках только медицинской невропатии или любых вопросов, связанных с ней. Если он не относится к медицине в области невропатии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "пульмонология" ->
-                    "Этот запрос должен быть в рамках только медицинской пульмонологии или любых вопросов, связанных с ней. Если он не относится к медицине в области пульмонологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "ревматология" ->
-                    "Этот запрос должен быть в рамках только медицинской ревматологии или любых вопросов, связанных с ней. Если он не относится к медицине в области ревматологии, тогда выведите слово 'Error'. Вопрос: " + message;
-            case "нейрохирургия" ->
-                    "Этот запрос должен быть в рамках только медицинской нейрохирургии или любых вопросов, связанных с ней. Если он не относится к медицине в области нейрохирургии, тогда выведите слово 'Error'. Вопрос: " + message;
-            default -> "Error";
-        };
+        String messageUpdate = message + "это вопрос в - " + serviceType.toLowerCase();
+        String query = "Этот запрос должен касаться только медицинской " + serviceType.toLowerCase() + " или любых вопросов, связанных с ней. Если он не относится к медицине в области " + serviceType.toLowerCase() + ", тогда выведите слово 'Error'. Вопрос: " + messageUpdate;
         return validateAndProcessQuery(sendOpenAiRequest(query));
+    }
+
+    private String buildMedicineQueryC(String serviceType) {
+        String formattedServiceType = serviceType.toLowerCase();
+        String query = String.format("Объясни какие симптомы могут быть у этого направления: %s", formattedServiceType);
+        return sendOpenAiRequest(query);
+    }
+
+    private String buildMedicineQueryL(String serviceType) {
+        String formattedServiceType = serviceType.toLowerCase();
+        String query = String.format("Порекомендуй какие лекарства могут помочь с проблемами связанные в этом направлении" +
+                ". Но предупреди, что это просто рекомендация: %s", formattedServiceType);
+        return sendOpenAiRequest(query);
+    }
+
+    private String getDoctorsInfo(String departmentName) {
+        Department department = departmentRepo.findByFacility(Facility.valueOf(departmentName));
+        List<Doctor> doctors = doctorRepository.getDoctorsByDepartment(department);
+        if (doctors.isEmpty()) {
+            return "В данный момент нет доступных докторов в отделении " + departmentName;
+        } else {
+            return doctors.stream()
+                    .map(Doctor::getFullNameDoctor)
+                    .collect(Collectors.joining(", ", "Доступные доктора в отделении " + departmentName + ": ", "."));
+        }
+    }
+
+    private List<String> getDoctorsInfoTimeSheet(String departmentName) {
+        Department department = departmentRepo.findByFacility(Facility.valueOf(departmentName));
+        LocalDate currentDate = LocalDate.now();
+        LocalDate currentDateRestrictions = currentDate.plusWeeks(1);
+
+        return doctorRepository.getDoctorsByDepartment(department).stream()
+                .flatMap(doctor -> doctor.getSchedule().getTimeSheets().stream()
+                        .filter(timeSheet -> timeSheet.getDateOfConsultation().isAfter(currentDate)
+                                && timeSheet.getDateOfConsultation().isBefore(currentDateRestrictions))
+                        .map(timeSheet -> {
+                            String formattedDate = timeSheet.getDateOfConsultation().format(DateTimeFormatter.ofPattern("dd.MM"));
+                            String timeSlotInfo = formattedDate + " - " + timeSheet.getStartTimeOfConsultation();
+                            if (doctor.getSchedule().getTimeSheets().indexOf(timeSheet) == 0) {
+                                return doctor.getFullNameDoctor() + ": " + timeSlotInfo;
+                            } else {
+                                return timeSlotInfo;
+                            }
+                        })
+                        .toList()
+                        .stream())
+                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ?
+                        Collections.singletonList("В данный момент нет свободных записей на ближайшею неделю") : list));
+    }
+
+    private Object processDiseaseKeywords(String diseaseType, @NotNull String message) {
+        return switch (message.toLowerCase()) {
+            case "симптомы" -> buildMedicineQueryC(diseaseType);
+            case "лекарства" -> buildMedicineQueryL(diseaseType);
+            case "доктора" -> getDoctorsInfo(diseaseType);
+            case "запись" -> getDoctorsInfoTimeSheet(diseaseType);
+            default -> processOtherKeywords(diseaseType, message);
+        };
     }
 
     private String sendOpenAiRequest(String userMessage) {
@@ -223,19 +229,6 @@ public class ChatBotApi {
         return query;
     }
 
-    private String buildMedicineQuery(String serviceType) {
-        String formattedServiceType = serviceType.toLowerCase();
-        String query = String.format("Объясни какие симптомы могут быть у этого направления: %s", formattedServiceType);
-        return sendOpenAiRequest(query);
-    }
-
-    private String processDiseaseKeywords(String diseaseType, @NotNull String message) {
-        if (message.equalsIgnoreCase("симптомы")) {
-            return buildMedicineQuery(diseaseType);
-        }
-        return processOtherKeywords(diseaseType, message);
-    }
-
     private String diagnoseAndRecommendField(String symptoms) {
         String diagnosis = sendOpenAiRequest("Диагностика заболевания на основе следующих симптомов" + symptoms +
                 " (пусть симптомы будут касательно только медицины) На основе этих симптомов порекомендуй пойти к одному из специалистов в этом списке (" +
@@ -259,26 +252,6 @@ public class ChatBotApi {
                 "Пульмонология\n" +
                 "Ревматология\n" +
                 "Нейрохирургия)");
-        String recommendedField = findClosestMatch(diagnosis);
-        return "Ваша диагностика: " + diagnosis + " На основе диагноза мы рекомендуем следующее медицинское направление: " + recommendedField;
-    }
-
-    private String findClosestMatch(String diagnosis) {
-        return diseaseTypes.stream()
-                .filter(diagnosis::contains)
-                .findFirst()
-                .orElse("неопределенное");
-    }
-
-    private String getDoctorsInfo(String departmentName) {
-        Department department = departmentRepo.findByFacility(Facility.valueOf(departmentName));
-        List<Doctor> doctors = doctorRepository.getDoctorsByDepartment(department);
-        if (doctors.isEmpty()) {
-            return "В данный момент нет доступных докторов в отделении " + departmentName;
-        } else {
-            return doctors.stream()
-                    .map(Doctor::getFullNameDoctor)
-                    .collect(Collectors.joining(", ", "Доступные доктора в отделении " + departmentName + ": ", "."));
-        }
+        return "Ваша диагностика: " + diagnosis;
     }
 }
