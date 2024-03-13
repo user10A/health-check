@@ -146,9 +146,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheet.setAvailable(true);
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return new SimpleResponse(String.format("Пользователь %d успешно записан",email ," Verification code s%",appointment.getAppointmentDate()), HttpStatus.OK);
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        String response="Appoinment id: "+appointment.getId();
+        String message=" Verification code: "+appointment.getVerificationCode();
+        return new SimpleResponse(response+message, HttpStatus.OK);
     }
 
     @Override
@@ -193,9 +195,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheet.setAvailable(true);
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return new SimpleResponse(String.format("Пользователь %d успешно записан",email ," Verification code s%",appointment.getAppointmentDate()), HttpStatus.OK);
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        String response="Appoinment id: "+appointment.getId();
+        String message=" Verification code: "+appointment.getVerificationCode();
+        return new SimpleResponse(response+message, HttpStatus.OK);
     }
     public String generateVerificationCode() {
         Random random = new Random();
