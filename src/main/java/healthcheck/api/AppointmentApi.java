@@ -1,14 +1,9 @@
 package healthcheck.api;
 
-import healthcheck.dto.Appointment.AppointmentScheduleTimeSheetResponse;
-import healthcheck.dto.Appointment.OnlineAppointmentResponse;
-import healthcheck.dto.Appointment.AppointmentRequest;
-import healthcheck.dto.Appointment.AppointmentProcessedRequest;
-import healthcheck.dto.Appointment.FindDoctorForAppointmentResponse;
+import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.TimeSheet.TimeSheetResponse;
 import healthcheck.enums.Facility;
-import healthcheck.dto.Appointment.AppointmentResponse;
 import healthcheck.service.AppointmentService;
 import healthcheck.service.TimeSheetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,20 +49,20 @@ public class AppointmentApi {
     @PostMapping("/add")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "add appointment", description = "Endpoint to add appointment.")
-    public OnlineAppointmentResponse addAppointment(@RequestParam Facility facility, @Valid @RequestBody AppointmentRequest request) throws MessagingException, IOException {
+    public SimpleResponse addAppointment(@RequestParam Facility facility, @Valid @RequestBody AppointmentRequest request) throws MessagingException, IOException {
         return appointmentService.addAppointment(facility,request);
     }
     @PostMapping("/addByDoctorId")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "add appointment", description = "Endpoint to add appointment.")
-    public OnlineAppointmentResponse addAppointmentByDoctorId(@RequestBody AppointmentRequest request) throws MessagingException, IOException {
+    public SimpleResponse addAppointmentByDoctorId(@RequestBody AppointmentRequest request) throws MessagingException, IOException {
         return appointmentService.addAppointmentByDoctorId(request);
     }
 
     @PatchMapping()
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "check verification code", description = "Endpoint checking code appointment.")
-    public SimpleResponse checkVerificationCode(@RequestParam Long appointmentId, @RequestParam String code) {
+    public AppointmentResponseById checkVerificationCode(@RequestParam Long appointmentId, @RequestParam String code) {
         SimpleResponse result=appointmentService.appointmentConfirmationEmail(appointmentId);
         log.info(String.valueOf(result));
         return appointmentService.verifyAppointment(appointmentId,code);
