@@ -8,7 +8,6 @@ public class HealthCheckJava11Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(HealthCheckJava11Application.class, args);
-		System.setProperty("java.awt.headless", "true");
 	}
 
 }
