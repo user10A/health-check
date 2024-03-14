@@ -1,12 +1,16 @@
 package healthcheck.exceptions.handler;
 
 import healthcheck.exceptions.*;
+import healthcheck.local.ExceptionService;
 import jakarta.validation.constraints.NotNull;
+//import localization1.ExceptionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
@@ -17,6 +21,21 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class AppExceptionHandler {
+    private final ExceptionService exceptionService;
+
+    @Autowired
+    public AppExceptionHandler(ExceptionService exceptionService) {
+        this.exceptionService = exceptionService;
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ResponseEntity<String> handleResourceNotFoundException(NotFoundException ex) {
+        String errorMessage = exceptionService.getErrorMessage("error.not_found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -31,15 +50,15 @@ public class AppExceptionHandler {
         return ResponseEntity.badRequest().body(errorMessages);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionResponse notFoundException(NotFoundException e) {
-        return ExceptionResponse.builder()
-                .httpStatus(HttpStatus.NOT_FOUND)
-                .exceptionClassName(e.getClass().getSimpleName())
-                .message(e.getMessage())
-                .build();
-    }
+//    @ExceptionHandler(NotFoundException.class)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public ExceptionResponse notFoundException(NotFoundException e) {
+//        return ExceptionResponse.builder()
+//                .httpStatus(HttpStatus.NOT_FOUND)
+//                .exceptionClassName(e.getClass().getSimpleName())
+//                .message(e.getMessage())
+//                .build();
+//    }
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -51,15 +70,16 @@ public class AppExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(AlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionResponse alreadyExistsException(AlreadyExistsException e) {
-        return ExceptionResponse.builder()
-                .httpStatus(HttpStatus.CONFLICT)
-                .exceptionClassName(e.getClass().getSimpleName())
-                .message(e.getMessage())
-                .build();
-    }
+//    @ExceptionHandler(AlreadyExistsException.class)
+//    @ResponseStatus(HttpStatus.CONFLICT)
+//    public ExceptionResponse alreadyExistsException(AlreadyExistsException e) {
+//        String errorMessage = exceptionService.getErrorMessage("error.already_exist");
+//        return ExceptionResponse.builder()
+//                .httpStatus(HttpStatus.CONFLICT)
+//                .exceptionClassName(e.getClass().getSimpleName())
+//                .message(errorMessage)
+//                .build();
+//    }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -101,15 +121,15 @@ public class AppExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(IOException.class) // отправить класс
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionResponse handleNotFoundException(NotFoundException e) {
-        return ExceptionResponse.builder()
-                .httpStatus(HttpStatus.NOT_FOUND)
-                .exceptionClassName(e.getClass().getSimpleName())
-                .message(e.getMessage())
-                .build();
-    }
+//    @ExceptionHandler(IOException.class) // отправить класс
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public ExceptionResponse handleNotFoundException(NotFoundException e) {
+//        return ExceptionResponse.builder()
+//                .httpStatus(HttpStatus.NOT_FOUND)
+//                .exceptionClassName(e.getClass().getSimpleName())
+//                .message(e.getMessage())
+//                .build();
+//    }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
