@@ -20,4 +20,5 @@ public class TimeSheetResponse {
     String dateOfConsultation;
     String dayOfWeek;
     List<String> startTimeOfConsultation;
+
 }
