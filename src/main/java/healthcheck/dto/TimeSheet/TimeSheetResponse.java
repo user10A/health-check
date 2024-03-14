@@ -15,8 +15,10 @@ import java.util.List;
 public class TimeSheetResponse {
     Long doctorId;
     String imageDoctor;
+    String department;
     String doctorFullName;
     String dateOfConsultation;
     String dayOfWeek;
     List<String> startTimeOfConsultation;
+
 }
