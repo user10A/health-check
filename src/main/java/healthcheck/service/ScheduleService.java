@@ -7,9 +7,7 @@ import healthcheck.dto.Schedule.TimeSheetDeleteRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
-import healthcheck.excel.ExcelExportUtils;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,7 +17,6 @@ public interface ScheduleService {
     List<ResponseToGetSchedules> getAllSchedules();
     List<ResponseToGetSchedules> getScheduleByDate(LocalDate startDate, LocalDate endDate);
     List<ResponseToGetSchedules> getScheduleBySearch(String word);
-    ExcelExportUtils exportCustomerToExcel(HttpServletResponse response) throws IOException;
     SimpleResponse savePatternTimeSheet(PatternTimeSheetRequest request);
     SimpleResponse deleteTimeSheetByDoctorIdAndDate(Long doctorId, LocalDate date, List<TimeSheetDeleteRequest> request);
 }
