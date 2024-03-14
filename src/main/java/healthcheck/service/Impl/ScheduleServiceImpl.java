@@ -12,8 +12,6 @@ import healthcheck.entities.TimeSheet;
 import healthcheck.entities.additional.PatternTimeSheetRequest;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
-import healthcheck.excel.ExcelExportUtils;
-import healthcheck.excel.ExcelExportUtilsImpl;
 import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.BadCredentialsException;
 import healthcheck.exceptions.DataUpdateException;
@@ -24,7 +22,6 @@ import healthcheck.repo.DoctorRepo;
 import healthcheck.repo.ScheduleRepo;
 import healthcheck.repo.TimeSheetRepo;
 import healthcheck.service.ScheduleService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +32,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -233,13 +229,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private boolean isConsultationTime(LocalTime currentTime, LocalTime startBreakTime, LocalTime endBreakTime) {
         return currentTime.isBefore(startBreakTime) || currentTime.isAfter(endBreakTime);
-    }
-
-    public ExcelExportUtils exportCustomerToExcel(HttpServletResponse response) throws IOException {
-        List<ResponseToGetSchedules> schedules=scheduleDao.getAllSchedules();
-        ExcelExportUtilsImpl exportUtils = new ExcelExportUtilsImpl(schedules);
-        return exportUtils;
-
     }
 
     @Override
