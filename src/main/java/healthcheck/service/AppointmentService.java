@@ -7,6 +7,7 @@ import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 
+
 public interface AppointmentService {
     List<AppointmentResponse> getAllAppointment(String word);
     SimpleResponse addAppointment(Facility facility, AppointmentRequest request) throws MessagingException, IOException;

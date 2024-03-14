@@ -61,7 +61,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Запрос на получение всех приемов для слова: {}", word);
         return appointmentDao.getAllAppointment(word);
     }
-
     @Override
     public SimpleResponse appointmentConfirmationEmail(Long appointmentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
