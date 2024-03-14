@@ -7,11 +7,12 @@ import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 
+
 public interface AppointmentService {
     List<AppointmentResponse> getAllAppointment(String word);
-    OnlineAppointmentResponse addAppointment(Facility facility, AppointmentRequest request) throws MessagingException, IOException;
-    OnlineAppointmentResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException;
-    SimpleResponse verifyAppointment(Long appointmentId, String verificationCode);
+    SimpleResponse addAppointment(Facility facility, AppointmentRequest request) throws MessagingException, IOException;
+    SimpleResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException;
+    AppointmentResponseById verifyAppointment(Long appointmentId, String verificationCode);
     SimpleResponse deleteAppointment(Long id);
     FindDoctorForAppointmentResponse findByDoctorId(Long id);
     List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId);

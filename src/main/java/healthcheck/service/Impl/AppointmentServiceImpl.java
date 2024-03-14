@@ -1,11 +1,6 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Appointment.AppointmentResponse;
-import healthcheck.dto.Appointment.OnlineAppointmentResponse;
-import healthcheck.dto.Appointment.AppointmentRequest;
-import healthcheck.dto.Appointment.FindDoctorForAppointmentResponse;
-import healthcheck.dto.Appointment.AppointmentScheduleTimeSheetResponse;
-import healthcheck.dto.Appointment.AppointmentProcessedRequest;
+import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.email.EmailService;
 import healthcheck.entities.*;
@@ -66,7 +61,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Запрос на получение всех приемов для слова: {}", word);
         return appointmentDao.getAllAppointment(word);
     }
-
     @Override
     public SimpleResponse appointmentConfirmationEmail(Long appointmentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -109,7 +103,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     @Transactional
-    public OnlineAppointmentResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
+    public SimpleResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         log.info(email);
@@ -151,24 +145,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheet.setAvailable(true);
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return OnlineAppointmentResponse.builder()
-                .id(appointment.getId())
-                .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
-                .dateOfAppointment(dateOfConsultation)
-                .startTimeOfConsultation(startOfConsultation)
-                .endTimeOfConsultation(timeSheet.getEndTimeOfConsultation())
-                .imageDoctors(doctor.getImage())
-                .fullNameDoctors(doctor.getFullNameDoctor())
-                .facility(department.getFacility().name())
-                .verificationCode(appointment.getVerificationCode())
-                .build();
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        String response="Appoinment id: "+appointment.getId();
+        String message=" Verification code: "+appointment.getVerificationCode();
+        return new SimpleResponse(response+message, HttpStatus.OK);
     }
 
     @Override
     @Transactional
-    public OnlineAppointmentResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException {
+    public SimpleResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         log.info(email);
@@ -208,19 +194,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheet.setAvailable(true);
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return OnlineAppointmentResponse.builder()
-                .id(appointment.getId())
-                .dayOfWeek(getDayOfWeek(dateOfConsultation).name())
-                .dateOfAppointment(dateOfConsultation)
-                .startTimeOfConsultation(startOfConsultation)
-                .endTimeOfConsultation(timeSheet.getEndTimeOfConsultation())
-                .imageDoctors(doctor.getImage())
-                .fullNameDoctors(doctor.getFullNameDoctor())
-                .facility(department.getFacility().name())
-                .verificationCode(appointment.getVerificationCode())
-                .build();
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        String response="Appoinment id: "+appointment.getId();
+        String message=" Verification code: "+appointment.getVerificationCode();
+        return new SimpleResponse(response+message, HttpStatus.OK);
     }
     public String generateVerificationCode() {
         Random random = new Random();
@@ -232,16 +210,25 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public SimpleResponse verifyAppointment(Long appointmentId, String verificationCode) {
+    public AppointmentResponseById verifyAppointment(Long appointmentId, String verificationCode) {
         Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("not found "));
         String checkVerificationCode =appointment.getVerificationCode();
         if (checkVerificationCode.equals(verificationCode)) {
             appointment.setStatus(Status.FINISHED);
             appointment.setVerificationCode(null);
             appointmentRepo.save(appointment);
-            return new SimpleResponse("Пациент успешно записан", HttpStatus.OK);
+            TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(appointment.getDoctor().getId(),appointment.getAppointmentDate(),appointment.getAppointmentTime());
+            return  AppointmentResponseById.builder()
+                    .id(appointment.getId())
+                    .localDate(appointment.getAppointmentDate())
+                    .startTime(timeSheet.getStartTimeOfConsultation())
+                    .endTime(timeSheet.getEndTimeOfConsultation())
+                    .dayOfWeek(getDayOfWeek(appointment.getAppointmentDate()).name())
+                    .doctorFullName(appointment.getDoctor().getFullNameDoctor())
+                    .facility(appointment.getDepartment().getFacility().name())
+                    .build();
         } else {
-            return new SimpleResponse("Не правильный код регистрации",HttpStatus.CONFLICT);
+            return null;
         }
     }
 
