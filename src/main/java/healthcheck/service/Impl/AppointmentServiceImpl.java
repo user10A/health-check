@@ -58,7 +58,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DepartmentRepo departmentRepo;
     private final AppointmentDao appointmentDao;
     private final MessageSource messageSource;
-
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
         log.info("Запрос на получение всех приемов для слова: {}", word);

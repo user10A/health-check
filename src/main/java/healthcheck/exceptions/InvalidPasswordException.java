@@ -12,7 +12,6 @@ public class InvalidPasswordException extends RuntimeException {
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public InvalidPasswordException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;

@@ -12,7 +12,6 @@ public class AlreadyExistsException extends RuntimeException {
             this.messageCode = messageCode;
             this.args = args;
         }
-
         public AlreadyExistsException(String messageCode) {
             super(messageCode);
             this.messageCode = messageCode;

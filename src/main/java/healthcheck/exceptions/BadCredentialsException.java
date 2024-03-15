@@ -12,7 +12,6 @@ public class BadCredentialsException extends RuntimeException{
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public BadCredentialsException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;

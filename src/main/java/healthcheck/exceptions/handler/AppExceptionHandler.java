@@ -22,6 +22,7 @@ import java.util.List;
 @RestControllerAdvice
 @Slf4j
 public class AppExceptionHandler {
+
     @Autowired
     private MessageSource messageSource;
     @ExceptionHandler(MethodArgumentNotValidException.class)

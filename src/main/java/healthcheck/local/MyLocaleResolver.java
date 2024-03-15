@@ -32,6 +32,7 @@ public class MyLocaleResolver implements LocaleResolver{
 
     @Override
     public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+
         throw new UnsupportedOperationException(messageSource.getMessage("error.unsupported_operation_exception",null, LocaleContextHolder.getLocale()));
     }
 }

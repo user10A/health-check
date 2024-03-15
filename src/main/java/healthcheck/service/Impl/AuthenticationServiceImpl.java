@@ -38,7 +38,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserAccountRepo userAccountRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-
     @Override
     public AuthenticationResponse signUp(SignUpRequest request) {
         try {

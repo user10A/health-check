@@ -12,7 +12,6 @@ public class DataUpdateException extends RuntimeException {
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public DataUpdateException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;

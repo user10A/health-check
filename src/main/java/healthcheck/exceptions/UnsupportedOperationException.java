@@ -12,7 +12,6 @@ public class UnsupportedOperationException extends RuntimeException {
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public UnsupportedOperationException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;

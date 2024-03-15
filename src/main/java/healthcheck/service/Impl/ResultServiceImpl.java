@@ -38,7 +38,6 @@ public class ResultServiceImpl implements ResultService {
     private final EmailSenderService emailSenderService;
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
-
     @Override
     @Transactional
     public SimpleResponse saveResult(RequestSaveResult request) {

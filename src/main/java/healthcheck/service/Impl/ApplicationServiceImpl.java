@@ -31,14 +31,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepo applicationRepo;
     private final ApplicationDao applicationDao;
     private final MessageSource messageSource;
-//    Application.response=Заявка успешно отправлена!
-
-//    error.already_exist=Уже существует {0}
-//    error.not_found=Email : {0} не найден
-//    application.response=Заявка успешно отправлена!
-//    error.internal_server_error=Ошибка при выполнении операции
-//    alreadyExists.phoneNumber={0} Этот номер уже существует
-
     @Override
     @Transactional
     public SimpleResponse createApplication(ApplicationRequest applicationRequest) {

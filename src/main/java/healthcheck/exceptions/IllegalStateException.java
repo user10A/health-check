@@ -12,7 +12,6 @@ public class IllegalStateException extends RuntimeException {
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public IllegalStateException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;

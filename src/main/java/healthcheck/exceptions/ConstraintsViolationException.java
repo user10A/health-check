@@ -12,7 +12,6 @@ public class ConstraintsViolationException extends RuntimeException{
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public ConstraintsViolationException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;

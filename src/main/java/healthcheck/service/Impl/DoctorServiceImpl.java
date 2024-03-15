@@ -25,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DoctorServiceImpl implements DoctorService {
-
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
     private final DoctorDao doctorDao;

@@ -12,7 +12,6 @@ public class AuthenticationException extends RuntimeException {
         this.messageCode = messageCode;
         this.args = args;
     }
-
     public AuthenticationException(String messageCode) {
         super(messageCode);
         this.messageCode = messageCode;
