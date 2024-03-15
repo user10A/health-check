@@ -13,6 +13,8 @@ import healthcheck.repo.UserRepo;
 import healthcheck.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final UserAccountRepo userAccountRepo;
     private final PasswordEncoder passwordEncoder;
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
@@ -63,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
                 log.info("Профиль пользователя успешно изменен");
 
-                return SimpleResponse.builder().message("Успешно изменено!").httpStatus(HttpStatus.OK).build();
+                return SimpleResponse.builder().messageCode("Успешно изменено!").httpStatus(HttpStatus.OK).build();
             } else {
                 throw new DataUpdateException("Пользователь не найден");
             }
@@ -93,7 +96,7 @@ public class UserServiceImpl implements UserService {
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
             log.error(String.format("User with email :%s is not found !!!",email));
-            return new NotFoundException("User is not found !!!");
+            return new NotFoundException(messageSource.getMessage("error.email_not_found",new Object[]{email}, LocaleContextHolder.getLocale()));
         });
         return userDao.getAllAppointmentsOfUser(user.getId());
     }
@@ -145,7 +148,7 @@ public class UserServiceImpl implements UserService {
 
             log.info("Пароль пользователя успешно изменен");
 
-            return SimpleResponse.builder().message("Успешно изменен пароль!").httpStatus(HttpStatus.OK).build();
+            return SimpleResponse.builder().messageCode("Успешно изменен пароль!").httpStatus(HttpStatus.OK).build();
         } catch (DataUpdateException e) {
             log.error("Ошибка при изменении пароля пользователя", e);
             throw new DataUpdateException("Ошибка при изменении пароля пользователя");

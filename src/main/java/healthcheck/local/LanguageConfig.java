@@ -10,7 +10,7 @@ import java.util.Locale;
 public class LanguageConfig {
     public static final List<Locale> LOCALES = Arrays.asList(
             new Locale("en"),
-            new Locale("es"),
+            new Locale("ky"),
             new Locale("ru")
     );
 }

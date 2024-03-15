@@ -82,7 +82,7 @@ public class ResultServiceImpl implements ResultService {
         } catch (Exception e) {
             String errorMessage = "Ошибка при сохранении заявки: " + e.getMessage();
             log.error(errorMessage, e);
-            return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).message("Произошла ошибка.").build();
+            return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).messageCode("Произошла ошибка.").build();
         }
     }
 

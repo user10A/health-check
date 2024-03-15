@@ -55,7 +55,7 @@ public class DoctorServiceImpl implements DoctorService {
 
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
-                .message("Успешно сохранен!")
+                .messageCode("Успешно сохранен!")
                 .build();
     }
 
@@ -126,7 +126,7 @@ public class DoctorServiceImpl implements DoctorService {
                 new NotFoundException("Doctor не найден!"));
 
         doctorRepo.delete(doctor);
-        return SimpleResponse.builder().message("Doctor успешно удален").httpStatus(HttpStatus.OK).build();
+        return SimpleResponse.builder().messageCode("Doctor успешно удален").httpStatus(HttpStatus.OK).build();
     }
 
     @Override
@@ -136,7 +136,7 @@ public class DoctorServiceImpl implements DoctorService {
                         .orElseThrow(()-> new NotFoundException("Доктор c таким id :"+id+" не найден"));
         doctor.setActive(b);
         doctorRepo.save(doctor);
-        return SimpleResponse.builder().message("Статус Доктора успешно обновлен").httpStatus(HttpStatus.OK).build();
+        return SimpleResponse.builder().messageCode("Статус Доктора успешно обновлен").httpStatus(HttpStatus.OK).build();
     }
     // <-
 }

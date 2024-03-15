@@ -12,12 +12,13 @@ import org.springframework.http.HttpStatus;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleResponse {
   
-    private String message;
+    private String messageCode;
     private HttpStatus httpStatus;
+
 
     public SimpleResponse(HttpStatus httpStatus, String successMessage) {
         this.httpStatus=httpStatus;
-        this.message=successMessage;
+        this.messageCode=successMessage;
     }
 
 

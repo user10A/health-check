@@ -36,8 +36,7 @@ public class SecurityConfig {
                                         "/v3/api-docs/**",
                                         "/chat-bot/**",
                                         "/api/application/createApplication",
-                                        "/api/search/**",
-                                        "/api/language/change"
+                                        "/api/search/**"
                                 )
                                 .permitAll()
                                 .anyRequest()
