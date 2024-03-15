@@ -9,6 +9,7 @@ import java.time.LocalTime;
 @Builder
 public class AppointmentResponseById {
     private Long id;
+    private String doctorImage;
     private String dayOfWeek;
     private LocalDate localDate;
     private LocalTime startTime;
