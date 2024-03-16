@@ -147,9 +147,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
         emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
-        String response="Appoinment id: "+appointment.getId();
-        String message=" Verification code: "+appointment.getVerificationCode();
-        return new SimpleResponse(response+message, HttpStatus.OK);
+        return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
 
     @Override
@@ -196,9 +194,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
         emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
-        String response="Appoinment id: "+appointment.getId();
-        String message=" Verification code: "+appointment.getVerificationCode();
-        return new SimpleResponse(response+message, HttpStatus.OK);
+        return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
     public String generateVerificationCode() {
         Random random = new Random();
@@ -220,6 +216,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(appointment.getDoctor().getId(),appointment.getAppointmentDate(),appointment.getAppointmentTime());
             return  AppointmentResponseById.builder()
                     .id(appointment.getId())
+                    .doctorImage(appointment.getDoctor().getImage())
                     .localDate(appointment.getAppointmentDate())
                     .startTime(timeSheet.getStartTimeOfConsultation())
                     .endTime(timeSheet.getEndTimeOfConsultation())
