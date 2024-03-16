@@ -35,7 +35,6 @@ import java.util.List;
 @Tag(name = "Appointment api", description = "API's for appointments ")
 @Slf4j
 public class AppointmentApi {
-
     private final AppointmentService appointmentService;
     private final TimeSheetService timeSheetService;
 

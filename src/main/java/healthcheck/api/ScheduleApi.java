@@ -8,28 +8,18 @@ import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.dto.Schedule.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
-import healthcheck.excel.ExcelExportUtilsImpl;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
 import healthcheck.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PatchMapping;
-import java.io.IOException;
+import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 @Slf4j
@@ -106,23 +96,6 @@ public class ScheduleApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
-    @GetMapping("/export-to-excel")
-    @Operation(summary = "export schedule to excel")
-    @PostAuthorize("hasAuthority('ADMIN')")
-    public void exportToExcel(HttpServletResponse response) throws IOException {
-        List<ResponseToGetSchedules> schedules = scheduleService.getAllSchedules();
-        ExcelExportUtilsImpl exportUtils = new ExcelExportUtilsImpl(schedules);
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=DoctorsSchedule.xlsx";
-        response.setHeader(headerKey, headerValue);
-        exportUtils.exportDataToExcel(response);
-        log.info("успешно");
-        scheduleService.exportCustomerToExcel(response);
-
-    }
-
 
     @PostMapping("/save-pattern-time-sheet")
     @Operation(summary = "Save Pattern Time Sheet")

@@ -18,9 +18,6 @@ FROM openjdk:17.0.2-jdk-slim
 WORKDIR /app
 COPY --from=build /app/target/health-check-java11-0.0.1-SNAPSHOT.jar .
 
-# Ignore the error related to libfreetype.so.6
-ENV LD_LIBRARY_PATH=""
-
 EXPOSE 2024
 CMD ["java", "-jar", "health-check-java11-0.0.1-SNAPSHOT.jar"]
 
