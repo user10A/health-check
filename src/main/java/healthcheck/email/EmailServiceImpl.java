@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -122,7 +124,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public String getGreeting() {
-        LocalTime time = LocalTime.now();
+        ZoneId zoneId = ZoneId.of("Asia/Bishkek");
+        ZonedDateTime currentTime = ZonedDateTime.now(zoneId);
+        LocalTime time = currentTime.toLocalTime();
         String greeting;
         if (time.isBefore(LocalTime.NOON)) {
             greeting = "Доброе утро";
