@@ -46,7 +46,7 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
                 GROUP BY
                     doc.id, doc.image, doctor_full_name, d.facility, t.date_of_consultation
                 ORDER BY
-                    doctor_full_name, t.date_of_consultation;
+                    t.date_of_consultation;
                 """;
          return jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) ->
               TimeSheetResponse.builder()
