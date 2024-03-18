@@ -148,7 +148,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),messageSource.getMessage("subject_appointment",null,LocaleContextHolder.getLocale()));
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
 
@@ -196,7 +196,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),messageSource.getMessage("subject_appointment",null,LocaleContextHolder.getLocale()));
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
     public String generateVerificationCode() {
