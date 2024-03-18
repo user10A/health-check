@@ -9,7 +9,7 @@ import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
 import healthcheck.entities.Schedule;
 import healthcheck.entities.TimeSheet;
-import healthcheck.entities.additional.PatternTimeSheetRequest;
+import healthcheck.dto.Schedule.PatternTimeSheetRequest;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.AlreadyExistsException;
@@ -103,7 +103,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         generateTimeSheets(currentDate, addScheduleRequest.getCreateEndDate(), days, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
 
-        return SimpleResponse.builder().message("Успешно создано расписание!").httpStatus(HttpStatus.OK).build();
+        return SimpleResponse.builder().messageCode("Успешно создано расписание!").httpStatus(HttpStatus.OK).build();
     }
 
     @Override
@@ -156,7 +156,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             log.info("Расписание доктора успешно обновлено: {}", doctorId);
 
             return SimpleResponse.builder()
-                    .message("Успешно обновлено")
+                    .messageCode("Успешно обновлено")
                     .httpStatus(HttpStatus.OK)
                     .build();
         } catch (NotFoundException e) {
@@ -272,7 +272,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         log.info("Паттерн расписания успешно сохранен");
 
         return SimpleResponse.builder()
-                .message("Успешно сохранен")
+                .messageCode("Успешно сохранен")
                 .httpStatus(HttpStatus.OK)
                 .build();
     }
@@ -295,7 +295,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
             if (timeSheetsToDelete.isEmpty()) {
                 return SimpleResponse.builder()
-                        .message("Нет записей для удаления")
+                        .messageCode("Нет записей для удаления")
                         .httpStatus(HttpStatus.OK)
                         .build();
             }
@@ -307,7 +307,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             log.info("Записи о приёме успешно удалены для доктора: {}", doctorId);
 
             return SimpleResponse.builder()
-                    .message("Успешно удалено")
+                    .messageCode("Успешно удалено")
                     .httpStatus(HttpStatus.OK)
                     .build();
         } catch (NotFoundException e) {

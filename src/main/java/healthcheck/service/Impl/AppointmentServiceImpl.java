@@ -20,6 +20,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -55,7 +57,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final EmailService emailService;
     private final DepartmentRepo departmentRepo;
     private final AppointmentDao appointmentDao;
-
+    private final MessageSource messageSource;
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
         log.info("Запрос на получение всех приемов для слова: {}", word);
@@ -66,7 +68,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() ->
-                new NotFoundException("User is not found !!!"));
+                new NotFoundException(messageSource.getMessage("error.email_not_found",new Object[]{email}, LocaleContextHolder.getLocale())));
         Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("not found "));
         User user = userAccount.getUser();
         String userName = user.getFirstName() + " " + user.getLastName();
@@ -79,7 +81,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         String dayOfMonth =(day+" "+month+" в "+time);
         variables.put("dayOfMonth",dayOfMonth);
         sendEmail(userAccount.getEmail(), variables);
-        return SimpleResponse.builder().message("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
+        return SimpleResponse.builder().messageCode("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
     }
     private void sendEmail(String to, Map<String, String> variables) {
         try {
@@ -173,7 +175,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new AlreadyExistsException("Это время занято!");
         } else if (booked == null) {
             try {
-                throw new BadRequestException("Этот специалист не работает в этот день или в это время! Рабочие даты: с" + doctor.getSchedule().getStartDateWork() + " to " + doctor.getSchedule().getEndDateWork());
+                throw new BadRequestException(messageSource.getMessage("error.appointment_bad_request_exception",new Object[]{doctor.getSchedule().getStartDateWork()},LocaleContextHolder.getLocale()));
+
             } catch (BadRequestException e) {
                 throw new RuntimeException(e);
             }
@@ -270,7 +273,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 new NotFoundException("Appointment не найден"));
         if (appointment.isProcessed()) {
             appointmentRepo.delete(appointment);
-            return SimpleResponse.builder().message("Успешно удален").httpStatus(HttpStatus.OK).build();
+            return SimpleResponse.builder().messageCode("Успешно удален").httpStatus(HttpStatus.OK).build();
         }else {
             log.error("Appointment с ID: " + id + " не обработан");
             return new SimpleResponse("Ошибка Appointment с ID: "+id +" не обработан", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -287,7 +290,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 log.info("Заявка успешно обновлена, статус обработки: " + appointment.isProcessed());
                 appointmentRepo.save(appointment);
                 return appointment.isProcessed();
-            } catch (NotFoundException e) {
+            } catch (Exception e) {
                 log.error("Ошибка обработки заявки: " + e.getMessage());
                 throw e;
             }

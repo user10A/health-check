@@ -5,7 +5,7 @@ import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.Schedule.TimeSheetDeleteRequest;
 import healthcheck.dto.SimpleResponse;
-import healthcheck.entities.additional.PatternTimeSheetRequest;
+import healthcheck.dto.Schedule.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
 
 import java.time.LocalDate;

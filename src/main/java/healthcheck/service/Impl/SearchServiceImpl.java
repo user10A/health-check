@@ -15,7 +15,6 @@ public class SearchServiceImpl implements SearchService {
 
     private final DoctorDao doctorDao;
     private static final Logger logger = Logger.getLogger(Doctor.class.getName());
-
     @Override
     public List<SearchResponse> search(String word) {
         logger.info("Поиск термина: {}" + word);

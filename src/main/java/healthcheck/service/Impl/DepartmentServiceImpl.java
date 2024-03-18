@@ -11,7 +11,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
-
     private final DepartmentDao departmentDao;
     @Override
     public List<DepartmentResponse> getAllFacility() {

@@ -6,7 +6,7 @@ import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.Schedule.TimeSheetDeleteRequest;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
-import healthcheck.entities.additional.PatternTimeSheetRequest;
+import healthcheck.dto.Schedule.PatternTimeSheetRequest;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 @Slf4j
