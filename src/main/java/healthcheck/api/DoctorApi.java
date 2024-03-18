@@ -43,7 +43,6 @@ public class DoctorApi {
 
     @GetMapping()
     @Operation(summary = "Get Doctor", description = "This endpoint allows an admin to get doctor.")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public DoctorResponse getDoctorById(@RequestParam Long id) {
         return doctorService.getDoctorById(id);
     }
@@ -76,7 +75,6 @@ public class DoctorApi {
 
     @GetMapping("/getAllDoctors")
     @Operation(summary = "Get all doctors", description = "This API is used to retrieve a list of all doctors")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<DoctorResponseByWord> getAllDoctors() {
         return doctorService.getAllDoctors();
     }

@@ -23,7 +23,6 @@ public class DepartmentApi {
 
     @GetMapping("/getAllFacility")
     @Operation(summary = "Get All Facilities", description = "Retrieve a list of facilities. This method fetches information about available facilities.")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<DepartmentResponse> getAllFacility() {
         return departmentService.getAllFacility();
     }
