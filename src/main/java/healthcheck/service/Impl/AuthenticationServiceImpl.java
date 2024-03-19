@@ -22,6 +22,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,11 +40,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserAccountRepo userAccountRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final MessageSource messageSource;
+
     @Override
     public AuthenticationResponse signUp(SignUpRequest request) {
         try {
             if (userAccountRepo.existsUserAccountByEmail(request.getEmail())) {
-                throw new AlreadyExistsException("Пользователь с этим адресом электронной почты уже существует");
+                throw new AlreadyExistsException(messageSource.
+                        getMessage("alreadyExists.emailExists", new Object[]{request.getEmail()}, LocaleContextHolder.getLocale()));
             }
 
             UserAccount userAccount = UserAccount.builder()
@@ -79,13 +84,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse signIn(SignInRequest request) {
         try {
             UserAccount user = userAccountRepo.getUserAccountByEmail(request.getEmail()).orElseThrow(() ->
-                    new NotFoundException("Электронная почта не найдена"));
+                    new NotFoundException(messageSource.
+                            getMessage("error.email_not_found", new Object[]{request.getEmail()}, LocaleContextHolder.getLocale())));
 
             String passwordBCrypt = request.getPassword();
             passwordEncoder.encode(passwordBCrypt);
 
             if (!passwordEncoder.matches(passwordBCrypt, user.getPassword())) {
-                throw new BadCredentialsException("Неверный пароль");
+                throw new BadCredentialsException(messageSource.
+                        getMessage("error.bad_request_exception_password", new Object[]{request.getPassword()}, LocaleContextHolder.getLocale()));
             }
 
             String jwt = jwtService.generateToken(user.getEmail());
