@@ -1,9 +1,6 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Doctor.DoctorResponse;
-import healthcheck.dto.Doctor.DoctorResponseByWord;
-import healthcheck.dto.Doctor.DoctorSaveRequest;
-import healthcheck.dto.Doctor.DoctorUpdateRequest;
+import healthcheck.dto.Doctor.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
@@ -141,5 +138,10 @@ private final MessageSource messageSource;
         doctorRepo.save(doctor);
         String successMessage = messageSource.getMessage("doctor.status.update.success", null, Locale.getDefault());
         return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();    }
-    // <-
+    }
+
+    @Override
+    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+        return doctorDao.getAllDoctorsSortByDepartments();
+    }
 }

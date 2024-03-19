@@ -36,7 +36,11 @@ public class SecurityConfig {
                                         "/v3/api-docs/**",
                                         "/chat-bot/**",
                                         "/api/application/createApplication",
-                                        "/api/search/**"
+                                        "/api/search/**",
+                                        "/api/doctor/getAllDoctors",
+                                        "/api/doctor/byDepartment",
+                                        "/api/doctor/getDoctorsSortByDepartments",
+                                        "/api/department/getAllFacility"
                                 )
                                 .permitAll()
                                 .anyRequest()
