@@ -81,7 +81,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         String dayOfMonth =(day+" "+month+" в "+time);
         variables.put("dayOfMonth",dayOfMonth);
         sendEmail(userAccount.getEmail(), variables);
-        return SimpleResponse.builder().messageCode("Сообщение успешно отправлено!").httpStatus(HttpStatus.OK).build();
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.response",
+                null, LocaleContextHolder.getLocale()));
     }
     private void sendEmail(String to, Map<String, String> variables) {
         try {
@@ -108,15 +109,24 @@ public class AppointmentServiceImpl implements AppointmentService {
     public SimpleResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+
         log.info(email);
+
         UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
         log.info("User account found: " + userAccount);
+
         Department department = departmentRepo.findByFacility(facility);
         log.info("Department found: " + department);
+
         Doctor doctor = doctorRepo.findById(request.getDoctorId())
-                .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
-        if (!department.getDoctors().contains(doctor)) throw new NotFoundException("This doctor does not work in this department");
+                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.doctor_not_found",
+                        new Object[]{request.getDoctorId()}, LocaleContextHolder.getLocale())));
+
+        if (!department.getDoctors().contains(doctor))
+            throw new NotFoundException(messageSource.getMessage("error.doctor_not_found_department",
+                    new Object[]{facility}, LocaleContextHolder.getLocale()));
         log.info("Doctor found: %s"+ doctor);
+
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
         log.info("startOfConsultation :"+startOfConsultation);
@@ -124,11 +134,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
                 " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
         Boolean booked = timeSheetRepo.booked(doctor.getSchedule().getId(),dateOfConsultation, startOfConsultation);
+
         if (booked != null && booked) {
-            throw new AlreadyExistsException("Это время занято!");
+            throw new AlreadyExistsException(messageSource.getMessage("error.timeSheet_alreadyExists",
+                    null, LocaleContextHolder.getLocale()));
         } else if (booked == null) {
             try {
-                throw new BadRequestException("Этот специалист не работает в этот день или в это время! Рабочие даты: с" + doctor.getSchedule().getStartDateWork() + " to " + doctor.getSchedule().getEndDateWork());
+                throw new BadRequestException(messageSource.getMessage("error.doctor_not_found_department",
+                        new Object[]{doctor.getSchedule().getStartDateWork(), doctor.getSchedule().getEndDateWork()}, LocaleContextHolder.getLocale()));
             } catch (BadRequestException e) {
                 throw new RuntimeException(e);
             }
@@ -162,20 +175,26 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("User account found: " + userAccount);
         Department department = doctorRepo.getDepartmentByDoctorId(request.getDoctorId());
         Doctor doctor = doctorRepo.findById(request.getDoctorId())
-                .orElseThrow(() -> new NotFoundException("Doctor not found by ID: " + request.getDoctorId()));
+                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.doctor_not_found",
+                        new Object[]{request.getDoctorId()}, LocaleContextHolder.getLocale())));
         log.info("Doctor found: " + doctor);
+
         LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
         LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
         log.info("startOfConsultation :"+startOfConsultation);
         log.info("Creating appointment for user: " + userAccount.getUser().getFirstName() + " " +
                 userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
                 " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
+
         Boolean booked = timeSheetRepo.booked(doctor.getSchedule().getId(),dateOfConsultation, startOfConsultation);
+
         if (booked != null && booked) {
-            throw new AlreadyExistsException("Это время занято!");
+            throw new AlreadyExistsException((messageSource.getMessage("error.timeSheet_alreadyExists",
+                    null, LocaleContextHolder.getLocale())));
         } else if (booked == null) {
             try {
-                throw new BadRequestException(messageSource.getMessage("error.appointment_bad_request_exception",new Object[]{doctor.getSchedule().getStartDateWork()},LocaleContextHolder.getLocale()));
+                throw new BadRequestException(messageSource.getMessage("error.appointment_bad_request_exception",
+                        new Object[]{doctor.getSchedule().getStartDateWork()},LocaleContextHolder.getLocale()));
 
             } catch (BadRequestException e) {
                 throw new RuntimeException(e);
@@ -199,6 +218,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
+
     public String generateVerificationCode() {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));
@@ -210,8 +230,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseById verifyAppointment(Long appointmentId, String verificationCode) {
-        Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("not found "));
+        Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException(messageSource.getMessage("error.appointment_not_found",
+                new Object[]{appointmentId}, LocaleContextHolder.getLocale())));
+
         String checkVerificationCode =appointment.getVerificationCode();
+
         if (checkVerificationCode.equals(verificationCode)) {
             appointment.setStatus(Status.FINISHED);
             appointment.setVerificationCode(null);
@@ -236,20 +259,28 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public SimpleResponse deleteAppointment(Long id) {
         Appointment appointment = appointmentRepo.findById(id)
-                .orElseThrow(()-> new NotFoundException("not found appointment by id: "+id));
+                .orElseThrow(()-> new NotFoundException(messageSource.getMessage("error.appointment_not_found",
+                        new Object[]{id}, LocaleContextHolder.getLocale())));
+
         appointmentRepo.delete(appointment);
+
         TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(appointment.getDoctor().getId(),
                 appointment.getAppointmentDate(),
                 appointment.getAppointmentTime());
         timeSheet.setAvailable(false);
+
         timeSheetRepo.save(timeSheet);
-        return new SimpleResponse("успешно удален ", HttpStatus.OK);
+
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
+                null, LocaleContextHolder.getLocale()));
     }
 
     @Override
     public FindDoctorForAppointmentResponse findByDoctorId(Long id) {
         Doctor doctor = doctorRepo
-                .findById(id).orElseThrow(()-> new NotFoundException("not found Doctor by Id: "+id));
+                .findById(id).orElseThrow(()-> new NotFoundException(messageSource.getMessage("error.doctor_not_found",
+                        new Object[]{id}, LocaleContextHolder.getLocale())));
+
         return FindDoctorForAppointmentResponse.builder()
                 .image(doctor.getImage())
                 .fullNameDoctor(doctor.getFullNameDoctor())
@@ -270,13 +301,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public SimpleResponse deleteAppointmentById(Long id) {
         Appointment appointment = appointmentRepo.findById(id).orElseThrow(() ->
-                new NotFoundException("Appointment не найден"));
+                new NotFoundException(messageSource.getMessage("error.appointment_not_found",
+                        new Object[]{id}, LocaleContextHolder.getLocale())));
         if (appointment.isProcessed()) {
             appointmentRepo.delete(appointment);
-            return SimpleResponse.builder().messageCode("Успешно удален").httpStatus(HttpStatus.OK).build();
+            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
+                    null, LocaleContextHolder.getLocale()));
         }else {
             log.error("Appointment с ID: " + id + " не обработан");
-            return new SimpleResponse("Ошибка Appointment с ID: "+id +" не обработан", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.appointment_response_bad_request",
+                    null, LocaleContextHolder.getLocale()));
         }
     }
 
@@ -301,18 +335,23 @@ public class AppointmentServiceImpl implements AppointmentService {
     public SimpleResponse deleteAllAppointmentsById(List<Long> listId) {
         try {
             log.info("Список ID в методе удаления всех: {}", listId);
+
             List<Appointment> appointments = appointmentRepo.findAllById(listId);
             log.info("Найдены заявки");
+
             appointmentRepo.deleteAll(appointments);
             log.info("Заявки успешно удалены");
-            return new SimpleResponse("Заявки успешно удалены", HttpStatus.OK);
+
+            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
+                    null, LocaleContextHolder.getLocale()));
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка удаления заявок: Некоторые заявки не найдены");
-            return new SimpleResponse("Ошибка удаления заявок: Некоторые заявки не найдены", HttpStatus.NOT_FOUND);
+            return new SimpleResponse(HttpStatus.NOT_FOUND, messageSource.getMessage("error.appointment_response_bad_request_all",
+                    null, LocaleContextHolder.getLocale()));
         } catch (Exception e) {
             log.error("Ошибка удаления заявок: " + e.getMessage());
-            return new SimpleResponse("Ошибка удаления заявок: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.appointment_response_internalServerError",
+                    null, LocaleContextHolder.getLocale()));
         }
     }
-
 }
