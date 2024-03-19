@@ -1,6 +1,7 @@
 package healthcheck.repo.Dao.Impl;
 
 import healthcheck.dto.Doctor.DoctorResponseByWord;
+import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse1;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse;
 import healthcheck.dto.GlobalSearch.SearchResponse;
 import healthcheck.repo.Dao.DoctorDao;
@@ -102,31 +103,39 @@ public class DoctorDaoImpl implements DoctorDao {
                 .build());
     }
     @Override
-    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+    public List<DoctorsGetAllByDepartmentsResponse1>getAllDoctorByDepartments (String facility) {
         var sql = """
                 SELECT
                     d.id,
                     d.image,
-                    d2.facility,
                     CONCAT(d.first_name, ' ', d.last_name) AS doctor_full_name
                 FROM
                     Doctor d
                 JOIN
                     department d2 ON d.department_id = d2.id
-                GROUP BY
-                    d.id,
-                    d2.facility, 
-                    doctor_full_name
+                WHERE d2.facility=?
                 ORDER BY
-                 d2.facility,
                  doctor_full_name;
                 """;
-        return jdbcTemplate.query(sql, (rs, rowNum) -> DoctorsGetAllByDepartmentsResponse.builder()
+        return jdbcTemplate.query(sql, new Object[]{facility},(rs, rowNum) -> DoctorsGetAllByDepartmentsResponse1.builder()
                 .id(rs.getLong(1))
                 .image(rs.getString(2))
-                .department(rs.getString(3))
-                .fullName(rs.getString(4))
+                .fullName(rs.getString(3))
                 .build());
+    }
+    @Override
+    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+
+        String sql =
+                """
+                SELECT d.facility FROM Department d ORDER BY d.facility
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            return DoctorsGetAllByDepartmentsResponse.builder()
+                    .department(rs.getString(1))
+                    .doctors(getAllDoctorByDepartments(rs.getString(1)))
+                    .build();
+        });
     }
 
 }

@@ -30,7 +30,6 @@ import java.util.List;
 public class DoctorApi {
 
     private final DoctorService doctorService;
-
     @PostMapping()
     @Operation(summary = "Save a new doctor", description = "This endpoint allows an admin to save a new doctor.")
     @PreAuthorize("hasAuthority('ADMIN')")
