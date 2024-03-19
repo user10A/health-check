@@ -1,9 +1,6 @@
 package healthcheck.api;
 
-import healthcheck.dto.Doctor.DoctorResponse;
-import healthcheck.dto.Doctor.DoctorResponseByWord;
-import healthcheck.dto.Doctor.DoctorSaveRequest;
-import healthcheck.dto.Doctor.DoctorUpdateRequest;
+import healthcheck.dto.Doctor.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
@@ -85,5 +82,10 @@ public class DoctorApi {
     @PreAuthorize("hasAuthority('ADMIN')")
     public SimpleResponse deleteDoctorById(@PathVariable Long doctorId) {
         return doctorService.deleteDoctorById(doctorId);
+    }
+    @GetMapping("/getDoctorsSortByDepartments")
+    @Operation(summary = "Get All Doctor sort by Departments", description = "This API is Get All Doctor sort by Departments")
+    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+        return doctorService.getAllDoctorsSortByDepartments();
     }
 }
