@@ -208,28 +208,40 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     private void generateTimeSlotsForDay(LocalDate currentDate, LocalTime startTime, LocalTime endTime,
-                                         LocalTime startBreakTime, LocalTime endBreakTime, int intervalInMinutes,
-                                         Schedule schedule) {
+                                         LocalTime staticStartBreakTime, LocalTime staticEndBreakTime,
+                                         int intervalInMinutes, Schedule schedule) {
         if (startTime.isBefore(endTime)) {
-            if (isConsultationTime(startTime, startBreakTime, endBreakTime) &&
-                    !isDuringBreak(startTime, startTime.plusMinutes(intervalInMinutes), startBreakTime, endBreakTime)) {
+            LocalTime endTimeOfConsultation = startTime.plusMinutes(intervalInMinutes);
+
+            if (!endTimeOfConsultation.isAfter(staticStartBreakTime)) {
                 TimeSheet timeSheet = TimeSheet.builder()
                         .dateOfConsultation(currentDate)
                         .startTimeOfConsultation(startTime)
-                        .endTimeOfConsultation(startTime.plusMinutes(intervalInMinutes))
+                        .endTimeOfConsultation(endTimeOfConsultation)
                         .schedule(schedule)
                         .available(false)
                         .build();
                 timeSheetRepo.save(timeSheet);
+
+                startTime = endTimeOfConsultation;
+            } else if (endTimeOfConsultation.isAfter(staticEndBreakTime) && endTimeOfConsultation.isAfter(staticStartBreakTime)) {
+                TimeSheet timeSheet = TimeSheet.builder()
+                        .dateOfConsultation(currentDate)
+                        .startTimeOfConsultation(startTime)
+                        .endTimeOfConsultation(endTimeOfConsultation)
+                        .schedule(schedule)
+                        .available(false)
+                        .build();
+                timeSheetRepo.save(timeSheet);
+
+                startTime = endTimeOfConsultation;
+            } else {
+                startTime = staticEndBreakTime;
             }
 
-            startTime = startTime.plusMinutes(intervalInMinutes);
-
-            generateTimeSlotsForDay(currentDate, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
+            generateTimeSlotsForDay(currentDate, startTime, endTime, staticStartBreakTime, staticEndBreakTime, intervalInMinutes, schedule);
         }
     }
-
-
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
@@ -241,14 +253,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (LocalTime.parse(startTime).isAfter(LocalTime.parse(endTime))) {
             throw new IllegalArgumentException("Время начала не может быть после времени окончания");
         }
-    }
-
-    private boolean isConsultationTime(LocalTime currentTime, LocalTime startBreakTime, LocalTime endBreakTime) {
-        return currentTime.isAfter(startBreakTime) || currentTime.isBefore(endBreakTime);
-    }
-
-    private boolean isDuringBreak(LocalTime startTime, LocalTime endTime, LocalTime startBreakTime, LocalTime endBreakTime) {
-        return !endTime.isBefore(startBreakTime) && !startTime.isAfter(endBreakTime);
     }
 
     @Override
