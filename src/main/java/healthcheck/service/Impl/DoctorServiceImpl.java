@@ -1,9 +1,6 @@
 package healthcheck.service.Impl;
 
-import healthcheck.dto.Doctor.DoctorResponse;
-import healthcheck.dto.Doctor.DoctorResponseByWord;
-import healthcheck.dto.Doctor.DoctorSaveRequest;
-import healthcheck.dto.Doctor.DoctorUpdateRequest;
+import healthcheck.dto.Doctor.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
@@ -136,6 +133,11 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setActive(b);
         doctorRepo.save(doctor);
         return SimpleResponse.builder().messageCode("Статус Доктора успешно обновлен").httpStatus(HttpStatus.OK).build();
+    }
+
+    @Override
+    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+        return doctorDao.getAllDoctorsSortByDepartments();
     }
     // <-
 }

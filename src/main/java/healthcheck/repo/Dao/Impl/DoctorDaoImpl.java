@@ -1,6 +1,7 @@
 package healthcheck.repo.Dao.Impl;
 
 import healthcheck.dto.Doctor.DoctorResponseByWord;
+import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse;
 import healthcheck.dto.GlobalSearch.SearchResponse;
 import healthcheck.repo.Dao.DoctorDao;
 import lombok.RequiredArgsConstructor;
@@ -98,6 +99,33 @@ public class DoctorDaoImpl implements DoctorDao {
                 .doctorLastName(rs.getString(4))
                 .doctorPosition(rs.getString(5))
                 .image(rs.getString(6))
+                .build());
+    }
+    @Override
+    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+        var sql = """
+                SELECT
+                    d.id,
+                    d.image,
+                    d2.facility,
+                    CONCAT(d.first_name, ' ', d.last_name) AS doctor_full_name
+                FROM
+                    Doctor d
+                JOIN
+                    department d2 ON d.department_id = d2.id
+                GROUP BY
+                    d.id,
+                    d2.facility, 
+                    doctor_full_name
+                ORDER BY
+                 d2.facility,
+                 doctor_full_name;
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> DoctorsGetAllByDepartmentsResponse.builder()
+                .id(rs.getLong(1))
+                .image(rs.getString(2))
+                .department(rs.getString(3))
+                .fullName(rs.getString(4))
                 .build());
     }
 

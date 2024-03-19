@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
+
+import java.time.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -22,9 +21,12 @@ public class AppointmentDaoImpl implements AppointmentDao {
     private final JdbcTemplate jdbcTemplate;
     @Override
     public List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId) {
+        ZoneId zoneId = ZoneId.of("Asia/Bishkek");
+        ZonedDateTime currentTime = ZonedDateTime.now(zoneId);
+        LocalTime startTime = currentTime.toLocalTime();
         LocalDate start = LocalDate.parse(startDate);
+        LocalDate start1 = currentTime.toLocalDate();
         LocalDate end = LocalDate.parse(endDate);
-        LocalTime startTime = LocalTime.now();
         Map<LocalDate, List<AppointmentScheduleTimeSheetResponse>> scheduleMap = new LinkedHashMap<>();
         var sql =
         """
@@ -47,7 +49,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     time_sheet.date_of_consultation;
     """;
         try {
-            List<AppointmentScheduleTimeSheetResponse> dbResults = jdbcTemplate.query(sql, new Object[]{startDate, endDate,startDate,startTime.toString(),doctorId}, (rs, rowNum) -> {
+            List<AppointmentScheduleTimeSheetResponse> dbResults = jdbcTemplate.query(sql, new Object[]{start1.toString(), endDate,start1.toString(),startTime.toString(),doctorId}, (rs, rowNum) -> {
                 LocalDate dateOfConsultation = rs.getDate(1).toLocalDate();
                 return AppointmentScheduleTimeSheetResponse.builder()
                         .dateOfConsultation(dateOfConsultation)
