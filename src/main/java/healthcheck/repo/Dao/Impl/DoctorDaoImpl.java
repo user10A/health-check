@@ -20,22 +20,29 @@ public class DoctorDaoImpl implements DoctorDao {
     @Override
     public List<DoctorResponseByWord> getAllDoctorsBySearch(String word) {
         var sql = """
-                 SELECT
-                                                         d.id,
-                                                         d.image,
-                                                         d.is_active,
-                                                         d.first_name,
-                                                         d.last_name,
-                                                         d2.facility,
-                                                         s.end_date_work,
-                                                         d.position
-                                                     FROM Doctor d
-                                                     JOIN schedule s ON d.id = s.doctor_id
-                                                     JOIN department d2 on d.department_id = d2.id
-                WHERE CONCAT(d.first_name, ' ', d.last_name) LIKE '%' || ? || '%'
-                ORDER BY d.id
+                SELECT
+                     d.id,
+                     d.image,
+                     d.is_active,
+                     d.first_name,
+                     d.last_name,
+                     d2.facility,
+                     s.end_date_work,
+                     d.position
+                 FROM Doctor d
+                 JOIN schedule s ON d.id = s.doctor_id
+                 JOIN department d2 on d.department_id = d2.id
+                 WHERE
+                     LOWER(d.first_name) LIKE CONCAT('%', LOWER(?), '%') OR
+                     LOWER(d.last_name) LIKE CONCAT('%', LOWER(?), '%')
+                 ORDER BY
+                     CASE\s
+                         WHEN LOWER(d.first_name) LIKE CONCAT(LOWER(?), '%') THEN 0\s
+                         WHEN LOWER(d.last_name) LIKE CONCAT(LOWER(?), '%') THEN 1
+                     END,
+                     d.id, d.first_name, d.last_name;
                 """;
-        return jdbcTemplate.query(sql, new Object[]{word}, (rs, rowNum) -> DoctorResponseByWord.builder()
+        return jdbcTemplate.query(sql, new Object[]{word, word, word, word}, (rs, rowNum) -> DoctorResponseByWord.builder()
                 .id(rs.getLong(1))
                 .image(rs.getString(2))
                 .isActive(rs.getBoolean(3))
