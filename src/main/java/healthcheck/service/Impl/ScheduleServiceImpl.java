@@ -138,7 +138,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 }
 
                 if (Duration.between(startTimeOfConsultation, endTimeOfConsultation).toMinutes() < 10) {
-                    throw new RuntimeException("Время консультации должно быть не менее 10 минут");
+                    throw new RuntimeException(messageSource.getMessage("error.timeSheet",null,LocaleContextHolder.getLocale()));
                 }
 
                 boolean timeSlotExists = timeSheets.stream()

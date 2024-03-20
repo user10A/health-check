@@ -13,6 +13,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -39,13 +41,13 @@ public class EmailServiceImpl implements EmailService {
     private final UserAccountRepo userAccountRepo;
     private final TemplateEngine templateEngine;
     private final JwtService jwtService;
+    private final MessageSource messageSource;
 
     @Override
     public SimpleResponse forgotPassword(String email, String link) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
-                        String.format("Пациент с таким email: %s не существует!", email)));
-
+                        messageSource.getMessage("error.email_not_found",new Object[]{email},LocaleContextHolder.getLocale())));
         String token = UUID.randomUUID().toString();
         User user = userAccount.getUser();
         userAccount.setTokenPassword(token);
@@ -59,7 +61,7 @@ public class EmailServiceImpl implements EmailService {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
         helper.setFrom(mailUsername);
-        helper.setSubject("Сброс пароля");
+        helper.setSubject(messageSource.getMessage("subject",null,LocaleContextHolder.getLocale()));
         helper.setTo(email);
         helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
@@ -67,16 +69,16 @@ public class EmailServiceImpl implements EmailService {
         return new SimpleResponse(userAccount.getTokenPassword(), HttpStatus.OK);
     }
     @Override
-    public AuthenticationResponse passwordRecovery(String token, String newPassword) {
+    public AuthenticationResponse passwordRecovery(String token, String newPassword) throws Exception {
         UserAccount userAccount = userAccountRepo.getByUserAccountByTokenPassword(token).orElseThrow(
                 () -> new NotFoundException(
-                        String.format("Пациент с таким email: %s не существует!", token)));
+                        messageSource.getMessage("error.email_not_found_token",new Object[]{token},LocaleContextHolder.getLocale())));
         log.info("аккаунт найден : " + userAccount);
         if (token.equals(userAccount.getTokenPassword())) {
             if (isVerificationCodeExpired(userAccount)) {
                 userAccount.setTokenPassword(null);
                 log.info("вермя истекло");
-                throw new RuntimeException("Verification code has expired.");
+                throw new Exception(messageSource.getMessage("error.email_verification_code_expired",null,LocaleContextHolder.getLocale()));
             } else {
                 userAccount.setPassword(passwordEncoder.encode(newPassword));
                 userAccount.setTokenPassword(null);
@@ -90,7 +92,7 @@ public class EmailServiceImpl implements EmailService {
                         .build();
             }
         } else {
-            throw new RuntimeException("Invalid verification code.");
+            throw new Exception(messageSource.getMessage("error.email_verification_code_invalid",null,LocaleContextHolder.getLocale()));
         }
     }
 
@@ -98,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
     public SimpleResponse sendMassage(String email, String code, String subject) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
-                        String.format("Пользователь с таким email: %s не существует!", email)));
+                        messageSource.getMessage("error.email_not_found",new Object[]{email},LocaleContextHolder.getLocale())));
         User user = userAccount.getUser();
         Context context = new Context();
         context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
@@ -113,7 +115,7 @@ public class EmailServiceImpl implements EmailService {
         helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return new SimpleResponse(String.format("Код для подтверждения онлайн записи отправлен: %s", email), HttpStatus.OK);
+        return new SimpleResponse(messageSource.getMessage("email_verification_code",new Object[]{email},LocaleContextHolder.getLocale()), HttpStatus.OK);
     }
 
     public boolean isVerificationCodeExpired(UserAccount request) {
@@ -129,13 +131,13 @@ public class EmailServiceImpl implements EmailService {
         LocalTime time = currentTime.toLocalTime();
         String greeting;
         if (time.isBefore(LocalTime.NOON)) {
-            greeting = "Доброе утро";
+            greeting = messageSource.getMessage("greeting_good_morning",null ,LocaleContextHolder.getLocale());
         } else if (time.isBefore(LocalTime.of(18, 0))) {
-            greeting = "Добрый день";
+            greeting = messageSource.getMessage("greeting_good_afternoon",null ,LocaleContextHolder.getLocale());
         } else if (time.isBefore(LocalTime.of(21, 0))) {
-            greeting = "Добрый вечер";
+            greeting = messageSource.getMessage("greeting_good_evening",null ,LocaleContextHolder.getLocale());
         } else {
-            greeting = "Доброй ночи";
+            greeting = messageSource.getMessage("greeting_good_night",null ,LocaleContextHolder.getLocale());
         }
         return greeting;
     }

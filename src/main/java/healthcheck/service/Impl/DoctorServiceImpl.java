@@ -139,7 +139,6 @@ private final MessageSource messageSource;
         String successMessage = messageSource.getMessage("doctor.status.update.success", null, Locale.getDefault());
         return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();
     }
-
     @Override
     public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
         return doctorDao.getAllDoctorsSortByDepartments();

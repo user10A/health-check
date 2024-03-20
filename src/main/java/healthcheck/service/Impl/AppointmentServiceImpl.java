@@ -76,7 +76,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         variables.put("greeting", emailService.getGreeting());
         variables.put("userName", userName);
         int day = appointment.getAppointmentDate().getDayOfMonth();
-        String month = appointment.getAppointmentDate().getMonth().getDisplayName(TextStyle.FULL, new Locale("ru"));
+        String month = appointment.getAppointmentDate().getMonth().getDisplayName(TextStyle.FULL, LocaleContextHolder.getLocale());
         String time = appointment.getAppointmentTime().toString();
         String dayOfMonth =(day+" "+month+" в "+time);
         variables.put("dayOfMonth",dayOfMonth);
@@ -96,7 +96,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
             helper.setTo(to);
-            helper.setSubject("Подтверждение записи");
+            helper.setSubject(messageSource.getMessage("message.confirmation_response",null,LocaleContextHolder.getLocale()));
             helper.setText(content, true);
             mailSender.send(message);
         } catch (MessagingException | IOException e) {
@@ -161,7 +161,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),messageSource.getMessage("message.code_response",null,LocaleContextHolder.getLocale()));
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
 
@@ -215,7 +215,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),"Код для онлайн регистрации !");
+        emailService.sendMassage(request.getEmail(),appointment.getVerificationCode(),messageSource.getMessage("subject_appointment",null,LocaleContextHolder.getLocale()));
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
 

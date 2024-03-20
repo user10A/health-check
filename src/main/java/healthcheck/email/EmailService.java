@@ -7,7 +7,7 @@ import jakarta.mail.MessagingException;
 import java.io.IOException;
 public interface EmailService {
     SimpleResponse forgotPassword(String email, String link) throws MessagingException, IOException;
-    AuthenticationResponse passwordRecovery(String token, String newPassword);
+    AuthenticationResponse passwordRecovery(String token, String newPassword) throws Exception;
     SimpleResponse sendMassage(String email, String link,String subject) throws MessagingException, IOException;
     String getGreeting();
 

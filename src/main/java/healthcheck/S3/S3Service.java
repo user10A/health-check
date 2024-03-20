@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -33,6 +35,8 @@ public class S3Service {
 
     @Value("${aws.bucket.path}")
     private String BUCKET_PATH;
+    @Autowired
+    private MessageSource messageSource;
 
     @Autowired
     public S3Service(S3Client s3) {
@@ -98,7 +102,7 @@ public class S3Service {
                     .body(resource);
         } catch (S3Exception | IOException e) {
             log.error("Error downloading file: {}", e.getMessage());
-            throw new IllegalStateException("Error downloading file");
+            throw new IllegalStateException(messageSource.getMessage("error.illegal_state_exception_download",null, LocaleContextHolder.getLocale()));
         }
     }
     public byte[] getPdfFileByUrl(String fileUrl) {
@@ -111,7 +115,7 @@ public class S3Service {
             return content;
         } catch (S3Exception | IOException e) {
             log.error("Ошибка file не найден: {}", e.getMessage());
-            throw new IllegalStateException("File не найден ! ");
+            throw new IllegalStateException(messageSource.getMessage("error.illegal_state_exception_not_found",null, LocaleContextHolder.getLocale()));
         }
     }
 }
