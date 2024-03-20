@@ -117,7 +117,8 @@ public class DoctorDaoImpl implements DoctorDao {
                 SELECT
                     d.id,
                     d.image,
-                    CONCAT(d.first_name, ' ', d.last_name) AS doctor_full_name
+                    CONCAT(d.first_name, ' ', d.last_name) AS doctor_full_name,
+                    d.position
                 FROM
                     Doctor d
                 JOIN
@@ -130,6 +131,7 @@ public class DoctorDaoImpl implements DoctorDao {
                 .id(rs.getLong(1))
                 .image(rs.getString(2))
                 .fullName(rs.getString(3))
+                .position(rs.getString(4))
                 .build());
     }
     @Override

@@ -9,4 +9,5 @@ public class DoctorsGetAllByDepartmentsResponse1 {
     private Long id;
     private String image;
     private String fullName;
+    private String position;
 }
