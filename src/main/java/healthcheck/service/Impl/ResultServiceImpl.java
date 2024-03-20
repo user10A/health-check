@@ -16,6 +16,8 @@ import healthcheck.service.ResultService;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -38,6 +41,8 @@ public class ResultServiceImpl implements ResultService {
     private final EmailSenderService emailSenderService;
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
+    private final MessageSource messageSource;
+
     @Override
     @Transactional
     public SimpleResponse saveResult(RequestSaveResult request) {
@@ -46,9 +51,8 @@ public class ResultServiceImpl implements ResultService {
             LocalDate endDate = startDate.plusDays(7);
             Department department = departmentRepo.findByFacility(request.getFacility());
             User user = userRepo.findById(request.getUserId())
-                    .orElseThrow(() -> new NotFoundException(
-                            String.format("Пользователь с ID: %d не найден", request.getUserId())
-                    ));
+                    .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.user_not_found",
+                            new Object[]{request.getUserId()}, LocaleContextHolder.getLocale())));
             Result result = Result.builder()
                     .resultDate(request.getDataOfDelivery())
                     .pdfUrl(request.getUrl())
@@ -73,15 +77,18 @@ public class ResultServiceImpl implements ResultService {
                 helper.setText(emailContent, true);
                 String successMessage = "Успешно сохранен!";
                 log.info(successMessage);
-                return new SimpleResponse(HttpStatus.OK, successMessage);
+                return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.save_response",
+                        null, LocaleContextHolder.getLocale()));
             } else {
                 log.info("Результат не сохранен! :"+request);
-                return new SimpleResponse(HttpStatus.BAD_REQUEST, String.format("%s : Текущая дата находится вне заданного диапазона. Добавление результата в течении 7 дней!", request.getDataOfDelivery()));
+                return new SimpleResponse(HttpStatus.BAD_REQUEST, messageSource.getMessage("result.bad_response",
+                        null, LocaleContextHolder.getLocale()));
             }
         } catch (Exception e) {
             String errorMessage = "Ошибка при сохранении заявки: " + e.getMessage();
             log.error(errorMessage, e);
-            return SimpleResponse.builder().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR).messageCode("Произошла ошибка.").build();
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.internal_server_error",
+                    null, LocaleContextHolder.getLocale()));
         }
     }
 
@@ -89,7 +96,8 @@ public class ResultServiceImpl implements ResultService {
     public String getResultByResultNumberResult(Long resultNumber) {
         String result = resultRepo.getResultByResultNumberResult(resultNumber);
         if (result == null) {
-            throw new NotFoundException(String.format("Результат с номером %d не найден", resultNumber));
+            throw new NotFoundException(messageSource.getMessage("result.not_found_response",
+                    null, LocaleContextHolder.getLocale()));
         }
         log.info("результат найден {}", result);
         return result;

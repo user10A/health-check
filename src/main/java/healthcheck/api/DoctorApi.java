@@ -1,9 +1,6 @@
 package healthcheck.api;
 
-import healthcheck.dto.Doctor.DoctorResponse;
-import healthcheck.dto.Doctor.DoctorResponseByWord;
-import healthcheck.dto.Doctor.DoctorSaveRequest;
-import healthcheck.dto.Doctor.DoctorUpdateRequest;
+import healthcheck.dto.Doctor.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
@@ -33,7 +30,6 @@ import java.util.List;
 public class DoctorApi {
 
     private final DoctorService doctorService;
-
     @PostMapping()
     @Operation(summary = "Save a new doctor", description = "This endpoint allows an admin to save a new doctor.")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -42,8 +38,8 @@ public class DoctorApi {
     }
 
     @GetMapping()
-    @Operation(summary = "Get Doctor", description = "This endpoint allows an admin to get doctor.")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Get Doctor", description = "This endpoint allows an admin to get doctor.")
     public DoctorResponse getDoctorById(@RequestParam Long id) {
         return doctorService.getDoctorById(id);
     }
@@ -76,7 +72,6 @@ public class DoctorApi {
 
     @GetMapping("/getAllDoctors")
     @Operation(summary = "Get all doctors", description = "This API is used to retrieve a list of all doctors")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<DoctorResponseByWord> getAllDoctors() {
         return doctorService.getAllDoctors();
     }
@@ -86,5 +81,10 @@ public class DoctorApi {
     @PreAuthorize("hasAuthority('ADMIN')")
     public SimpleResponse deleteDoctorById(@PathVariable Long doctorId) {
         return doctorService.deleteDoctorById(doctorId);
+    }
+    @GetMapping("/getDoctorsSortByDepartments")
+    @Operation(summary = "Get All Doctor sort by Departments", description = "This API is Get All Doctor sort by Departments")
+    public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
+        return doctorService.getAllDoctorsSortByDepartments();
     }
 }

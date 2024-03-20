@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
+
+import java.time.*;
 import java.util.*;
 
 @Repository
@@ -20,9 +19,11 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
 
     @Override
     public List<TimeSheetResponse> getTimesheetDoctor(String facility) {
-        LocalDate start = LocalDate.now();
+        ZoneId zoneId = ZoneId.of("Asia/Bishkek");
+        ZonedDateTime currentTime = ZonedDateTime.now(zoneId);
+        LocalDate start = currentTime.toLocalDate();
         LocalDate end = start.plusDays(7);
-        LocalTime startTime = LocalTime.now();
+        LocalTime startTime = currentTime.toLocalTime();
         String sql =
                 """
                 SELECT
@@ -46,7 +47,7 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
                 GROUP BY
                     doc.id, doc.image, doctor_full_name, d.facility, t.date_of_consultation
                 ORDER BY
-                    doctor_full_name, t.date_of_consultation;
+                    t.date_of_consultation;
                 """;
          return jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) ->
               TimeSheetResponse.builder()
@@ -126,9 +127,11 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
 
     @Override
     public List<TimeSheetResponse> getTimesheetDoctorById(Long id) {
-        LocalDate start = LocalDate.now();
+        ZoneId zoneId = ZoneId.of("Asia/Bishkek");
+        ZonedDateTime currentTime = ZonedDateTime.now(zoneId);
+        LocalDate start = currentTime.toLocalDate();
         LocalDate end = start.plusDays(7);
-        LocalTime startTime = LocalTime.now();
+        LocalTime startTime = currentTime.toLocalTime();
         String sql =
         """
         SELECT
@@ -150,9 +153,9 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
             doc.id = ? AND t.available = false AND t.date_of_consultation BETWEEN TO_DATE(?, 'YYYY-MM-DD') AND TO_DATE(?, 'YYYY-MM-DD') AND (
             t.date_of_consultation > TO_DATE(?, 'YYYY-MM-DD') OR t.start_time_of_consultation > CAST(? AS TIME))
         GROUP BY
-            doc.id, doc.image, doctor_full_name, t.date_of_consultation
-        ORDER BY
-            doctor_full_name, t.date_of_consultation;
+            doc.id, doc.image, doctor_full_name, d.facility, t.date_of_consultation
+            ORDER BY
+            t.date_of_consultation;
         """;
         return jdbcTemplate.query(sql, new Object[]{id, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) ->
                 TimeSheetResponse.builder()
