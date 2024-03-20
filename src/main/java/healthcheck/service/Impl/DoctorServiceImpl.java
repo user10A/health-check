@@ -137,7 +137,7 @@ private final MessageSource messageSource;
         doctor.setActive(b);
         doctorRepo.save(doctor);
         String successMessage = messageSource.getMessage("doctor.status.update.success", null, Locale.getDefault());
-        return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();    }
+        return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();
     }
 
     @Override
