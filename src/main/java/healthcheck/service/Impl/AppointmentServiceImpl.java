@@ -270,7 +270,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheet.setAvailable(false);
         timeSheetRepo.save(timeSheet);
 
-        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.canceled",
                 null, LocaleContextHolder.getLocale()));
     }
 
