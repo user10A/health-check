@@ -40,7 +40,8 @@ public class SecurityConfig {
                                         "/api/doctor/getAllDoctors",
                                         "/api/doctor/byDepartment",
                                         "/api/doctor/getDoctorsSortByDepartments",
-                                        "/api/department/getAllFacility"
+                                        "/api/department/getAllFacility",
+                                        "/api/doctor/{id}"
                                 )
                                 .permitAll()
                                 .anyRequest()

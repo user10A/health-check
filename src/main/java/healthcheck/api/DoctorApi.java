@@ -38,7 +38,6 @@ public class DoctorApi {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Get Doctor", description = "This endpoint allows an admin to get doctor.")
     public DoctorResponse getDoctorById(@PathVariable Long id) {
         return doctorService.getDoctorById(id);
