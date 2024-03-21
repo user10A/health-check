@@ -37,10 +37,10 @@ public class DoctorApi {
         return ResponseEntity.ok(doctorService.saveDoctor(request));
     }
 
-    @GetMapping()
+    @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Get Doctor", description = "This endpoint allows an admin to get doctor.")
-    public DoctorResponse getDoctorById(@RequestParam Long id) {
+    public DoctorResponse getDoctorById(@PathVariable Long id) {
         return doctorService.getDoctorById(id);
     }
 
