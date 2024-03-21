@@ -71,18 +71,7 @@ private final MessageSource messageSource;
 
     @Override
     public DoctorResponse getDoctorById(Long id) {
-        Doctor doctor = doctorRepo.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, Locale.getDefault())));
-        return DoctorResponse.builder()
-                .id(doctor.getId())
-                .firstName(doctor.getFirstName())
-                .lastName(doctor.getLastName())
-                .position(doctor.getPosition())
-                .image(doctor.getImage())
-                .department(doctor.getDepartment().getFacility().name())
-                .description(doctor.getDescription())
-                .build();
+        return doctorDao.getDoctorById(id);
     }
 
     @Override

@@ -1,4 +1,5 @@
 package healthcheck.repo.Dao;
+import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorResponseByWord;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse1;
@@ -11,5 +12,6 @@ public interface DoctorDao {
     List<SearchResponse> globalSearch(String word);
     List<DoctorsGetAllByDepartmentsResponse1>getAllDoctorByDepartments (String facility);
     List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments();
+    DoctorResponse getDoctorById (Long id);
 }
 
