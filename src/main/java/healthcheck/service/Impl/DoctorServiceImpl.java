@@ -13,6 +13,7 @@ import healthcheck.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,8 +72,14 @@ private final MessageSource messageSource;
 
     @Override
     public DoctorResponse getDoctorById(Long id) {
-        return doctorDao.getDoctorById(id);
+        DoctorResponse response = doctorDao.getDoctorById(id);
+        if (response != null) {
+            return response;
+        } else {
+            throw new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, LocaleContextHolder.getLocale()));
+        }
     }
+
 
     @Override
     @Transactional
