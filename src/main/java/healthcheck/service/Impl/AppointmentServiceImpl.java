@@ -262,16 +262,15 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(()-> new NotFoundException(messageSource.getMessage("error.appointment_not_found",
                         new Object[]{id}, LocaleContextHolder.getLocale())));
 
-        appointmentRepo.delete(appointment);
-
+        appointment.setStatus(Status.CANCELLED);
+        appointmentRepo.save(appointment);
         TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(appointment.getDoctor().getId(),
                 appointment.getAppointmentDate(),
                 appointment.getAppointmentTime());
         timeSheet.setAvailable(false);
-
         timeSheetRepo.save(timeSheet);
 
-        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.canceled",
                 null, LocaleContextHolder.getLocale()));
     }
 
