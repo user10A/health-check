@@ -8,6 +8,7 @@ import lombok.Data;
 public class DoctorResponse {
     private Long id;
     private String image;
+    private String fullName;
     private String firstName;
     private String lastName;
     private String department;

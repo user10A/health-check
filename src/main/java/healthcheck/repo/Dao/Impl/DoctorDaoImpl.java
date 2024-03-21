@@ -1,5 +1,6 @@
 package healthcheck.repo.Dao.Impl;
 
+import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorResponseByWord;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse1;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse;
@@ -147,6 +148,37 @@ public class DoctorDaoImpl implements DoctorDao {
                     .doctors(getAllDoctorByDepartments(rs.getString(1)))
                     .build();
         });
+    }
+    @Override
+    public DoctorResponse getDoctorById(Long id) {
+        var sql = """
+            SELECT
+                d.id,
+                d.image,
+                CONCAT(d.first_name, ' ', d.last_name) AS doctor_full_name,
+                d.first_name,
+                d.last_name,
+                d.position,
+                d.description,
+                d2.facility
+            FROM
+                Doctor d
+            JOIN
+                department d2 ON d.department_id = d2.id
+            WHERE d.id =?
+            ORDER BY
+             doctor_full_name;
+            """;
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> DoctorResponse.builder()
+                .id(rs.getLong(1))
+                .image(rs.getString(2))
+                .fullName(rs.getString(3))
+                .firstName(rs.getString(4))
+                .lastName(rs.getString(5))
+                .position(rs.getString(6))
+                .description(rs.getString(7))
+                .department(rs.getString(8))
+                .build());
     }
 
 }
