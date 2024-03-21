@@ -71,13 +71,8 @@ private final MessageSource messageSource;
     }
 
     @Override
-    public DoctorResponse getDoctorById(Long id) {
-        DoctorResponse response = doctorDao.getDoctorById(id);
-        if (response != null) {
-            return response;
-        } else {
-            throw new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, LocaleContextHolder.getLocale()));
-        }
+    public DoctorResponse getDoctorById(Long id)throws NotFoundException {
+       return doctorDao.getDoctorById(id);
     }
 
 

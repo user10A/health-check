@@ -5,8 +5,12 @@ import healthcheck.dto.Doctor.DoctorResponseByWord;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse1;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse;
 import healthcheck.dto.GlobalSearch.SearchResponse;
+import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.DoctorDao;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -16,6 +20,7 @@ import java.util.List;
 public class DoctorDaoImpl implements DoctorDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MessageSource messageSource;
 
 
     @Override
@@ -149,9 +154,11 @@ public class DoctorDaoImpl implements DoctorDao {
                     .build();
         });
     }
+
     @Override
     public DoctorResponse getDoctorById(Long id) {
-        var sql = """
+        try {
+            var sql = """
             SELECT
                 d.id,
                 d.image,
@@ -169,16 +176,20 @@ public class DoctorDaoImpl implements DoctorDao {
             ORDER BY
              doctor_full_name;
             """;
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> DoctorResponse.builder()
-                .id(rs.getLong(1))
-                .image(rs.getString(2))
-                .fullName(rs.getString(3))
-                .firstName(rs.getString(4))
-                .lastName(rs.getString(5))
-                .position(rs.getString(6))
-                .description(rs.getString(7))
-                .department(rs.getString(8))
-                .build());
+            return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> DoctorResponse.builder()
+                    .id(rs.getLong(1))
+                    .image(rs.getString(2))
+                    .fullName(rs.getString(3))
+                    .firstName(rs.getString(4))
+                    .lastName(rs.getString(5))
+                    .position(rs.getString(6))
+                    .description(rs.getString(7))
+                    .department(rs.getString(8))
+                    .build());
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, LocaleContextHolder.getLocale()));
+        }
     }
+
 
 }
