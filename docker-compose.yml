@@ -12,6 +12,19 @@ services:
       POSTGRES_DB: jdbc:postgresql://database:5432/postgres
       POSTGRES_USER: healthcheckuser
       POSTGRES_PASSWORD: healthcheck11
+
+  activemq:
+    image: rmohr/activemq:5.16.2-alpine
+    container_name: activemq
+    ports:
+      - "61616:61616"
+    environment:
+      ACTIVEMQ_CONFIG_NAME: "amqp"
+      ACTIVEMQ_CONFIG_DEFAULTACCOUNT: "true"
+      ACTIVEMQ_ADMIN_LOGIN: "admin"
+      ACTIVEMQ_ADMIN_PASSWORD: "admin"
+      ACTIVEMQ_CONFIG_QUEUES: "pdfQueue"
+
   database:
     image: postgres:15
     restart: always
@@ -23,5 +36,3 @@ services:
       POSTGRES_PASSWORD: healthcheck11
     volumes:
       - db_data:/var/lib/postgresql/data
-volumes:
-  db_data:

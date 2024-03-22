@@ -47,16 +47,20 @@ public class EmailServiceImpl implements EmailService {
     public SimpleResponse forgotPassword(String email, String link) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
-                        messageSource.getMessage("error.email_not_found",new Object[]{email},LocaleContextHolder.getLocale())));
+                        "error.email_not_found",new Object[]{email}));
         String token = UUID.randomUUID().toString();
         User user = userAccount.getUser();
         userAccount.setTokenPassword(token);
         userAccount.setVerificationCodeTime(new Date());
         userAccountRepo.save(userAccount);
         Context context = new Context();
+        context.setVariable("dear", messageSource.getMessage("message.sss",null,LocaleContextHolder.getLocale()));
+        context.setVariable("changePassword", messageSource.getMessage("message.change.password",null,LocaleContextHolder.getLocale()));
+        context.setVariable("reset", messageSource.getMessage("message.reset",null,LocaleContextHolder.getLocale()));
         context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
         context.setVariable("greeting", getGreeting());
         context.setVariable("link", link);
+        context.setVariable("confirm", messageSource.getMessage("message.confirm",null,LocaleContextHolder.getLocale()));
         String emailContent = templateEngine.process("message", context);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
@@ -66,19 +70,19 @@ public class EmailServiceImpl implements EmailService {
         helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return new SimpleResponse(userAccount.getTokenPassword(), HttpStatus.OK);
+        return new SimpleResponse(HttpStatus.OK,userAccount.getTokenPassword());
     }
     @Override
     public AuthenticationResponse passwordRecovery(String token, String newPassword) throws Exception {
         UserAccount userAccount = userAccountRepo.getByUserAccountByTokenPassword(token).orElseThrow(
                 () -> new NotFoundException(
-                        messageSource.getMessage("error.email_not_found_token",new Object[]{token},LocaleContextHolder.getLocale())));
+                        "error.email_not_found_token",new Object[]{token}));
         log.info("аккаунт найден : " + userAccount);
         if (token.equals(userAccount.getTokenPassword())) {
             if (isVerificationCodeExpired(userAccount)) {
                 userAccount.setTokenPassword(null);
                 log.info("вермя истекло");
-                throw new Exception(messageSource.getMessage("error.email_verification_code_expired",null,LocaleContextHolder.getLocale()));
+                throw new Exception("error.email_verification_code_expired");
             } else {
                 userAccount.setPassword(passwordEncoder.encode(newPassword));
                 userAccount.setTokenPassword(null);
@@ -92,7 +96,7 @@ public class EmailServiceImpl implements EmailService {
                         .build();
             }
         } else {
-            throw new Exception(messageSource.getMessage("error.email_verification_code_invalid",null,LocaleContextHolder.getLocale()));
+            throw new Exception("error.email_verification_code_invalid");
         }
     }
 
@@ -100,7 +104,7 @@ public class EmailServiceImpl implements EmailService {
     public SimpleResponse sendMassage(String email, String code, String subject) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
-                        messageSource.getMessage("error.email_not_found",new Object[]{email},LocaleContextHolder.getLocale())));
+                       "error.email_not_found",new Object[]{email}));
         User user = userAccount.getUser();
         Context context = new Context();
         context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
@@ -115,7 +119,8 @@ public class EmailServiceImpl implements EmailService {
         helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        return new SimpleResponse(messageSource.getMessage("email_verification_code",new Object[]{email},LocaleContextHolder.getLocale()), HttpStatus.OK);
+        return new SimpleResponse(HttpStatus.OK,messageSource.getMessage
+                ("email_verification_code",new Object[]{email},LocaleContextHolder.getLocale()));
     }
 
     public boolean isVerificationCodeExpired(UserAccount request) {
@@ -131,13 +136,13 @@ public class EmailServiceImpl implements EmailService {
         LocalTime time = currentTime.toLocalTime();
         String greeting;
         if (time.isBefore(LocalTime.NOON)) {
-            greeting = messageSource.getMessage("greeting_good_morning",null ,LocaleContextHolder.getLocale());
+            greeting = messageSource.getMessage("greeting_good_morning",null,LocaleContextHolder.getLocale());
         } else if (time.isBefore(LocalTime.of(18, 0))) {
-            greeting = messageSource.getMessage("greeting_good_afternoon",null ,LocaleContextHolder.getLocale());
+            greeting = messageSource.getMessage("greeting_good_afternoon",null,LocaleContextHolder.getLocale());
         } else if (time.isBefore(LocalTime.of(21, 0))) {
-            greeting = messageSource.getMessage("greeting_good_evening",null ,LocaleContextHolder.getLocale());
+            greeting = messageSource.getMessage("greeting_good_evening",null,LocaleContextHolder.getLocale());
         } else {
-            greeting = messageSource.getMessage("greeting_good_night",null ,LocaleContextHolder.getLocale());
+            greeting = messageSource.getMessage("greeting_good_night",null,LocaleContextHolder.getLocale());
         }
         return greeting;
     }

@@ -29,14 +29,14 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
     private final DoctorDao doctorDao;
-private final MessageSource messageSource;
+    private final MessageSource messageSource;
     @Override
     @Transactional
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
         Department department = departmentRepo.findById(request.getDepartmentId())
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("error.department_not_found", new Object[]{request.getDepartmentId()}, Locale.getDefault())
-                ));
+                       "error.department_not_found", new Object[]{request.getDepartmentId()})
+                );
 
         Doctor doctor = Doctor.builder()
                 .firstName(request.getFirstName())
@@ -52,10 +52,9 @@ private final MessageSource messageSource;
         doctorRepo.save(doctor);
 
         log.info("Врач успешно сохранен: " + doctor.getFirstName() + " " + doctor.getLastName());
-        String successMessage = messageSource.getMessage("doctor.save.success", null, Locale.getDefault());
         return SimpleResponse.builder()
                 .httpStatus(HttpStatus.OK)
-                .messageCode(successMessage)
+                .messageCode(messageSource.getMessage("doctor.save.success",null,LocaleContextHolder.getLocale()))
                 .build();
     }
 
@@ -63,10 +62,8 @@ private final MessageSource messageSource;
     public List<Doctor> getDoctorsByDepartment(Facility facility) {
         Department department = departmentRepo.getDepartmentByFacility(facility).orElseThrow(() ->
 
-                new NotFoundException(messageSource.getMessage("department.not.found", null, Locale.getDefault())));
-
+                new NotFoundException("department.not.found"));
         log.info("Получены врачи для отделения: " + department.getFacility().name());
-
         return doctorRepo.getDoctorsByDepartment(department);
     }
 
@@ -80,10 +77,10 @@ private final MessageSource messageSource;
     @Transactional
     public SimpleResponse updateDoctor(Facility facility, Long id, DoctorUpdateRequest request) {
         Department department = departmentRepo.getDepartmentByFacility(facility)
-                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("department.not.found", null, Locale.getDefault())));
+                .orElseThrow(() -> new NotFoundException("department.not.found"));
 
         Doctor doctor = doctorRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, Locale.getDefault())));
+                .orElseThrow(() -> new NotFoundException("doctor.not.found", new Object[]{id}));
         doctor = Doctor.builder()
                 .id(doctor.getId())
                 .firstName(request.getFirstName())
@@ -96,8 +93,7 @@ private final MessageSource messageSource;
         department.addDoctor(doctor);
         doctorRepo.save(doctor);
         departmentRepo.save(department);
-        String successMessage = messageSource.getMessage("doctor.update.success", null, Locale.getDefault());
-        return new SimpleResponse(successMessage, HttpStatus.OK);    }
+        return new SimpleResponse(messageSource.getMessage("doctor.update.success",null,LocaleContextHolder.getLocale()), HttpStatus.OK);    }
 
     // Специалисты. Методы: 1 - Search по именам. 2 - Вывод всех докторов. 3 - Удаление ->
     @Override
@@ -114,21 +110,19 @@ private final MessageSource messageSource;
     @Transactional
     public SimpleResponse deleteDoctorById(Long doctorId) {
         Doctor doctor = doctorRepo.findById(doctorId).orElseThrow(() ->
-                new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{doctorId}, Locale.getDefault())));
+                new NotFoundException("doctor.not.found", new Object[]{doctorId}));
 
         doctorRepo.delete(doctor);
-        String successMessage = messageSource.getMessage("doctor.delete.success", null, Locale.getDefault());
-        return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();
+        return SimpleResponse.builder().messageCode(messageSource.getMessage("doctor.delete.success",null,LocaleContextHolder.getLocale())).httpStatus(HttpStatus.OK).build();
     }
 
     @Override
     public SimpleResponse updateDoctorStatusById(Long id, boolean b) {
         Doctor doctor = doctorRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, Locale.getDefault())));
+                .orElseThrow(() -> new NotFoundException("doctor.not.found", new Object[]{id}));
         doctor.setActive(b);
         doctorRepo.save(doctor);
-        String successMessage = messageSource.getMessage("doctor.status.update.success", null, Locale.getDefault());
-        return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();
+        return SimpleResponse.builder().messageCode(messageSource.getMessage("doctor.status.update.success",null,LocaleContextHolder.getLocale())).httpStatus(HttpStatus.OK).build();
     }
     @Override
     public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {

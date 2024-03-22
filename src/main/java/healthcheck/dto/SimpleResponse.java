@@ -7,7 +7,6 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 
 @Data
-@AllArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleResponse {
@@ -17,6 +16,10 @@ public class SimpleResponse {
 
 
     public SimpleResponse(HttpStatus httpStatus, String successMessage) {
+        this.httpStatus=httpStatus;
+        this.messageCode=successMessage;
+    }
+    public SimpleResponse(String successMessage,HttpStatus httpStatus) {
         this.httpStatus=httpStatus;
         this.messageCode=successMessage;
     }

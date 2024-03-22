@@ -14,15 +14,14 @@ import healthcheck.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -65,17 +64,15 @@ public class UserServiceImpl implements UserService {
                 userAccountRepo.save(userAccount);
 
                 log.info("Профиль пользователя успешно изменен");
-                String successMessage = messageSource.getMessage("update.success", null, Locale.getDefault());
-                return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();
+                return SimpleResponse.builder().messageCode(messageSource.getMessage("update.success",
+                        null, LocaleContextHolder.getLocale())).httpStatus(HttpStatus.OK).build();
             } else {
-                throw new DataUpdateException(messageSource.getMessage("user.not.found", null, Locale.getDefault()));
+                throw new DataUpdateException("user.not.found");
             }
         } catch (DataUpdateException e) {
             log.error("Ошибка при редактировании профиля пользователя", e);
-
-            throw new RuntimeException(messageSource.getMessage("profile.edit.error", null, Locale.getDefault()), e);
+            throw new RuntimeException("profile.edit.error");
         }
-
     }
 
     @Override
@@ -98,7 +95,7 @@ public class UserServiceImpl implements UserService {
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
             log.error(String.format("User with email :%s is not found !!!", email));
-            return new NotFoundException(messageSource.getMessage("user.not.found", null, Locale.getDefault()));
+            return new NotFoundException("user.not.found");
         });
         return userDao.getAllAppointmentsOfUser(user.getId());
     }
@@ -115,7 +112,7 @@ public class UserServiceImpl implements UserService {
         String email = authentication.getName();
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
             log.error(String.format("User with email %s is not found !!!", email));
-            return new NotFoundException(messageSource.getMessage("user.not.found", null, Locale.getDefault()));
+            return new NotFoundException("user.not.found");
         });
         return userDao.clearMyAppointments(user.getId());
     }
@@ -136,28 +133,25 @@ public class UserServiceImpl implements UserService {
             String oldPassword = changePasswordUserRequest.getOldPassword();
 
             if (!passwordEncoder.matches(oldPassword, userAccount.getPassword())) {
-                throw new InvalidPasswordException(messageSource.getMessage("password.old.invalid", null, Locale.getDefault()));
+                throw new InvalidPasswordException("password.old.invalid");
             }
 
             if (!changePasswordUserRequest.getNewPassword().equals(changePasswordUserRequest.getResetNewPassword())) {
-                throw new InvalidPasswordException(messageSource.getMessage("password.new.mismatch", null, Locale.getDefault()));
+                throw new InvalidPasswordException("password.new.mismatch");
             }
-
             String newPassword = passwordEncoder.encode(changePasswordUserRequest.getNewPassword());
             userAccount.setPassword(newPassword);
 
             userAccountRepo.save(userAccount);
 
             log.info("Пароль пользователя успешно изменен");
-
-            String successMessage = messageSource.getMessage("password.change.success", null, Locale.getDefault());
-            return SimpleResponse.builder().messageCode(successMessage).httpStatus(HttpStatus.OK).build();
+            return SimpleResponse.builder().messageCode(messageSource.getMessage("password.change.success",
+                    null,LocaleContextHolder.getLocale())).httpStatus(HttpStatus.OK).build();
         } catch (DataUpdateException e) {
             log.error("Ошибка при изменении пароля пользователя", e);
-            throw new DataUpdateException(messageSource.getMessage("password.change.error", null, Locale.getDefault()));
+            throw new DataUpdateException("password.change.error");
         }
     }
-
     @Override
     @Transactional
     public SimpleResponse deletePatientsById(Long id) {
@@ -165,14 +159,13 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             userRepo.delete(user);
-            String deleted = messageSource.getMessage("user.deleted.success", null, Locale.getDefault());
-            return new SimpleResponse(deleted, HttpStatus.OK);
+            return new SimpleResponse(messageSource.getMessage("user.deleted.success",
+                    null,LocaleContextHolder.getLocale()), HttpStatus.OK);
         } else {
-            String notFound = messageSource.getMessage("error.user_not_found", null, Locale.getDefault());
-            return new SimpleResponse(notFound, HttpStatus.OK);
+            return new SimpleResponse(messageSource.getMessage("error.user_not_found",
+                    null,LocaleContextHolder.getLocale()), HttpStatus.OK);
         }
     }
-
     @Override
     public List<ResultUsersResponse> getAllPatients() {
         return userDao.getAllPatients();

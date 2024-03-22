@@ -53,7 +53,7 @@ public class ResultApi {
     @Operation(summary = "Get PDF file by methods get result",description = "This method get pdf file")
     @PreAuthorize("hasAuthority('USER')")
     public byte[] getPdf(){
-        String message= jmsService.receiveMessage("pdfQueue");
+        String message = jmsService.receiveMessage("pdfQueue");
         return s3Service.getPdfFileByUrl(message);
     }
 

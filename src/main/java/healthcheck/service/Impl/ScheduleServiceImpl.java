@@ -54,17 +54,16 @@ public class ScheduleServiceImpl implements ScheduleService {
     public SimpleResponse saveSchedule(@NonNull Facility facility, @NonNull Long doctorId,
                                        @Valid @NonNull AddScheduleRequest addScheduleRequest) {
         Department department = departmentRepo.getDepartmentByFacility(facility)
-                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.department_not_found",
-                        new Object[]{facility}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException("error.department_not_found",
+                        new Object[]{facility}));
 
         Doctor doctor = doctorRepo.findById(doctorId)
                 .filter(d -> department.getDoctors().contains(d))
-                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.doctor_not_found_department",
-                        new Object[]{doctorId}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException("error.doctor_not_found_department",
+                        new Object[]{doctorId}));
 
         if (doctor.getSchedule() != null) {
-            throw new AlreadyExistsException(messageSource.getMessage("error.schedule_exists",
-                    null, LocaleContextHolder.getLocale()));
+            throw new AlreadyExistsException("error.schedule_exists");
         }
 
         validateDateRange(addScheduleRequest.getCreateStartDate(), addScheduleRequest.getCreateEndDate());
@@ -110,16 +109,15 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         generateTimeSheets(currentDate, addScheduleRequest.getCreateEndDate(), days, startTime, endTime, startBreakTime, endBreakTime, intervalInMinutes, schedule);
 
-        return new SimpleResponse(HttpStatus.OK, messageSource.
-                getMessage("error.schedule_save", null, LocaleContextHolder.getLocale()));
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("error.schedule_save",null,LocaleContextHolder.getLocale()));
     }
 
     @Override
     public SimpleResponse updateScheduleByDoctorId(Long doctorId, LocalDate date, List<ScheduleUpdateRequest> timeSlots) {
         try {
             Doctor doctor = doctorRepo.findById(doctorId)
-                    .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.doctor_not_found",
-                            new Object[]{doctorId}, LocaleContextHolder.getLocale())));
+                    .orElseThrow(() -> new NotFoundException("error.doctor_not_found",
+                            new Object[]{doctorId}));
 
             Schedule schedule = Optional.ofNullable(doctor.getSchedule()).orElseGet(Schedule::new);
 
@@ -138,7 +136,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 }
 
                 if (Duration.between(startTimeOfConsultation, endTimeOfConsultation).toMinutes() < 10) {
-                    throw new RuntimeException(messageSource.getMessage("error.timeSheet",null,LocaleContextHolder.getLocale()));
+                    throw new RuntimeException("error.timeSheet");
                 }
 
                 boolean timeSlotExists = timeSheets.stream()
@@ -150,8 +148,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                         );
 
                 if (timeSlotExists) {
-                    throw new BadCredentialsException(messageSource.getMessage("error.timeSheet_alreadyExists",
-                            null, LocaleContextHolder.getLocale()));
+                    throw new BadCredentialsException("error.timeSheet_alreadyExists");
                 }
 
                 TimeSheet newTimeSheet = TimeSheet.builder()
@@ -172,15 +169,13 @@ public class ScheduleServiceImpl implements ScheduleService {
             doctorRepo.save(doctor);
             log.info("Расписание доктора успешно обновлено: {}", doctorId);
 
-            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("error.schedule_update",
-                    null, LocaleContextHolder.getLocale()));
+            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("error.schedule_update",null,LocaleContextHolder.getLocale()));
         } catch (NotFoundException e) {
             log.error("Ошибка в методе updateScheduleByDoctorId: {}", e.getMessage(), e);
             throw e;
         } catch (Exception ex) {
             log.error("Ошибка обновления расписания доктора: {}", ex.getMessage(), ex);
-            throw new DataUpdateException(messageSource.getMessage("error.schedule_data_update_exception",
-                    null, LocaleContextHolder.getLocale()));
+            throw new DataUpdateException("error.schedule_data_update_exception");
         }
     }
 
@@ -253,23 +248,21 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException(messageSource.getMessage("error.schedule_illegal_argument_exception_validateDateRange",
-                    null, LocaleContextHolder.getLocale()));
+            throw new IllegalArgumentException("error.schedule_illegal_argument_exception_validateDateRange");
         }
     }
 
     private void validateTimeRange(String startTime, String endTime) {
         if (LocalTime.parse(startTime).isAfter(LocalTime.parse(endTime))) {
-            throw new IllegalArgumentException(messageSource.getMessage("error.schedule_illegal_argument_exception_validateTimeRange",
-                    null, LocaleContextHolder.getLocale()));
+            throw new IllegalArgumentException("error.schedule_illegal_argument_exception_validateTimeRange");
         }
     }
 
     @Override
     public SimpleResponse savePatternTimeSheet(PatternTimeSheetRequest request) {
         Doctor doctor = doctorRepo.findById(request.getDoctorId()).orElseThrow(() ->
-                new NotFoundException(messageSource.getMessage("error.doctor_not_found",
-                        new Object[]{request.getDoctorId()}, LocaleContextHolder.getLocale())));
+                new NotFoundException("error.doctor_not_found",
+                        new Object[]{request.getDoctorId()}));
 
         Pageable pageable = PageRequest.of(0, 1);
         Page<TimeSheet> result = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime1(doctor.getId()
@@ -281,8 +274,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         if (timeSheet != null) {
             log.error("Уже есть данные");
-            throw new AlreadyExistsException(messageSource.getMessage("error.schedule_exists",
-                    null, LocaleContextHolder.getLocale()));
+            throw new AlreadyExistsException("error.schedule_exists");
         }
 
         Schedule schedule = doctor.getSchedule();
@@ -290,8 +282,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         if (dateOfConsultation.isBefore(schedule.getStartDateWork()) || dateOfConsultation.isAfter(schedule.getEndDateWork())) {
             log.error("В этот день доктор не работает");
-            throw new BadCredentialsException(messageSource.getMessage("error.schedule_bad_request_exception",
-                    null, LocaleContextHolder.getLocale()));
+            throw new BadCredentialsException("error.schedule_bad_request_exception");
         }
 
         String days = request.getDateOfConsultation().getDayOfWeek().toString();
@@ -308,16 +299,15 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         log.info("Паттерн расписания успешно сохранен");
 
-        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.save_response",
-                null, LocaleContextHolder.getLocale()));
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.save_response",null,LocaleContextHolder.getLocale()));
     }
 
     @Override
     public SimpleResponse deleteTimeSheetByDoctorIdAndDate(Long doctorId, LocalDate date, List<TimeSheetDeleteRequest> request) {
         try {
             Doctor doctor = doctorRepo.findById(doctorId)
-                    .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.doctor_not_found",
-                            new Object[]{doctorId}, LocaleContextHolder.getLocale())));
+                    .orElseThrow(() -> new NotFoundException("error.doctor_not_found",
+                            new Object[]{doctorId}));
 
             Schedule schedule = doctor.getSchedule();
             List<TimeSheet> timeSheets = schedule.getTimeSheets();
@@ -330,8 +320,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                     .collect(Collectors.toList());
 
             if (timeSheetsToDelete.isEmpty()) {
-                return new SimpleResponse(HttpStatus.NOT_FOUND, messageSource.getMessage("error.schedule_delete_response",
-                        null, LocaleContextHolder.getLocale()));
+                return new SimpleResponse(HttpStatus.NOT_FOUND, messageSource.getMessage("error.schedule_delete_response",null,LocaleContextHolder.getLocale()));
             }
 
             timeSheets.removeAll(timeSheetsToDelete);
@@ -340,15 +329,13 @@ public class ScheduleServiceImpl implements ScheduleService {
             doctorRepo.save(doctor);
             log.info("Записи о приёме успешно удалены для доктора: {}", doctorId);
 
-            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
-                    null, LocaleContextHolder.getLocale()));
+            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",null,LocaleContextHolder.getLocale()));
         } catch (NotFoundException e) {
             log.error("Ошибка в методе deleteTimeSheetByDoctorIdAndDate: {}", e.getMessage(), e);
             throw e;
         } catch (Exception ex) {
             log.error("Ошибка удаления записей о приёме: {}", ex.getMessage(), ex);
-            throw new DataUpdateException(messageSource.getMessage("error.schedule_data_update_exception_delete",
-                    null, LocaleContextHolder.getLocale()));
+            throw new DataUpdateException("error.schedule_data_update_exception_delete");
         }
     }
 
