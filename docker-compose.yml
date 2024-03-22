@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: healthcheck11
 
   activemq:
-    image: rmohr/activemq:5.16.2-alpine
+    image: rmohr/activemq:5.14.0
     container_name: activemq
     ports:
       - "61616:61616"
