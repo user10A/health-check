@@ -9,7 +9,6 @@ import healthcheck.exceptions.AlreadyExistsException;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.ApplicationRepo;
 import healthcheck.repo.Dao.ApplicationDao;
-import healthcheck.repo.UserRepo;
 import healthcheck.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +33,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional
     public SimpleResponse createApplication(ApplicationRequest applicationRequest) {
         if (applicationRepo.existsByPhoneNumber(applicationRequest.getPhoneNumber())){
-            throw new AlreadyExistsException(messageSource.getMessage("alreadyExists.phoneNumber",new Object[]{applicationRequest.getPhoneNumber()},LocaleContextHolder.getLocale()));
+            throw new AlreadyExistsException("alreadyExists.phoneNumber",new Object[]{applicationRequest.getPhoneNumber()});
         }
         Application application = Application.builder()
                         .username(applicationRequest.getUsername())
@@ -45,10 +43,10 @@ public class ApplicationServiceImpl implements ApplicationService {
                         .build();
     try {
          applicationRepo.save(application);
-         return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("application.response", null, LocaleContextHolder.getLocale()));
+         return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("application.response",null, LocaleContextHolder.getLocale()));
         } catch (Exception e) {
             log.info("Ошибка при сохранении заявки: " + e.getMessage());
-            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("application.saveErrorResponse", null, LocaleContextHolder.getLocale()));
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,messageSource.getMessage("application.saveErrorResponse",null, LocaleContextHolder.getLocale()));
         }
     }
 
@@ -71,11 +69,11 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.info("applications found");
             applicationRepo.deleteAll(applicationsToDelete);
             log.info("Successfully deleted applications");
-            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("application.deleteResponse", null, LocaleContextHolder.getLocale()));
+            return new SimpleResponse(HttpStatus.OK,messageSource.getMessage("application.deleteResponse",null, LocaleContextHolder.getLocale()));
         } catch (EmptyResultDataAccessException e) {
-            return new SimpleResponse(HttpStatus.NOT_FOUND, messageSource.getMessage("application.deleteErrorResponse", null, LocaleContextHolder.getLocale()));
+            return new SimpleResponse(HttpStatus.NOT_FOUND, messageSource.getMessage("application.deleteErrorResponse",null, LocaleContextHolder.getLocale()));
         } catch (Exception e) {
-            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("application.deleteErrorResponse1", null, LocaleContextHolder.getLocale()));
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,messageSource.getMessage("application.deleteErrorResponse1",null, LocaleContextHolder.getLocale()));
         }
     }
 
@@ -84,11 +82,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     public boolean processedById(ApplicationProcessedRequest request) {
         try {
             Optional<Application> applicationOptional = applicationRepo.findById(request.getId());
-            Application application = applicationOptional.orElseThrow(() -> new NotFoundException("Не найдена заявка с ID: " + request.getId()));
+            Application application = applicationOptional.orElseThrow(() -> new NotFoundException("application.deleteNotFound", new Object[]{request.getId()}));
             log.info("Заявка найдена по ID: " + request.getId());
             application.setProcessed(request.getIsActive());
             log.info("Заявка успешно обновлена, статус обработки: " + application.isProcessed());
-
             applicationRepo.save(application);
             return application.isProcessed();
         } catch (NotFoundException e) {
@@ -101,7 +98,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public SimpleResponse deleteById(Long request) {
         Application application = applicationRepo.findById(request)
-                .orElseThrow(() -> new NotFoundException(messageSource.getMessage("application.deleteNotFound",new Object[]{request},LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException("application.deleteNotFound",new Object[]{request}));
         if (application.isProcessed()) {
             log.info("Application found by id: " + request);
             applicationRepo.delete(application);

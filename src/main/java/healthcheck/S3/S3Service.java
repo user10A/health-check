@@ -55,12 +55,10 @@ public class S3Service {
                 .key(key)
                 .build();
         s3.putObject(put, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
         log.info("Upload successfully deleted!");
         return Map.of(
                 "link", BUCKET_PATH + key);
     }
-
     public Map<String, String> delete(String fileLink) {
         log.info("Deleting file...");
         try {
@@ -76,7 +74,6 @@ public class S3Service {
         return Map.of(
                 "message", fileLink + " has been deleted");
     }
-  
     public ResponseEntity<ByteArrayResource> download(String fileLink) {
         try {
             log.info("Downloading file...");
@@ -84,17 +81,14 @@ public class S3Service {
             ResponseInputStream<GetObjectResponse> s3Object = s3.getObject(GetObjectRequest.builder().bucket(BUCKET_NAME).key(key).build());
             byte[] fileContent = IOUtils.toByteArray(s3Object);
             ByteArrayResource resource = new ByteArrayResource(fileContent);
-
             // Determine the content type
             MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
             if (key.toLowerCase().endsWith(".pdf")) {
                 mediaType = MediaType.APPLICATION_PDF;
             }
-
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + key);
             headers.setContentLength(resource.contentLength());
-
             log.info("Download successfully completed!");
             return ResponseEntity.ok()
                     .headers(headers)
@@ -102,7 +96,7 @@ public class S3Service {
                     .body(resource);
         } catch (S3Exception | IOException e) {
             log.error("Error downloading file: {}", e.getMessage());
-            throw new IllegalStateException(messageSource.getMessage("error.illegal_state_exception_download",null, LocaleContextHolder.getLocale()));
+            throw new IllegalStateException("error.illegal_state_exception_download");
         }
     }
     public byte[] getPdfFileByUrl(String fileUrl) {
@@ -115,7 +109,7 @@ public class S3Service {
             return content;
         } catch (S3Exception | IOException e) {
             log.error("Ошибка file не найден: {}", e.getMessage());
-            throw new IllegalStateException(messageSource.getMessage("error.illegal_state_exception_not_found",null, LocaleContextHolder.getLocale()));
+            throw new IllegalStateException("error.illegal_state_exception_not_found");
         }
     }
 }

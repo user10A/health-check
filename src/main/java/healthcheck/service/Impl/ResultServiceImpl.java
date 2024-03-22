@@ -51,8 +51,8 @@ public class ResultServiceImpl implements ResultService {
             LocalDate endDate = startDate.plusDays(7);
             Department department = departmentRepo.findByFacility(request.getFacility());
             User user = userRepo.findById(request.getUserId())
-                    .orElseThrow(() -> new NotFoundException(messageSource.getMessage("error.user_not_found",
-                            new Object[]{request.getUserId()}, LocaleContextHolder.getLocale())));
+                    .orElseThrow(() -> new NotFoundException("error.user_not_found",
+                            new Object[]{request.getUserId()}));
             Result result = Result.builder()
                     .resultDate(request.getDataOfDelivery())
                     .pdfUrl(request.getUrl())
@@ -68,7 +68,7 @@ public class ResultServiceImpl implements ResultService {
                 context.setVariable("patientName", user.getFirstName() + " " + user.getLastName());
                 context.setVariable("departmentName", department.getFacility());
                 context.setVariable("generateNumber", result.getResultNumber());
-                emailSenderService.sendEmail(user.getUserAccount().getEmail(), "HealthCheck : Оповещение о результате", "result", context);
+                emailSenderService.sendEmail(user.getUserAccount().getEmail(), messageSource.getMessage("result.subject",null,LocaleContextHolder.getLocale()), "result", context);
                 log.info("Сообщение отправлено пользователю с email : %s".formatted(user.getUserAccount().getEmail()));
                 MimeMessage mimeMessage = javaMailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
@@ -96,8 +96,8 @@ public class ResultServiceImpl implements ResultService {
     public String getResultByResultNumberResult(Long resultNumber) {
         String result = resultRepo.getResultByResultNumberResult(resultNumber);
         if (result == null) {
-            throw new NotFoundException(messageSource.getMessage("result.not_found_response",
-                    null, LocaleContextHolder.getLocale()));
+            throw new NotFoundException("result.not_found_response",
+                    new Object[]{resultNumber});
         }
         log.info("результат найден {}", result);
         return result;

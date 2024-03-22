@@ -14,6 +14,7 @@ import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.enums.Role;
 import healthcheck.exceptions.AlreadyExistsException;
+import healthcheck.exceptions.BadCredentialsException;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
@@ -22,10 +23,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
@@ -40,14 +38,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserAccountRepo userAccountRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final MessageSource messageSource;
 
     @Override
     public AuthenticationResponse signUp(SignUpRequest request) {
         try {
             if (userAccountRepo.existsUserAccountByEmail(request.getEmail())) {
-                throw new AlreadyExistsException(messageSource.
-                        getMessage("alreadyExists.emailExists", new Object[]{request.getEmail()}, LocaleContextHolder.getLocale()));
+                throw new AlreadyExistsException("alreadyExists.emailExists", new Object[]{request.getEmail()});
             }
 
             UserAccount userAccount = UserAccount.builder()
@@ -84,15 +80,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse signIn(SignInRequest request) {
         try {
             UserAccount user = userAccountRepo.getUserAccountByEmail(request.getEmail()).orElseThrow(() ->
-                    new NotFoundException(messageSource.
-                            getMessage("error.email_not_found", new Object[]{request.getEmail()}, LocaleContextHolder.getLocale())));
+                    new NotFoundException("error.email_not_found", new Object[]{request.getEmail()}));
 
             String passwordBCrypt = request.getPassword();
             passwordEncoder.encode(passwordBCrypt);
 
             if (!passwordEncoder.matches(passwordBCrypt, user.getPassword())) {
-                throw new BadCredentialsException(messageSource.
-                        getMessage("error.bad_request_exception_password", new Object[]{request.getPassword()}, LocaleContextHolder.getLocale()));
+                throw new BadCredentialsException("error.bad_request_exception_password", new Object[]{request.getPassword()});
             }
 
             String jwt = jwtService.generateToken(user.getEmail());
