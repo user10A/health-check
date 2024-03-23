@@ -54,10 +54,9 @@ public class EmailServiceImpl implements EmailService {
         userAccount.setVerificationCodeTime(new Date());
         userAccountRepo.save(userAccount);
         Context context = new Context();
-        context.setVariable("dear", messageSource.getMessage("message.sss",null,LocaleContextHolder.getLocale()));
         context.setVariable("changePassword", messageSource.getMessage("message.change.password",null,LocaleContextHolder.getLocale()));
         context.setVariable("reset", messageSource.getMessage("message.reset",null,LocaleContextHolder.getLocale()));
-        context.setVariable("userName", user.getFirstName() + " " + user.getLastName());
+        context.setVariable("userName", messageSource.getMessage("message.sss",null,LocaleContextHolder.getLocale())+" "+ user.getFirstName() + " " + user.getLastName());
         context.setVariable("greeting", getGreeting());
         context.setVariable("link", link);
         context.setVariable("confirm", messageSource.getMessage("message.confirm",null,LocaleContextHolder.getLocale()));

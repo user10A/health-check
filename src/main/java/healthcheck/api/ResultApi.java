@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
@@ -30,7 +29,6 @@ public class ResultApi {
     private final JmsService jmsService;
     @Value("${activemq.queue.name}")
     private String pdfQueue;
-
 
     @PostMapping("/save")
     @Operation(summary = "Save Result", description = "This API is used to save a result.")
@@ -63,6 +61,4 @@ public class ResultApi {
     public List<ResultsUserResponse> getResultByUserId(@PathVariable Long id){
         return resultService.getAllResultsByUserId(id);
     }
-
-
 }
