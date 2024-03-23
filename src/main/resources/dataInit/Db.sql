@@ -3,7 +3,7 @@ VALUES
     (0,'admin@gmail.com','$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K','ADMIN'),
     (1, 'pavel.morozov@example.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (2, 'aigerim.kozhomberdieva@gmail.com',  '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
-    (3, ' bakyt.akmatov@gmail.com','$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
+    (3, 'healthcheck2024java11@gmail.com','$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (4, 'cholpon.orozova@example.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (5, 'meerim.davletova@example.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
     (6, 'irina.smirnova@example.com', '$2a$04$q/5hoHH1.96f6IUIF4oEIO4EAjuLOPvJSa/hPCo5XEERI3cC2pm4K', 'USER'),
@@ -171,7 +171,7 @@ INSERT INTO result (id, result_date, time_of_uploading_result, pdf_url, result_n
 VALUES
     (1, '2024-03-15', '10:30:00', '/path/to/result.pdf', 1234500001, 1, 1),
     (2, '2024-03-16', '12:00:00', '/path/to/result_cardiology.pdf', 5432100002, 1, 2),
-    (3, '2024-03-17', '14:45:00', '/path/to/result_dermatology.pdf', 6789000003, 1, 3),
+    (3, '2024-03-17', '14:45:00', 'https://java112024.s3.eu-north-1.amazonaws.com/1711175173295PDF.pdf', 6789000003, 1, 3),
     (4, '2024-03-18', '11:15:00', '/path/to/result_orthopedics.pdf', 9876500004, 2, 4),
     (5, '2024-03-19', '16:45:00', '/path/to/result_pediatrics.pdf', 5678900005, 2, 5),
     (6, '2024-03-19', '13:30:00', '/path/to/result_urology.pdf', 4321000006, 2, 6),

@@ -61,6 +61,7 @@
             padding: 10px;
             border-radius: 5px;
             width: 200px;
+            text-transform: none;
         }
         .link{
             color: white;
@@ -83,7 +84,8 @@
         <p class="description">
             <span style="color: #048741; font-size: 28px;" th:text="${greeting}"></span>
         </p>
-        <p class="text" style="font-size: 18px;" th:text="${dear}">, <span style="font-size: 18px;" th:text="${userName}"></span></p>
+        <p class="text" style="font-size: 18px;" th:text="${userName}">
+        </p>
         <hr />
         <div class="password-reset">
             <h2 class="text" style="font-size: 18px;" th:text="${changePassword}"></h2>
