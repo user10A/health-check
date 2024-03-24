@@ -206,11 +206,11 @@ public class UserDaoImpl implements UserDao {
                 r.result_date
                 FROM
                 users u
-                JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
+                LEFT JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
                 r_max ON r_max.user_id = u.id
-                JOIN
+                LEFT JOIN
                 result r ON r.user_id = u.id AND r.result_date = r_max.max_result_date
-                JOIN
+                LEFT JOIN
                 user_account ua ON ua.id = u.user_account_id
                 WHERE concat(u.first_name, ' ', u.last_name) LIKE '%' || ? || '%'
                 OR ua.email LIKE '%' || ? || '%'
