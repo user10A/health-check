@@ -27,6 +27,8 @@ public class User {
     private List<Result> results;
     @OneToMany(mappedBy = "user",cascade = {CascadeType.REMOVE})
     private List<Appointment> appointments;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Feedback> reviews;
 
     @Override
     public String toString() {
