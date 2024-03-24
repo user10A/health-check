@@ -15,6 +15,6 @@ public class ResultUsersResponse {
     private String surname;
     private String phoneNumber;
     private String email;
-    private LocalDate resultDate;
+    private String resultDate;
 
 }

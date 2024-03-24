@@ -32,26 +32,30 @@ public class UserDaoImpl implements UserDao {
                          r.result_date
                         FROM
                          users u
-                        JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id) 
+                        LEFT JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
                          r_max ON r_max.user_id = u.id
-                        JOIN 
+                        LEFT JOIN
                          result r ON r.user_id = u.id AND r.result_date = r_max.max_result_date
-                        JOIN 
+                        LEFT JOIN
                          user_account ua ON ua.id = u.user_account_id
                         ORDER BY
-                         full_name;
+                         u.id;
                         """;
-
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             ResultUsersResponse response = new ResultUsersResponse();
             response.setId(rs.getLong("id"));
             response.setSurname(rs.getString("full_name"));
             response.setPhoneNumber(rs.getString("phone_number"));
             response.setEmail(rs.getString("email"));
-            response.setResultDate(rs.getDate("result_date").toLocalDate());
+            if (rs.getDate("result_date") != null) {
+                response.setResultDate(rs.getDate("result_date").toString());
+            } else {
+                response.setResultDate("-");
+            }
             return response;
         });
     }
+
 
     @Override
     public List<ResponseToGetUserAppointments> getAllAppointmentsOfUser(Long id) {
@@ -202,24 +206,30 @@ public class UserDaoImpl implements UserDao {
                 r.result_date
                 FROM
                 users u
-                JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
+                LEFT JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
                 r_max ON r_max.user_id = u.id
-                JOIN
+                LEFT JOIN
                 result r ON r.user_id = u.id AND r.result_date = r_max.max_result_date
-                JOIN
+                LEFT JOIN
                 user_account ua ON ua.id = u.user_account_id
                 WHERE concat(u.first_name, ' ', u.last_name) LIKE '%' || ? || '%'
                 OR ua.email LIKE '%' || ? || '%'
                 ORDER BY
-                full_name;
+                u.id;
                 """;
 
-        return jdbcTemplate.query(sql, new Object[]{word, word}, (rs, rowNum) -> ResultUsersResponse.builder()
-                .id(rs.getLong(1))
-                .surname(rs.getString(2))
-                .phoneNumber(rs.getString(3))
-                .email(rs.getString(4))
-                .resultDate(rs.getDate(5).toLocalDate())
-                .build());
+        return jdbcTemplate.query(sql, new Object[]{word, word}, (rs, rowNum) -> {
+            ResultUsersResponse response = new ResultUsersResponse();
+            response.setId(rs.getLong("id"));
+            response.setSurname(rs.getString("full_name"));
+            response.setPhoneNumber(rs.getString("phone_number"));
+            response.setEmail(rs.getString("email"));
+            if (rs.getDate("result_date") != null) {
+                response.setResultDate(rs.getDate("result_date").toString());
+            } else {
+                response.setResultDate("-"); // или любое другое значение, которое вы хотите использовать для обозначения отсутствующего результата
+            }
+            return response;
+        });
     }
 }
