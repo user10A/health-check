@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Data
 @Builder
@@ -20,6 +22,7 @@ public class Feedback {
     private Doctor doctor;
     @ManyToOne
     private User user;
-    private String comment;
+    private LocalDate localDate;
     private int rating;
+    private String comment;
 }

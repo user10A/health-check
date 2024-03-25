@@ -42,6 +42,9 @@ public class Doctor {
     @OneToOne(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     @JsonIgnore
     private Schedule schedule;
+    @OneToMany(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
+    @JsonIgnore
+    private List<Feedback> feedbacks;
 
     public String getFullNameDoctor() {
         return this.getFirstName() + " " + this.getLastName();
