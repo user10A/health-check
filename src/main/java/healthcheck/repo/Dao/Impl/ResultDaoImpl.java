@@ -36,7 +36,7 @@ public class ResultDaoImpl implements ResultDao {
                     .date(rs.getDate(2).toLocalDate())
                     .localTime(rs.getTime(3).toLocalTime())
                     .numberResult(rs.getString("result_number"))
-                    .pdf("pdf_url")
+                    .pdf(rs.getString("pdf_url"))
                     .build();
             return response;
         });
