@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDate;
 @Builder
 @Data
-public class FeedbackDao {
+public class FeedbackDaoResponse {
     private Long feedbackId;
     private String userImage;
     private String userFullName;
