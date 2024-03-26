@@ -2,15 +2,7 @@ package healthcheck.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import healthcheck.enums.Facility;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +15,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Cacheable
 public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "application_gen")

@@ -1,19 +1,13 @@
 package healthcheck.entities;
 
 import healthcheck.enums.Status;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -39,6 +33,10 @@ public class Appointment {
     private Department department;
     @ManyToOne(cascade = {CascadeType.DETACH})
     private Doctor doctor;
+
+    @Column(name = "creation_date")
+    private Timestamp creationDate;
+
     @Override
     public String toString() {
         return "Appointment{" +

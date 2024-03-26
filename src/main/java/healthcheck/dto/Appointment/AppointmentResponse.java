@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -23,4 +24,5 @@ public class AppointmentResponse {
     private LocalTime localTime;
     private String status;
     private boolean processed;
+    private Timestamp creationDate;
 }
