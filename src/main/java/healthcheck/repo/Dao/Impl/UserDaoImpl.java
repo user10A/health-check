@@ -1,5 +1,6 @@
 package healthcheck.repo.Dao.Impl;
 
+import healthcheck.dto.Doctor.DoctorResponseByWord;
 import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetUserById;
@@ -10,6 +11,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.webjars.NotFoundException;
 
+import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.List;
 
 @Repository
@@ -29,7 +32,8 @@ public class UserDaoImpl implements UserDao {
                          CONCAT(u.first_name, ' ', u.last_name) AS full_name,
                          u.phone_number,
                          ua.email,
-                         r.result_date
+                         r.result_date,
+                         u.creation_date
                         FROM
                          users u
                         LEFT JOIN ( SELECT user_id, MAX(result_date) AS max_result_date FROM result GROUP BY user_id)
@@ -41,7 +45,8 @@ public class UserDaoImpl implements UserDao {
                         ORDER BY
                          u.id;
                         """;
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+
+        List<ResultUsersResponse> responses = jdbcTemplate.query(sql, (rs, rowNum) -> {
             ResultUsersResponse response = new ResultUsersResponse();
             response.setId(rs.getLong("id"));
             response.setSurname(rs.getString("full_name"));
@@ -52,8 +57,17 @@ public class UserDaoImpl implements UserDao {
             } else {
                 response.setResultDate("-");
             }
+
+            Timestamp timestamp = rs.getTimestamp("creation_date");
+            if (timestamp != null) {
+                response.setCreationDate(timestamp);
+            }
             return response;
         });
+        responses.sort(Comparator.comparing(ResultUsersResponse::getCreationDate,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+
+        return responses;
     }
 
 

@@ -1,5 +1,6 @@
 package healthcheck.service.Impl;
 
+import com.google.cloud.Timestamp;
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.email.EmailService;
@@ -57,6 +58,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DepartmentRepo departmentRepo;
     private final AppointmentDao appointmentDao;
     private final MessageSource messageSource;
+
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
         log.info("Запрос на получение всех приемов для слова: {}", word);
@@ -153,6 +155,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
                 .build();
+
         appointmentRepo.save(appointment);
         timeSheet.setAvailable(true);
         timeSheetRepo.save(timeSheet);
@@ -206,6 +209,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .appointmentTime(startOfConsultation)
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
+                .creationDate(Timestamp.now().toSqlTimestamp())
                 .build();
         appointmentRepo.save(appointment);
         timeSheet.setAvailable(true);

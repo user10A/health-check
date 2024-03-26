@@ -42,5 +42,4 @@ public class ResultDaoImpl implements ResultDao {
         });
         return getAll;
     }
-
 }
