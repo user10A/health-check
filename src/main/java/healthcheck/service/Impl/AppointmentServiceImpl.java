@@ -340,13 +340,13 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointmentRepo.deleteAll(appointments);
             log.info("Заявки успешно удалены");
 
-            return new SimpleResponse(HttpStatus.OK,"message.delete_response");
+            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",null,LocaleContextHolder.getLocale()));
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка удаления заявок: Некоторые заявки не найдены");
-            return new SimpleResponse(HttpStatus.NOT_FOUND,"error.appointment_response_bad_request_all");
-        } catch (Exception e) {
-            log.error("Ошибка удаления заявок: " + e.getMessage());
-            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,"error.appointment_response_internalServerError");
-        }
+            return new SimpleResponse(HttpStatus.NOT_FOUND,messageSource.getMessage("error.appointment_response_bad_request_all",null,LocaleContextHolder.getLocale()));
+    } catch (Exception e) {
+        log.error("Ошибка удаления заявок: " + e.getMessage());
+        return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.appointment_response_internalServerError",null,LocaleContextHolder.getLocale()));
+    }
     }
 }
