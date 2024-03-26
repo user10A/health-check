@@ -308,7 +308,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             return new SimpleResponse(HttpStatus.OK,messageSource.getMessage("message.delete_response",null,LocaleContextHolder.getLocale()));
         }else {
             log.error("Appointment с ID: " + id + " не обработан");
-            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,"error.appointment_response_bad_request");
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,messageSource.getMessage("error.appointment_response_bad_request",null,LocaleContextHolder.getLocale()));
         }
     }
 
