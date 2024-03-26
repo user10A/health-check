@@ -19,4 +19,6 @@ public class ApplicationResponse {
     private String phoneNumber;
     private boolean processed;
     private Timestamp creationDate;
+
+
 }
