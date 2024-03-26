@@ -1,14 +1,12 @@
 package healthcheck.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -26,4 +24,7 @@ public class Application {
     private LocalDate dateOfApplicationCreation;
     private String phoneNumber;
     private boolean processed;
+
+    @Column(name = "creation_date")
+    private Timestamp creationDate;
 }

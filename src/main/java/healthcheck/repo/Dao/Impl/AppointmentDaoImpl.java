@@ -8,17 +8,19 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.time.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Arrays;
+import java.sql.Timestamp;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
 public class AppointmentDaoImpl implements AppointmentDao {
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId) {
         ZoneId zoneId = ZoneId.of("Asia/Bishkek");
@@ -84,7 +86,6 @@ public class AppointmentDaoImpl implements AppointmentDao {
         }
     }
 
-
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
         String sql = """
@@ -98,7 +99,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
                     a.appointment_date,
                     a.appointment_time,
                     a.status,
-                    a.processed
+                    a.processed,
+                    a.creation_date
                 FROM Appointment a
                     JOIN users u ON a.user_id = u.id
                     JOIN Doctor d ON a.doctor_id = d.id
@@ -110,19 +112,30 @@ public class AppointmentDaoImpl implements AppointmentDao {
                           LOWER(d.last_name) LIKE concat('%', LOWER(?), '%')
                       
                 """;
-        return jdbcTemplate.query(sql, new Object[]{word,word,word,word}, (rs, rowNum) ->
-                AppointmentResponse.builder()
-                    .appointmentId(rs.getLong(1))
-                    .fullName(rs.getString(2))
-                    .phoneNumber(rs.getString(3))
-                    .email(rs.getString(4))
-                    .facility(rs.getString(5))
-                    .specialist(rs.getString(6))
-                    .localDate(rs.getDate(7).toLocalDate())
-                    .localTime(rs.getTime(8).toLocalTime())
-                    .status(rs.getString("status"))
-                    .processed(rs.getBoolean(10))
-                    .build());
+
+        List<AppointmentResponse> responsesWord = jdbcTemplate.query(sql, new Object[]{word,word,word,word},
+                (rs, rowNum) -> {
+                AppointmentResponse response = new AppointmentResponse();
+                    response.setAppointmentId(rs.getLong(1));
+                    response.setFullName(rs.getString(2));
+                    response.setPhoneNumber(rs.getString(3));
+                    response.setEmail(rs.getString(4));
+                    response.setFacility(rs.getString(5));
+                    response.setSpecialist(rs.getString(6));
+                    response.setLocalDate(rs.getDate(7).toLocalDate());
+                    response.setLocalTime(rs.getTime(8).toLocalTime());
+                    response.setStatus(rs.getString("status"));
+                    response.setProcessed(rs.getBoolean(10));
+
+                    Timestamp creationTimestamp = rs.getTimestamp("creation_date");
+                    if (creationTimestamp != null) {
+                        response.setCreationDate(Timestamp.valueOf(creationTimestamp.toLocalDateTime()));
+                    }
+
+                    return response;
+                });
+
+        return responsesWord;
     }
 
     @Override
@@ -138,7 +151,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
                     a.appointment_date,
                     a.appointment_time,
                     a.status,
-                    a.processed
+                    a.processed,
+                    a.creation_date
                 FROM Appointment a
                     JOIN users u ON a.user_id = u.id
                     JOIN Doctor d ON a.doctor_id = d.id
@@ -146,22 +160,30 @@ public class AppointmentDaoImpl implements AppointmentDao {
                     JOIN department dep ON d.department_id = dep.id
                 order by a.id
                 """;
-        return jdbcTemplate.query(sql,(rs, rowNum) ->
-             AppointmentResponse.builder()
-                    .appointmentId(rs.getLong(1))
-                    .fullName(rs.getString(2))
-                    .phoneNumber(rs.getString(3))
-                    .email(rs.getString(4))
-                    .facility(rs.getString(5))
-                    .specialist(rs.getString(6))
-                    .localDate(rs.getDate(7).toLocalDate())
-                    .localTime(rs.getTime(8).toLocalTime())
-                    .status(rs.getString("status"))
-                    .processed(rs.getBoolean(10))
-                    .build()
-        );
-    }
+        List<AppointmentResponse> responsesDefault = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            AppointmentResponse response = new AppointmentResponse();
+            response.setAppointmentId(rs.getLong(1));
+            response.setFullName(rs.getString(2));
+            response.setPhoneNumber(rs.getString(3));
+            response.setEmail(rs.getString(4));
+            response.setFacility(rs.getString(5));
+            response.setSpecialist(rs.getString(6));
+            response.setLocalDate(rs.getDate(7).toLocalDate());
+            response.setLocalTime(rs.getTime(8).toLocalTime());
+            response.setStatus(rs.getString("status"));
+            response.setProcessed(rs.getBoolean(10));
 
+            Timestamp creationTimestamp = rs.getTimestamp("creation_date");
+            if (creationTimestamp != null) {
+                response.setCreationDate(Timestamp.valueOf(creationTimestamp.toLocalDateTime()));
+            }
+            return response;
+        });
+        responsesDefault.sort(Comparator.comparing(AppointmentResponse::getCreationDate,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+
+        return responsesDefault;
+    }
 
     public DayOfWeek getDayOfWeek(LocalDate date) {
         return date.getDayOfWeek();

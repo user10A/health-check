@@ -1,5 +1,6 @@
 package healthcheck.service.Impl;
 
+import com.google.cloud.Timestamp;
 import healthcheck.dto.Doctor.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
@@ -18,18 +19,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Locale;
-
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DoctorServiceImpl implements DoctorService {
-
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
     private final DoctorDao doctorDao;
     private final MessageSource messageSource;
+
     @Override
     @Transactional
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
@@ -46,6 +45,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .department(department)
                 .description(request.getDescription())
                 .isActive(false)
+                .creationDate(Timestamp.now().toSqlTimestamp())
                 .build();
 
         department.addDoctor(doctor);
