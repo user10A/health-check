@@ -25,4 +25,7 @@ public class AppointmentResponse {
     private String status;
     private boolean processed;
     private Timestamp creationDate;
+
+    public AppointmentResponse(long l, String johnDoe, String number, String mail, String s, String s1, LocalDate now, LocalTime now1, String scheduled, boolean b) {
+    }
 }
