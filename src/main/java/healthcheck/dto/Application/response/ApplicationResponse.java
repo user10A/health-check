@@ -21,4 +21,6 @@ public class ApplicationResponse {
     private Timestamp creationDate;
 
 
+    public ApplicationResponse(long i, String johnDoe, LocalDate now, String number, boolean b) {
+    }
 }
