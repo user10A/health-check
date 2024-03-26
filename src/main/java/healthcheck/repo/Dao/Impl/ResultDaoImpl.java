@@ -5,7 +5,7 @@ import healthcheck.repo.Dao.ResultDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
+import java.util.Comparator;
 import java.util.List;
 
 @Repository
@@ -36,10 +36,15 @@ public class ResultDaoImpl implements ResultDao {
                     .date(rs.getDate(2).toLocalDate())
                     .localTime(rs.getTime(3).toLocalTime())
                     .numberResult(rs.getString("result_number"))
-                    .pdf("pdf_url")
+                    .pdf(rs.getString("pdf_url"))
                     .build();
             return response;
         });
+
+        getAll.sort(Comparator.comparing(response -> {
+            return response.getDate().atTime(response.getLocalTime());
+        }, Comparator.nullsLast(Comparator.reverseOrder())));
+
         return getAll;
     }
 }
