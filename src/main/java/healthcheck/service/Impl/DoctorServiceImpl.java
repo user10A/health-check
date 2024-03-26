@@ -81,15 +81,14 @@ public class DoctorServiceImpl implements DoctorService {
 
         Doctor doctor = doctorRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("doctor.not.found", new Object[]{id}));
-        doctor = Doctor.builder()
-                .id(doctor.getId())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .position(request.getPosition())
-                .image(request.getImage())
-                .department(department)
-                .description(request.getDescription())
-                .build();
+        doctor.setId(doctor.getId());
+        doctor.setFirstName(doctor.getFirstName());
+        doctor.setLastName(doctor.getLastName());
+        doctor.setPosition(doctor.getPosition());
+        doctor.setImage(doctor.getImage());
+        doctor.setDepartment(department);
+        doctor.setDescription(request.getDescription());
+        
         department.addDoctor(doctor);
         doctorRepo.save(doctor);
         departmentRepo.save(department);
