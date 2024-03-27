@@ -11,7 +11,6 @@ import healthcheck.enums.Facility;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.service.DoctorService;
 import healthcheck.service.ScheduleService;
-import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
