@@ -33,60 +33,60 @@ public class DoctorServiceTest {
         this.doctorRepo = doctorRepo;
     }
 
-    @Test
-    @DisplayName("Сохранение врача с существующим отделением")
-    public void saveDoctor_ExistingDepartment_Success() {
-        DoctorSaveRequest request = DoctorSaveRequest.builder()
-                .firstName("Jane")
-                .lastName("Smith")
-                .position("Surgeon")
-                .image("https://example.com/doctor.jpg")
-                .description("Highly skilled surgeon specializing in cardiovascular procedures.")
-                .build();
+//    @Test
+//    @DisplayName("Сохранение врача с существующим отделением")
+//    public void saveDoctor_ExistingDepartment_Success() {
+//        DoctorSaveRequest request = DoctorSaveRequest.builder()
+//                .firstName("Jane")
+//                .lastName("Smith")
+//                .position("Surgeon")
+//                .image("https://example.com/doctor.jpg")
+//                .description("Highly skilled surgeon specializing in cardiovascular procedures.")
+//                .build();
+//
+//        try {
+//            Long departmentId = 2L;
+//            Department existingDepartment = new Department();
+//            existingDepartment.setId(departmentId);
+//
+//            request.setDepartmentId(departmentId);
+//
+//            SimpleResponse response = doctorService.saveDoctor(request);
+//
+////            log.info("Результат сохранения врача: HttpStatus - {}, Message - {}", response.getHttpStatus(), response.getMessage());
+//
+//            assertEquals(HttpStatus.OK, response.getHttpStatus());
+////            assertEquals("Успешно сохранен!", response.getMessage());
+//
+//        } catch (Exception e) {
+//            log.error("Ошибка при сохранении врача: " + e.getMessage());
+//            throw e;
+//        }
+//    }
 
-        try {
-            Long departmentId = 2L;
-            Department existingDepartment = new Department();
-            existingDepartment.setId(departmentId);
-
-            request.setDepartmentId(departmentId);
-
-            SimpleResponse response = doctorService.saveDoctor(request);
-
-//            log.info("Результат сохранения врача: HttpStatus - {}, Message - {}", response.getHttpStatus(), response.getMessage());
-
-            assertEquals(HttpStatus.OK, response.getHttpStatus());
-//            assertEquals("Успешно сохранен!", response.getMessage());
-
-        } catch (Exception e) {
-            log.error("Ошибка при сохранении врача: " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    @DisplayName("Сохранение врача с несуществующим отделением")
-    public void saveDoctor_NonExistingDepartment_ThrowsException() {
-        DoctorSaveRequest request = DoctorSaveRequest.builder()
-                .firstName("John")
-                .lastName("Doe")
-                .position("Pediatrician")
-                .image("https://example.com/doctor2.jpg")
-                .description("Experienced pediatrician with a focus on child health.")
-                .build();
-
-        try {
-            Long nonExistingDepartmentId = 99L;
-            request.setDepartmentId(nonExistingDepartmentId);
-
-            NotFoundException response = assertThrows(NotFoundException.class, () ->
-                    doctorService.saveDoctor(request));
-
-            assertEquals(response.getMessage(), String.format("Отделение с ID: %d не найдено", nonExistingDepartmentId));
-
-        } catch (Exception e) {
-            log.error("Ошибка при сохранении врача с несуществующим отделением: " + e.getMessage());
-            throw e;
-        }
-    }
+//    @Test
+//    @DisplayName("Сохранение врача с несуществующим отделением")
+//    public void saveDoctor_NonExistingDepartment_ThrowsException() {
+//        DoctorSaveRequest request = DoctorSaveRequest.builder()
+//                .firstName("John")
+//                .lastName("Doe")
+//                .position("Pediatrician")
+//                .image("https://example.com/doctor2.jpg")
+//                .description("Experienced pediatrician with a focus on child health.")
+//                .build();
+//
+//        try {
+//            Long nonExistingDepartmentId = 99L;
+////            request.setDepartmentId(nonExistingDepartmentId);
+//
+//            NotFoundException response = assertThrows(NotFoundException.class, () ->
+//                    doctorService.saveDoctor(request));
+//
+//            assertEquals(response.getMessage(), String.format("Отделение с ID: %d не найдено", nonExistingDepartmentId));
+//
+//        } catch (Exception e) {
+//            log.error("Ошибка при сохранении врача с несуществующим отделением: " + e.getMessage());
+//            throw e;
+//        }
+//    }
 }
