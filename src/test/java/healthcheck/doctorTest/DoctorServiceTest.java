@@ -33,6 +33,7 @@ public class DoctorServiceTest {
         this.doctorRepo = doctorRepo;
     }
 
+
 //    @Test
 //    @DisplayName("Сохранение врача с существующим отделением")
 //    public void saveDoctor_ExistingDepartment_Success() {
