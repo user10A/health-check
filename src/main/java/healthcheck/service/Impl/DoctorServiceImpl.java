@@ -19,16 +19,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Locale;
+
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DoctorServiceImpl implements DoctorService {
+
     private final DoctorRepo doctorRepo;
     private final DepartmentRepo departmentRepo;
     private final DoctorDao doctorDao;
     private final MessageSource messageSource;
-
     @Override
     @Transactional
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
@@ -50,6 +52,7 @@ public class DoctorServiceImpl implements DoctorService {
                     .build();
             department.addDoctor(doctor);
             doctorRepo.save(doctor);
+
             log.info("Врач успешно сохранен: " + doctor.getFirstName() + " " + doctor.getLastName());
             return SimpleResponse.builder()
                     .httpStatus(HttpStatus.OK)

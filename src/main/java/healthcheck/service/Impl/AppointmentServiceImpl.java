@@ -1,6 +1,5 @@
 package healthcheck.service.Impl;
 
-import com.google.cloud.Timestamp;
 import healthcheck.dto.Appointment.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.email.EmailService;
@@ -58,7 +57,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DepartmentRepo departmentRepo;
     private final AppointmentDao appointmentDao;
     private final MessageSource messageSource;
-
     @Override
     public List<AppointmentResponse> getAllAppointment(String word) {
         log.info("Запрос на получение всех приемов для слова: {}", word);
@@ -83,7 +81,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         variables.put("dayOfMonth",dayOfMonth);
         sendEmail(userAccount.getEmail(), variables);
         return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.response",
-                null, LocaleContextHolder.getLocale()));    }
+                null, LocaleContextHolder.getLocale()));}
     private void sendEmail(String to, Map<String, String> variables) {
         try {
             String templatePath = "confirmation_email";
@@ -155,7 +153,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
                 .build();
-
         appointmentRepo.save(appointment);
         timeSheet.setAvailable(true);
         timeSheetRepo.save(timeSheet);
@@ -209,7 +206,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .appointmentTime(startOfConsultation)
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
-                .creationDate(Timestamp.now().toSqlTimestamp())
                 .build();
         appointmentRepo.save(appointment);
         timeSheet.setAvailable(true);
@@ -344,9 +340,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка удаления заявок: Некоторые заявки не найдены");
             return new SimpleResponse(HttpStatus.NOT_FOUND,messageSource.getMessage("error.appointment_response_bad_request_all",null,LocaleContextHolder.getLocale()));
-    } catch (Exception e) {
-        log.error("Ошибка удаления заявок: " + e.getMessage());
-        return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.appointment_response_internalServerError",null,LocaleContextHolder.getLocale()));
-    }
+        } catch (Exception e) {
+            log.error("Ошибка удаления заявок: " + e.getMessage());
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.appointment_response_internalServerError",null,LocaleContextHolder.getLocale()));
+        }
     }
 }

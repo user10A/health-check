@@ -55,7 +55,7 @@ public class AppointmentApi {
     @PostMapping("/addByDoctorId")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "add appointment", description = "Endpoint to add appointment.")
-    public SimpleResponse addAppointmentByDoctorId(@RequestBody AppointmentRequest request) throws MessagingException, IOException {
+    public SimpleResponse addAppointmentByDoctorId(@RequestBody @Valid AppointmentRequest request) throws MessagingException, IOException {
         return appointmentService.addAppointmentByDoctorId(request);
     }
 
@@ -85,7 +85,7 @@ public class AppointmentApi {
     @GetMapping("/{id}")
     @Operation(summary = "Get available timesheet doctors by ID", description = "Endpoint to get available timesheet doctors by doctor ID.")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
-    public List<TimeSheetResponse> getTimeSheetDoctors(@PathVariable Long id) {
+    public List<TimeSheetResponse> getTimeSheetByIdDoctors(@PathVariable Long id) {
         return timeSheetService.getTimesheetDoctorById(id);
     }
 

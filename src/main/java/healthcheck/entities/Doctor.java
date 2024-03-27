@@ -36,6 +36,9 @@ public class Doctor {
     @OneToOne(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
     @JsonIgnore
     private Schedule schedule;
+    @OneToMany(mappedBy = "doctor",cascade = {CascadeType.REMOVE})
+    @JsonIgnore
+    private List<Feedback> feedbacks;
 
     @Column(name = "creation_date")
     private Timestamp creationDate;

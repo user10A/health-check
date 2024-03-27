@@ -29,6 +29,8 @@ public class User {
     private List<Result> results;
     @OneToMany(mappedBy = "user",cascade = {CascadeType.REMOVE})
     private List<Appointment> appointments;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.REMOVE})
+    private List<Feedback> feedbacks;
 
     @Column(name = "creation_date")
     private Timestamp creationDate;

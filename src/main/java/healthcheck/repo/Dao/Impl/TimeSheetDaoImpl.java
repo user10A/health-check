@@ -1,7 +1,9 @@
 package healthcheck.repo.Dao.Impl;
 
+import healthcheck.dto.Feedback.RatingResponse;
 import healthcheck.dto.Schedule.ScheduleDate;
 import healthcheck.dto.TimeSheet.TimeSheetResponse;
+import healthcheck.repo.Dao.FeedbackDao;
 import healthcheck.repo.Dao.TimeSheetDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -16,6 +18,7 @@ import java.util.*;
 public class TimeSheetDaoImpl implements TimeSheetDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final FeedbackDao feedbackDao;
 
     @Override
     public List<TimeSheetResponse> getTimesheetDoctor(String facility) {
@@ -27,38 +30,43 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
         String sql =
                 """
                 SELECT
-                    doc.id AS doctor_id,
-                    doc.image AS image,
-                    CONCAT(doc.first_name, ' ', doc.last_name) AS doctor_full_name,
+                    doctor.id AS doctor_id,
+                    doctor.image AS image,
+                    CONCAT(doctor.first_name, ' ', doctor.last_name) AS doctor_full_name,
                     d.facility AS facility,
                     t.date_of_consultation AS date_of_consultation,
                     STRING_AGG(t.start_time_of_consultation::TEXT, ', ' ORDER BY t.start_time_of_consultation) AS start_times
                 FROM
                     department d
                 JOIN
-                    doctor doc ON d.id = doc.department_id
+                    doctor doctor ON d.id = doctor.department_id
                 JOIN
-                    schedule sched ON doc.id = sched.doctor_id
+                    schedule sched ON doctor.id = sched.doctor_id
                 JOIN
                     time_sheet t ON sched.id = t.schedule_id
                 WHERE
                     d.facility = ? AND t.available = false AND t.date_of_consultation BETWEEN TO_DATE(?, 'YYYY-MM-DD') AND TO_DATE(?, 'YYYY-MM-DD') AND (
                     t.date_of_consultation > TO_DATE(?, 'YYYY-MM-DD') OR t.start_time_of_consultation > CAST(? AS TIME))
                 GROUP BY
-                    doc.id, doc.image, doctor_full_name, d.facility, t.date_of_consultation
+                    doctor.id,doctor.image, doctor_full_name, d.facility, t.date_of_consultation
                 ORDER BY
                     t.date_of_consultation;
                 """;
-         return jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) ->
-              TimeSheetResponse.builder()
+        List<TimeSheetResponse> query = jdbcTemplate.query(sql, new Object[]{facility, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) -> {
+            RatingResponse rating = feedbackDao.getRaringResponseByIdDoctor(rs.getLong("doctor_id"));
+            return TimeSheetResponse.builder()
                     .doctorId(rs.getLong("doctor_id"))
+                    .averageRating(rating.getAverageRating())
+                    .count(rating.getCountRating())
                     .imageDoctor(rs.getString("image"))
                     .doctorFullName(rs.getString("doctor_full_name"))
                     .department(rs.getString("facility"))
                     .dayOfWeek(getDayOfWeek(rs.getDate("date_of_consultation").toLocalDate()).name())
                     .dateOfConsultation(String.valueOf(rs.getDate("date_of_consultation").toLocalDate()))
                     .startTimeOfConsultation(Arrays.asList(rs.getString("start_times").split(", ")))
-                    .build());
+                    .build();
+        });
+        return query;
     }
 
     @Override
@@ -136,6 +144,8 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
         """
         SELECT
             doc.id AS doctor_id,
+            avg(f.rating) as rating,
+            count(f) as feedback_count
             doc.image AS image,
             CONCAT(doc.first_name, ' ', doc.last_name) AS doctor_full_name,
             d.facility AS facility,
@@ -149,17 +159,22 @@ public class TimeSheetDaoImpl implements TimeSheetDao {
             schedule sched ON doc.id = sched.doctor_id
         JOIN
             time_sheet t ON sched.id = t.schedule_id
+        JOIN
+            feedback f ON f.doctor_id = doc.id
         WHERE
             doc.id = ? AND t.available = false AND t.date_of_consultation BETWEEN TO_DATE(?, 'YYYY-MM-DD') AND TO_DATE(?, 'YYYY-MM-DD') AND (
             t.date_of_consultation > TO_DATE(?, 'YYYY-MM-DD') OR t.start_time_of_consultation > CAST(? AS TIME))
         GROUP BY
-            doc.id, doc.image, doctor_full_name, d.facility, t.date_of_consultation
-            ORDER BY
-            t.date_of_consultation;
+           GROUP BY
+           doc.id, doc.image, doctor_full_name, d.facility, t.date_of_consultation
+        ORDER BY
+           t.date_of_consultation;
         """;
         return jdbcTemplate.query(sql, new Object[]{id, start.toString(), end.toString(), start.toString(), startTime.toString()}, (rs, rowNum) ->
                 TimeSheetResponse.builder()
                         .doctorId(rs.getLong("doctor_id"))
+                        .averageRating(rs.getDouble("rating"))
+                        .count(rs.getInt("feedback_count"))
                         .imageDoctor(rs.getString("image"))
                         .doctorFullName(rs.getString("doctor_full_name"))
                         .department(rs.getString("facility"))
