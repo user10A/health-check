@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 @Data
 public class DoctorSaveRequest {
-        private Long departmentId;
+        private String department;
         @NotBlank
         private String firstName;
         @NotBlank

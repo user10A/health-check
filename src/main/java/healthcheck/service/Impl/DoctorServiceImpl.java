@@ -32,30 +32,32 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     @Transactional
     public SimpleResponse saveDoctor(DoctorSaveRequest request) {
-        Department department = departmentRepo.findById(request.getDepartmentId())
-                .orElseThrow(() -> new NotFoundException(
-                       "error.department_not_found", new Object[]{request.getDepartmentId()})
-                );
-
-        Doctor doctor = Doctor.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .position(request.getPosition())
-                .image(request.getImage())
-                .department(department)
-                .description(request.getDescription())
-                .isActive(false)
-                .creationDate(Timestamp.now().toSqlTimestamp())
-                .build();
-
-        department.addDoctor(doctor);
-        doctorRepo.save(doctor);
-
-        log.info("Врач успешно сохранен: " + doctor.getFirstName() + " " + doctor.getLastName());
-        return SimpleResponse.builder()
-                .httpStatus(HttpStatus.OK)
-                .messageCode(messageSource.getMessage("doctor.save.success",null,LocaleContextHolder.getLocale()))
-                .build();
+        try {
+            Department department = departmentRepo.findByFacility(Facility.valueOf(request.getDepartment()));
+            if (department == null) {
+                throw new NotFoundException(
+                        "error.department_not_found1", new Object[]{request.getDepartment()});
+            }
+            Doctor doctor = Doctor.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .position(request.getPosition())
+                    .image(request.getImage())
+                    .department(department)
+                    .description(request.getDescription())
+                    .isActive(false)
+                    .creationDate(Timestamp.now().toSqlTimestamp())
+                    .build();
+            department.addDoctor(doctor);
+            doctorRepo.save(doctor);
+            log.info("Врач успешно сохранен: " + doctor.getFirstName() + " " + doctor.getLastName());
+            return SimpleResponse.builder()
+                    .httpStatus(HttpStatus.OK)
+                    .messageCode(messageSource.getMessage("doctor.save.success", null, LocaleContextHolder.getLocale()))
+                    .build();
+        }catch (IllegalArgumentException e){
+            throw new NotFoundException( "error.department_not_found1", new Object[]{request.getDepartment()});
+        }
     }
 
     @Override
