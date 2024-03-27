@@ -41,7 +41,8 @@ public class AppointmentApi {
     @GetMapping("/getAppointment")
     @Operation(summary = "Get appointment", description = "Endpoint to get appointment.")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public List<AppointmentResponse> getAppointment(@RequestParam String word){
+    public List<AppointmentResponse>
+    getAppointment(@RequestParam String word){
         return appointmentService.getAllAppointment(word);
     }
 

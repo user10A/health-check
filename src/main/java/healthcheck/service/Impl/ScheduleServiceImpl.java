@@ -1,6 +1,8 @@
 package healthcheck.service.Impl;
 
+import com.google.cloud.Timestamp;
 import healthcheck.dto.Appointment.AddScheduleRequest;
+import healthcheck.dto.Schedule.PatternTimeSheetRequest;
 import healthcheck.dto.Schedule.ResponseToGetSchedules;
 import healthcheck.dto.Schedule.ScheduleUpdateRequest;
 import healthcheck.dto.Schedule.TimeSheetDeleteRequest;
@@ -9,7 +11,6 @@ import healthcheck.entities.Department;
 import healthcheck.entities.Doctor;
 import healthcheck.entities.Schedule;
 import healthcheck.entities.TimeSheet;
-import healthcheck.dto.Schedule.PatternTimeSheetRequest;
 import healthcheck.enums.DaysOfRepetition;
 import healthcheck.enums.Facility;
 import healthcheck.exceptions.AlreadyExistsException;
@@ -86,6 +87,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .dayOfWeek(days)
                 .doctor(doctor)
                 .department(department)
+                .creationDate(Timestamp.now().toSqlTimestamp())
                 .build();
 
         scheduleRepo.save(schedule);

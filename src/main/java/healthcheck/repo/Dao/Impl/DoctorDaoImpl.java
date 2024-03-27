@@ -2,8 +2,8 @@ package healthcheck.repo.Dao.Impl;
 
 import healthcheck.dto.Doctor.DoctorResponse;
 import healthcheck.dto.Doctor.DoctorResponseByWord;
-import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse1;
 import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse;
+import healthcheck.dto.Doctor.DoctorsGetAllByDepartmentsResponse1;
 import healthcheck.dto.GlobalSearch.SearchResponse;
 import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.DoctorDao;
@@ -13,6 +13,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.List;
 
 @Repository
@@ -71,23 +74,35 @@ public class DoctorDaoImpl implements DoctorDao {
                                                          d.last_name,
                                                          d2.facility,
                                                          s.end_date_work,
-                                                         d.position
+                                                         d.position,
+                                                         d.creation_date
                                                      FROM Doctor d
                                                      JOIN schedule s ON d.id = s.doctor_id
                                                      JOIN department d2 on d.department_id = d2.id
                 ORDER BY d.id
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> DoctorResponseByWord.builder()
-                .id(rs.getLong(1))
-                .image(rs.getString(2))
-                .isActive(rs.getBoolean(3))
-                .firstName(rs.getString(4))
-                .lastName(rs.getString(5))
-                .department(rs.getString(6))
-                .endDateWork(rs.getDate(7).toLocalDate())
-                .position(rs.getString(8))
-                .build());
+        List<DoctorResponseByWord> response = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            DoctorResponseByWord responseByWord = new DoctorResponseByWord();
+            responseByWord.setId(rs.getLong(1));
+            responseByWord.setImage(rs.getString(2));
+            responseByWord.setIsActive(rs.getBoolean(3));
+            responseByWord.setFirstName(rs.getString(4));
+            responseByWord.setLastName(rs.getString(5));
+            responseByWord.setDepartment(rs.getString(6));
+            responseByWord.setEndDateWork(rs.getDate(7).toLocalDate());
+            responseByWord.setPosition(rs.getString(8));
+
+            Timestamp creationTimestamp = rs.getTimestamp(9);
+            if (creationTimestamp != null) {
+                responseByWord.setCreationDate(Timestamp.valueOf(creationTimestamp.toLocalDateTime()));
+            }
+            return responseByWord;
+        });
+        response.sort(Comparator.comparing(DoctorResponseByWord::getCreationDate,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+
+        return response;
     }
 
     @Override
@@ -117,8 +132,9 @@ public class DoctorDaoImpl implements DoctorDao {
                 .image(rs.getString(6))
                 .build());
     }
+
     @Override
-    public List<DoctorsGetAllByDepartmentsResponse1>getAllDoctorByDepartments (String facility) {
+    public List<DoctorsGetAllByDepartmentsResponse1> getAllDoctorByDepartments(String facility) {
         var sql = """
                 SELECT
                     d.id,
@@ -140,6 +156,7 @@ public class DoctorDaoImpl implements DoctorDao {
                 .position(rs.getString(4))
                 .build());
     }
+
     @Override
     public List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments() {
 
@@ -190,6 +207,4 @@ public class DoctorDaoImpl implements DoctorDao {
             throw new NotFoundException(messageSource.getMessage("doctor.not.found", new Object[]{id}, LocaleContextHolder.getLocale()));
         }
     }
-
-
 }

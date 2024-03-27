@@ -3,7 +3,6 @@ package healthcheck.chatBot;
 import healthcheck.chatBot.dto.ChatGPTRequest;
 import healthcheck.chatBot.dto.ChatGptResponse;
 import healthcheck.entities.Department;
-import healthcheck.entities.Doctor;
 import healthcheck.enums.Facility;
 import healthcheck.repo.DepartmentRepo;
 import healthcheck.repo.DoctorRepo;
@@ -149,18 +148,6 @@ public class ChatBotApi {
         return sendOpenAiRequest(query);
     }
 
-    private String getDoctorsInfo(String departmentName) {
-        Department department = departmentRepo.findByFacility(Facility.valueOf(departmentName));
-        List<Doctor> doctors = doctorRepository.getDoctorsByDepartment(department);
-        if (doctors.isEmpty()) {
-            return "В данный момент нет доступных докторов в отделении " + departmentName;
-        } else {
-            return doctors.stream()
-                    .map(Doctor::getFullNameDoctor)
-                    .collect(Collectors.joining(", ", "Доступные доктора в отделении " + departmentName + ": ", "."));
-        }
-    }
-
     private List<String> getDoctorsInfoTimeSheet(String departmentName) {
         Department department = departmentRepo.findByFacility(Facility.valueOf(departmentName));
         LocalDate currentDate = LocalDate.now();
@@ -187,9 +174,8 @@ public class ChatBotApi {
 
     private Object processDiseaseKeywords(String diseaseType, @NotNull String message) {
         return switch (message.toLowerCase()) {
-            case "симптомы" -> buildMedicineQueryC(diseaseType);
+            case "список симптомов" -> buildMedicineQueryC(diseaseType);
             case "лекарства" -> buildMedicineQueryL(diseaseType);
-            case "доктора" -> getDoctorsInfo(diseaseType);
             case "запись" -> getDoctorsInfoTimeSheet(diseaseType);
             default -> processOtherKeywords(diseaseType, message);
         };

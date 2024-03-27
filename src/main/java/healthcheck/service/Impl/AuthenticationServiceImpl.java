@@ -1,6 +1,7 @@
 package healthcheck.service.Impl;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.Timestamp;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,6 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .lastName(request.getLastName())
                     .phoneNumber(request.getNumber())
                     .userAccount(userAccount)
+                    .creationDate(Timestamp.now().toSqlTimestamp())
                     .build();
 
             userRepo.save(user);

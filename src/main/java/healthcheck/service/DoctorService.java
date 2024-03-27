@@ -17,6 +17,4 @@ public interface DoctorService {
     SimpleResponse deleteDoctorById(Long doctorId);
     SimpleResponse updateDoctorStatusById(Long id,boolean b);
     List<DoctorsGetAllByDepartmentsResponse> getAllDoctorsSortByDepartments();
-
-
 }

@@ -9,7 +9,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,9 @@ public class Schedule {
     private Doctor doctor;
     @ManyToOne
     private Department department;
+
+    @Column(name = "creation_date")
+    private Timestamp creationDate;
 
     @Override
     public int hashCode() {
