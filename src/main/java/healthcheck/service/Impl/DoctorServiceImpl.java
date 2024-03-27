@@ -1,5 +1,6 @@
 package healthcheck.service.Impl;
 
+import com.google.cloud.Timestamp;
 import healthcheck.dto.Doctor.*;
 import healthcheck.dto.SimpleResponse;
 import healthcheck.entities.Department;
@@ -85,15 +86,13 @@ public class DoctorServiceImpl implements DoctorService {
 
         Doctor doctor = doctorRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("doctor.not.found", new Object[]{id}));
-        doctor = Doctor.builder()
-                .id(doctor.getId())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .position(request.getPosition())
-                .image(request.getImage())
-                .department(department)
-                .description(request.getDescription())
-                .build();
+        doctor.setFirstName(request.getFirstName());
+        doctor.setLastName(request.getLastName());
+        doctor.setPosition(request.getPosition());
+        doctor.setImage(request.getImage());
+        doctor.setDepartment(department);
+        doctor.setDescription(request.getDescription());
+
         department.addDoctor(doctor);
         doctorRepo.save(doctor);
         departmentRepo.save(department);
