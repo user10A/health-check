@@ -9,5 +9,6 @@ public interface FeedbackService {
     SimpleResponse add(FeedbackRequest request);
     SimpleResponse update(FeedbackUpdateRequest request);
     SimpleResponse delete(Long id);
+    SimpleResponse deleteUser(Long id);
     FeedbackResponse getFeedbackByDoctorId(Long id);
 }

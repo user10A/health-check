@@ -14,6 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 public class TimeSheetResponse {
     Long doctorId;
+    double averageRating;
+    int count;
     String imageDoctor;
     String department;
     String doctorFullName;

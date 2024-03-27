@@ -7,7 +7,6 @@ import java.time.LocalDate;
 @Data
 public class FeedbackDaoResponse {
     private Long feedbackId;
-    private String userImage;
     private String userFullName;
     private LocalDate localDate;
     private int rating;

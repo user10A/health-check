@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.security.Timestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -15,9 +16,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Feedback {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "fb_gen")
-    @SequenceGenerator(name = "fb_gen",sequenceName = "fb_seq", allocationSize = 1,
-            initialValue = 11)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "feedback_gen")
+    @SequenceGenerator(name = "feedback_gen",sequenceName = "feedback_seq", allocationSize = 1,
+            initialValue = 21)
+    private Long id;
     @ManyToOne
     private Doctor doctor;
     @ManyToOne
@@ -25,4 +27,6 @@ public class Feedback {
     private LocalDate localDate;
     private int rating;
     private String comment;
+    @Column(name = "creation_date")
+    private Timestamp creationDate;
 }

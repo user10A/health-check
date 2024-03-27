@@ -120,10 +120,10 @@ public class AppExceptionHandler {
                 .build();
     }
     @ExceptionHandler(IOException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionResponse handleNotFoundException(NotFoundException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleNotFoundException(BadCredentialsException e) {
         return ExceptionResponse.builder()
-                .httpStatus(HttpStatus.NOT_FOUND)
+                .httpStatus(HttpStatus.BAD_REQUEST)
                 .exceptionClassName(e.getClass().getSimpleName())
                 .message(messageSource.getMessage(e.getMessage(), e.getArgs(), LocaleContextHolder.getLocale()))
                 .build();

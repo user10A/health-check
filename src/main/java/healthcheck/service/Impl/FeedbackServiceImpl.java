@@ -8,6 +8,7 @@ import healthcheck.entities.Doctor;
 import healthcheck.entities.Feedback;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.Dao.FeedbackDao;
 import healthcheck.repo.DoctorRepo;
 import healthcheck.repo.FeedbackRepo;
 import healthcheck.repo.UserAccountRepo;
@@ -20,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 
 @Service
@@ -31,6 +31,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final DoctorRepo doctorRepo;
     private final UserAccountRepo userAccountRepo;
     private final MessageSource messageSource;
+    private final FeedbackDao feedbackDao;
 
     @Override
     public SimpleResponse add(FeedbackRequest request) {
@@ -78,7 +79,27 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
+    public SimpleResponse deleteUser(Long feedBackId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        log.info(email);
+
+        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+        log.info("User account found: " + userAccount);
+        Feedback feedback = feedbackRepo.findById(feedBackId).orElseThrow(()-> new NotFoundException("error.feedback.not_found"));
+        if (!userAccount.getUser().getFeedbacks().contains(feedback)) {
+            log.info("User пытается удалить чужой отзыв: %s" + feedback);
+            throw new NotFoundException("error.user.feedback.not_found");
+        }
+        feedbackRepo.delete(feedback);
+        log.info("Отзыв удален: %s" + feedback);
+
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",
+                null, LocaleContextHolder.getLocale()));
+    }
+
+    @Override
     public FeedbackResponse getFeedbackByDoctorId(Long id) {
-        return null;
+        return feedbackDao.getFeedbackByDoctorId(id);
     }
 }

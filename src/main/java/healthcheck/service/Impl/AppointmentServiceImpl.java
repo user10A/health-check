@@ -81,7 +81,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         variables.put("dayOfMonth",dayOfMonth);
         sendEmail(userAccount.getEmail(), variables);
         return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.response",
-                null, LocaleContextHolder.getLocale()));    }
+                null, LocaleContextHolder.getLocale()));}
     private void sendEmail(String to, Map<String, String> variables) {
         try {
             String templatePath = "confirmation_email";
@@ -304,7 +304,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             return new SimpleResponse(HttpStatus.OK,messageSource.getMessage("message.delete_response",null,LocaleContextHolder.getLocale()));
         }else {
             log.error("Appointment с ID: " + id + " не обработан");
-            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,"error.appointment_response_bad_request");
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,messageSource.getMessage("error.appointment_response_bad_request",null,LocaleContextHolder.getLocale()));
         }
     }
 
@@ -336,13 +336,13 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointmentRepo.deleteAll(appointments);
             log.info("Заявки успешно удалены");
 
-            return new SimpleResponse(HttpStatus.OK,"message.delete_response");
+            return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.delete_response",null,LocaleContextHolder.getLocale()));
         } catch (EmptyResultDataAccessException e) {
             log.error("Ошибка удаления заявок: Некоторые заявки не найдены");
-            return new SimpleResponse(HttpStatus.NOT_FOUND,"error.appointment_response_bad_request_all");
+            return new SimpleResponse(HttpStatus.NOT_FOUND,messageSource.getMessage("error.appointment_response_bad_request_all",null,LocaleContextHolder.getLocale()));
         } catch (Exception e) {
             log.error("Ошибка удаления заявок: " + e.getMessage());
-            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR,"error.appointment_response_internalServerError");
+            return new SimpleResponse(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage("error.appointment_response_internalServerError",null,LocaleContextHolder.getLocale()));
         }
     }
 }
