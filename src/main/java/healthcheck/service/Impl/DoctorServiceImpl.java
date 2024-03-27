@@ -47,8 +47,8 @@ public class DoctorServiceImpl implements DoctorService {
                     .department(department)
                     .description(request.getDescription())
                     .isActive(false)
+                    .creationDate(Timestamp.now().toSqlTimestamp())
                     .build();
-
             department.addDoctor(doctor);
             doctorRepo.save(doctor);
 
