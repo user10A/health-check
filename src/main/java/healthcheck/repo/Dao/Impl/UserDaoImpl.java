@@ -1,6 +1,5 @@
 package healthcheck.repo.Dao.Impl;
 
-import healthcheck.dto.Doctor.DoctorResponseByWord;
 import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetUserById;
@@ -81,7 +80,7 @@ public class UserDaoImpl implements UserDao {
                            a.status,
                            CONCAT(d.first_name, ' ', d.last_name) AS full_name,
                            dep.facility,
-                           u.id as user_id,
+                           a.id as user_id,
                            d.image
                        FROM
                            appointment a
@@ -96,7 +95,7 @@ public class UserDaoImpl implements UserDao {
                            a.status,
                            full_name,
                            dep.facility,
-                           u.id,
+                           a.id,
                            d.image;
                     """;
             return jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) -> ResponseToGetUserAppointments.builder()

@@ -1,5 +1,6 @@
 package healthcheck.api;
 
+import healthcheck.dto.Feedback.FeedbackDaoResponse;
 import healthcheck.dto.Feedback.FeedbackRequest;
 import healthcheck.dto.Feedback.FeedbackResponse;
 import healthcheck.dto.Feedback.FeedbackUpdateRequest;
@@ -42,10 +43,14 @@ public class FeedbackApi {
     }
 
     @GetMapping("/{doctorId}")
-//    @PreAuthorize("hasAuthority('USER')")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public FeedbackResponse getFeedbackByDoctorId(@PathVariable("doctorId") Long doctorId) {
         return feedbackService.getFeedbackByDoctorId(doctorId);
+    }
+    @GetMapping("/{doctorId}/get")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    public FeedbackDaoResponse getFeedbackById(@PathVariable("doctorId") Long doctorId) {
+        return feedbackService.getFeedbackById(doctorId);
     }
 }
 

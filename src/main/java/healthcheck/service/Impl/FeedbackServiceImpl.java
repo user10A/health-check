@@ -1,5 +1,6 @@
 package healthcheck.service.Impl;
 
+import healthcheck.dto.Feedback.FeedbackDaoResponse;
 import healthcheck.dto.Feedback.FeedbackRequest;
 import healthcheck.dto.Feedback.FeedbackResponse;
 import healthcheck.dto.Feedback.FeedbackUpdateRequest;
@@ -46,7 +47,10 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .orElseThrow(() -> new NotFoundException("error.doctor_not_found",
                         new Object[]{request.getDoctorId()}));
         log.info("Doctor found: " + doctor);
-
+        int rating = request.getRating();
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("error.illegal_argument_exception.rating");
+        }
         Feedback feedback = Feedback.builder()
                 .user(userAccount.getUser())
                 .doctor(doctor)
@@ -55,12 +59,16 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .localDate(LocalDate.now())
                 .build();
         feedbackRepo.save(feedback);
-        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.save_response",
+        return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("feedback.response.save",
                 null, LocaleContextHolder.getLocale()));
     }
 
     @Override
     public SimpleResponse update(FeedbackUpdateRequest request) {
+        int rating = request.getRating();
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("error.illegal_argument_exception.rating");
+        }
         Feedback feedback =feedbackRepo.findById(request.getFeedbackId()).orElseThrow(()-> new NotFoundException("error.feedback.not_found"));
         feedback.setRating(request.getRating());
         feedback.setComment(request.getComment());
@@ -101,5 +109,21 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public FeedbackResponse getFeedbackByDoctorId(Long id) {
         return feedbackDao.getFeedbackByDoctorId(id);
+    }
+
+    @Override
+    public FeedbackDaoResponse getFeedbackById(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        log.info(email);
+        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+        Feedback feedback =feedbackRepo.findById(id).orElseThrow(()-> new NotFoundException("error.feedback.not_found"));
+        return FeedbackDaoResponse.builder()
+                .feedbackId(feedback.getId())
+                .userFullName(userAccount.getUser().getFirstName()+" "+userAccount.getUser().getLastName())
+                .localDate(feedback.getLocalDate())
+                .rating(feedback.getRating())
+                .comment(feedback.getComment())
+                .build();
     }
 }

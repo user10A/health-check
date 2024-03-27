@@ -119,7 +119,7 @@ VALUES
       (25, 'Виктория', 'Фостер', 'https://java112024.s3.eu-north-1.amazonaws.com/1710739799947Group 337677.png', 'Психотерапевт', '<p>Оказывает психотерапевтическую помощь пациентам с психическими расстройствами и проблемами.<p>', true, 16);
 INSERT INTO schedule (id, start_date_work, end_date_work, start_day_time, end_day_time, start_break_time, end_break_time, interval_in_minutes, department_id, doctor_id)
 VALUES
---     (1, '2024-03-15', '2024-04-15', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'THIRTY', 1, 1),
+    (1, '2024-03-15', '2024-04-15', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'THIRTY', 1, 1),
     (2, '2024-03-16', '2024-04-16', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'SIXTY', 1, 2),
     (3, '2024-03-17', '2024-04-17', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'THIRTY', 1, 3),
     (4, '2024-03-18', '2024-04-18', '08:00:00', '17:00:00', '12:00:00', '13:00:00', 'SIXTY', 2, 4),
@@ -147,7 +147,7 @@ VALUES
 
 INSERT INTO appointment (id, appointment_date, appointment_time, status, processed, user_id, department_id, doctor_id)
 VALUES
---     (1, '2024-03-15', '10:00:00', 'CANCELLED', false, 1, 1, 1),
+    (1, '2024-03-15', '10:00:00', 'CANCELLED', false, 1, 1, 1),
     (2, '2024-03-16', '11:30:00', 'CONFIRMED', false, 2, 1, 2),
     (3, '2024-03-17', '14:15:00', 'CONFIRMED', false, 3, 1, 3),
     (4, '2024-03-18', '09:45:00', 'FINISHED', true, 4, 2, 4),
@@ -216,7 +216,7 @@ VALUES
 
 INSERT INTO schedule_day_of_week (day_of_week, is_working_day, schedule_id)
 VALUES
---     ('MONDAY', true, 1),
+    ('MONDAY', true, 1),
     ('TUESDAY', true, 2),
     ('WEDNESDAY', true, 3),
     ('THURSDAY', true, 4),
@@ -263,6 +263,5 @@ VALUES
     (18, 8, 3, '2024-03-08', 3, 'Средний врач'),
     (19, 9, 2, '2024-03-07', 2, 'Не рекомендую этого врача'),
     (20, 1, 1, '2024-03-06', 1, 'Самый ужасный врач!');
-    (21, 1, 1, '2024-03-08', 4, 'Неплохой врач, но могло быть лучше'),
 
 
