@@ -64,22 +64,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
     @Override
     public SimpleResponse appointmentConfirmationEmail(Long appointmentId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() ->
-                new NotFoundException("error.email_not_found",new Object[]{email}));
         Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("error.appointment_not_found",new Object[]{appointmentId}));
-        User user = userAccount.getUser();
-        String userName = user.getFirstName() + " " + user.getLastName();
         Map<String, String> variables = new HashMap<>();
         variables.put("greeting", emailService.getGreeting());
-        variables.put("userName", userName);
+        variables.put("userName", appointment.getFullName());
         int day = appointment.getAppointmentDate().getDayOfMonth();
         String month = appointment.getAppointmentDate().getMonth().getDisplayName(TextStyle.FULL, LocaleContextHolder.getLocale());
         String time = appointment.getAppointmentTime().toString();
         String dayOfMonth =(day+" "+month+" в "+time);
         variables.put("dayOfMonth",dayOfMonth);
-        sendEmail(userAccount.getEmail(), variables);
+        sendEmail(appointment.getEmail(), variables);
         return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.response",
                 null, LocaleContextHolder.getLocale()));}
     private void sendEmail(String to, Map<String, String> variables) {
@@ -150,6 +144,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .doctor(doctor)
                 .appointmentDate(dateOfConsultation)
                 .appointmentTime(startOfConsultation)
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .fullName(request.getFullName())
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
                 .build();
@@ -163,60 +160,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 messageSource.getMessage("message.code_response",null,LocaleContextHolder.getLocale()));
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
-
-    @Override
-    @Transactional
-    public SimpleResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        log.info(email);
-        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
-        log.info("User account found: " + userAccount);
-        Department department = doctorRepo.getDepartmentByDoctorId(request.getDoctorId());
-        Doctor doctor = doctorRepo.findById(request.getDoctorId())
-                .orElseThrow(() -> new NotFoundException("error.doctor_not_found",
-                        new Object[]{request.getDoctorId()}));
-        log.info("Doctor found: " + doctor);
-
-        LocalDate dateOfConsultation = LocalDate.parse(request.getDate());
-        LocalTime startOfConsultation = LocalTime.parse(request.getStartTimeConsultation());
-        log.info("startOfConsultation :"+startOfConsultation);
-        log.info("Creating appointment for user: " + userAccount.getUser().getFirstName() + " " +
-                userAccount.getUser().getLastName() + " with doctor: " + doctor.getFullNameDoctor() +
-                " on date: " + dateOfConsultation + " at time: " + startOfConsultation);
-
-        Boolean booked = timeSheetRepo.booked(doctor.getSchedule().getId(),dateOfConsultation, startOfConsultation);
-        String date= doctor.getSchedule().getStartDateWork()+"-"+ doctor.getSchedule().getEndDateWork();
-        if (booked != null && booked) {
-            throw new AlreadyExistsException("error.timeSheet_alreadyExists");
-        } else if (booked == null) {
-            try {
-                throw new BadCredentialsException("error.doctor_not_found_department",
-                        new Object[]{date});
-            } catch (BadCredentialsException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        TimeSheet timeSheet = timeSheetRepo.getTimeSheetByDoctorIdAndStartTime(doctor.getId(), dateOfConsultation, startOfConsultation);
-        Appointment appointment = Appointment.builder()
-                .user(userAccount.getUser())
-                .department(department)
-                .doctor(doctor)
-                .appointmentDate(dateOfConsultation)
-                .appointmentTime(startOfConsultation)
-                .status(Status.CONFIRMED)
-                .verificationCode(generateVerificationCode())
-                .build();
-        appointmentRepo.save(appointment);
-        timeSheet.setAvailable(true);
-        timeSheetRepo.save(timeSheet);
-        log.info("успешно обновлен бронирование на true ");
-        log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        String userFullName=" "+request.getFullName();
-        emailService.sendMassage(userFullName,email,request.getEmail(),appointment.getVerificationCode(),
-                messageSource.getMessage("message.code_response",null,LocaleContextHolder.getLocale()));        return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
-    }
-
     public String generateVerificationCode() {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));

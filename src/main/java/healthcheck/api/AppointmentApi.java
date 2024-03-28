@@ -52,13 +52,6 @@ public class AppointmentApi {
     public SimpleResponse addAppointment(@RequestParam Facility facility, @Valid @RequestBody AppointmentRequest request) throws MessagingException, IOException {
         return appointmentService.addAppointment(facility,request);
     }
-    @PostMapping("/addByDoctorId")
-    @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @Operation(summary = "add appointment", description = "Endpoint to add appointment.")
-    public SimpleResponse addAppointmentByDoctorId(@RequestBody @Valid AppointmentRequest request) throws MessagingException, IOException {
-        return appointmentService.addAppointmentByDoctorId(request);
-    }
-
     @PatchMapping()
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
     @Operation(summary = "check verification code", description = "Endpoint checking code appointment.")
@@ -81,14 +74,6 @@ public class AppointmentApi {
     public List<TimeSheetResponse> getTimeSheetDoctors(@RequestParam String facility) {
         return timeSheetService.getTimesheetDoctor(facility);
     }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Get available timesheet doctors by ID", description = "Endpoint to get available timesheet doctors by doctor ID.")
-    @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
-    public List<TimeSheetResponse> getTimeSheetByIdDoctors(@PathVariable Long id) {
-        return timeSheetService.getTimesheetDoctorById(id);
-    }
-
     @GetMapping("/getDoctor")
     @Operation(summary = "Get doctor for appointment", description = "Endpoint to get doctor for appointment.")
     @PostAuthorize("hasAnyAuthority('USER','ADMIN')")
@@ -120,7 +105,6 @@ public class AppointmentApi {
     public List<AppointmentResponse> getAllAppointmentsDefault() {
         return appointmentService.getAllAppointmentDefault();
     }
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete appointment by ID",
             description = "Delete an appointment by providing the appointment ID. " +
