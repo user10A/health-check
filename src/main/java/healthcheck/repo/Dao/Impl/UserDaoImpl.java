@@ -92,8 +92,9 @@ public class UserDaoImpl implements UserDao {
                        GROUP BY
                            a.appointment_date,
                            a.appointment_time,
+                           d.first_name,
+                           d.last_name,
                            a.status,
-                           full_name,
                            dep.facility,
                            a.id,
                            d.image;

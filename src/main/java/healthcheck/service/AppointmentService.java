@@ -11,7 +11,6 @@ import java.util.List;
 public interface AppointmentService {
     List<AppointmentResponse> getAllAppointment(String word);
     SimpleResponse addAppointment(Facility facility, AppointmentRequest request) throws MessagingException, IOException;
-    SimpleResponse addAppointmentByDoctorId(AppointmentRequest request) throws MessagingException, IOException;
     AppointmentResponseById verifyAppointment(Long appointmentId, String verificationCode);
     SimpleResponse deleteAppointment(Long id);
     FindDoctorForAppointmentResponse findByDoctorId(Long id);

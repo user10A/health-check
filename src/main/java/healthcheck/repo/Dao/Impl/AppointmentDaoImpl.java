@@ -20,7 +20,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AppointmentDaoImpl implements AppointmentDao {
     private final JdbcTemplate jdbcTemplate;
-
     @Override
     public List<AppointmentScheduleTimeSheetResponse> getTheDoctorFreeTimeInTheCalendar(String startDate, String endDate, Long doctorId) {
         ZoneId zoneId = ZoneId.of("Asia/Bishkek");
