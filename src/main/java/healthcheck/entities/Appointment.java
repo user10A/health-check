@@ -35,7 +35,6 @@ public class Appointment {
     private Doctor doctor;
     @Column(name = "creation_date")
     private Timestamp creationDate;
-
     @Override
     public String toString() {
         return "Appointment{" +
