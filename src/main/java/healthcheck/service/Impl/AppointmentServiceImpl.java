@@ -64,16 +64,22 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
     @Override
     public SimpleResponse appointmentConfirmationEmail(Long appointmentId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() ->
+                new NotFoundException("error.email_not_found",new Object[]{email}));
         Appointment appointment = appointmentRepo.findById(appointmentId).orElseThrow(()-> new NotFoundException("error.appointment_not_found",new Object[]{appointmentId}));
+        User user = userAccount.getUser();
+        String userName = user.getFirstName() + " " + user.getLastName();
         Map<String, String> variables = new HashMap<>();
         variables.put("greeting", emailService.getGreeting());
-        variables.put("userName", appointment.getFullName());
+        variables.put("userName", userName);
         int day = appointment.getAppointmentDate().getDayOfMonth();
         String month = appointment.getAppointmentDate().getMonth().getDisplayName(TextStyle.FULL, LocaleContextHolder.getLocale());
         String time = appointment.getAppointmentTime().toString();
         String dayOfMonth =(day+" "+month+" в "+time);
         variables.put("dayOfMonth",dayOfMonth);
-        sendEmail(appointment.getEmail(), variables);
+        sendEmail(userAccount.getEmail(), variables);
         return new SimpleResponse(HttpStatus.OK, messageSource.getMessage("message.response",
                 null, LocaleContextHolder.getLocale()));}
     private void sendEmail(String to, Map<String, String> variables) {
@@ -101,7 +107,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     public SimpleResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-
         log.info(email);
 
         UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
@@ -144,9 +149,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .doctor(doctor)
                 .appointmentDate(dateOfConsultation)
                 .appointmentTime(startOfConsultation)
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .fullName(request.getFullName())
                 .status(Status.CONFIRMED)
                 .verificationCode(generateVerificationCode())
                 .build();
