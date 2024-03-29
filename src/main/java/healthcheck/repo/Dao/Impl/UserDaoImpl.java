@@ -144,7 +144,8 @@ public class UserDaoImpl implements UserDao {
                         a.appointment_date,
                         a.appointment_time,
                         a.status,
-                        full_name,
+                        d.first_name, 
+                        d.last_name,
                         dep.facility;
                 """;
         try {
