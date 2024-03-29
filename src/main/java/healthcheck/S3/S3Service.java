@@ -1,4 +1,5 @@
 package healthcheck.S3;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -47,18 +49,31 @@ public class S3Service {
     public Map<String, String> upload(MultipartFile file) throws IOException {
         log.info("Uploading file ...");
         String key = System.currentTimeMillis() + file.getOriginalFilename();
+
+        // Determine content type based on file extension
+        String contentType = "application/octet-stream"; // Default content type
+        String fileName = file.getOriginalFilename();
+        if (fileName != null) {
+            if (fileName.toLowerCase().endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (fileName.toLowerCase().endsWith(".png")) {
+                contentType = "image/png";
+            }
+        }
+
         PutObjectRequest put = PutObjectRequest.builder()
                 .bucket(BUCKET_NAME)
-                .contentType("png")
-                .contentType("pdf")
+                .contentType(contentType)
                 .contentLength(file.getSize())
                 .key(key)
                 .build();
+
         s3.putObject(put, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         log.info("Upload successfully deleted!");
-        return Map.of(
-                "link", BUCKET_PATH + key);
+        return Map.of("link", BUCKET_PATH + key);
     }
+
+
     public Map<String, String> delete(String fileLink) {
         log.info("Deleting file...");
         try {
@@ -74,6 +89,7 @@ public class S3Service {
         return Map.of(
                 "message", fileLink + " has been deleted");
     }
+
     public ResponseEntity<ByteArrayResource> download(String fileLink) {
         try {
             log.info("Downloading file...");
@@ -99,6 +115,7 @@ public class S3Service {
             throw new IllegalStateException("error.illegal_state_exception_download");
         }
     }
+
     public byte[] getPdfFileByUrl(String fileUrl) {
         try {
             log.info("Поиск file...");
@@ -112,4 +129,5 @@ public class S3Service {
             throw new IllegalStateException("error.illegal_state_exception_not_found");
         }
     }
+
 }
