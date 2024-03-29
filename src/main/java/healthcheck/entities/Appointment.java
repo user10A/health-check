@@ -23,9 +23,6 @@ public class Appointment {
     private Long id;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
-    private String email;
-    private String phoneNumber;
-    private String fullName;
     @Enumerated(EnumType.STRING)
     private Status status;
     private boolean processed;
@@ -38,7 +35,6 @@ public class Appointment {
     private Doctor doctor;
     @Column(name = "creation_date")
     private Timestamp creationDate;
-
     @Override
     public String toString() {
         return "Appointment{" +
