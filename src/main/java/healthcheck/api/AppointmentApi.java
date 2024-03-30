@@ -91,14 +91,13 @@ public class AppointmentApi {
         return appointmentService.getTheDoctorFreeTimeInTheCalendar(startDate,endDate,id);
     }
 
-    @DeleteMapping("/deleteAll") //delete all
+    @DeleteMapping("/deleteAll")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @Operation(summary = "Delete appointment",
             description = "This method can be used by both administrators and patients")
     public SimpleResponse delete(@RequestBody List<Long> appointments) {
         return appointmentService.deleteAllAppointmentsById(appointments);
     }
-
     @GetMapping("/all")
     @Operation(summary = "Get all appointments",
             description = "Retrieve a list of all appointments with default settings.")

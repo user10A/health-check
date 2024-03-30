@@ -73,6 +73,7 @@ public class EmailServiceImpl implements EmailService {
     }
     @Override
     public AuthenticationResponse passwordRecovery(String token, String newPassword) throws Exception {
+
         UserAccount userAccount = userAccountRepo.getByUserAccountByTokenPassword(token).orElseThrow(
                 () -> new NotFoundException(
                         "error.email_not_found_token",new Object[]{token}));
@@ -100,13 +101,13 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public SimpleResponse sendMassage(String username,String email,String toEmail, String code, String subject) throws MessagingException {
+    public SimpleResponse sendMassage(String email, String code, String subject) throws MessagingException {
         UserAccount userAccount = userAccountRepo.getUserAccountByEmail(email).orElseThrow(
                 () -> new NotFoundException(
                        "error.email_not_found",new Object[]{email}));
         User user = userAccount.getUser();
         Context context = new Context();
-        context.setVariable("userName", username);
+        context.setVariable("userName", user.getFirstName()+" "+user.getLastName());
         context.setVariable("greeting", getGreeting());
         context.setVariable("verificationCode", code);
         String emailContent = templateEngine.process("registrationCode", context);
@@ -114,10 +115,10 @@ public class EmailServiceImpl implements EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
         helper.setFrom(mailUsername);
         helper.setSubject(subject);
-        helper.setTo(toEmail);
+        helper.setTo(email);
         helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
-        log.info("Электронное письмо успешно отправлено на адрес: {}", toEmail);
+        log.info("Электронное письмо успешно отправлено на адрес: {}", email);
         return new SimpleResponse(HttpStatus.OK,messageSource.getMessage
                 ("email_verification_code",new Object[]{email},LocaleContextHolder.getLocale()));
     }
