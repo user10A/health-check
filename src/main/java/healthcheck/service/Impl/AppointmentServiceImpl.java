@@ -108,6 +108,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         log.info(email);
+
         UserAccount userAccount = userAccountRepo.findUserAccountByEmail(request.getEmail());
         if (userAccount==null){
             throw new NotFoundException("error.email_not_found", new Object[]{request.getEmail()});

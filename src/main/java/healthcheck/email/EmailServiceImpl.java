@@ -73,6 +73,7 @@ public class EmailServiceImpl implements EmailService {
     }
     @Override
     public AuthenticationResponse passwordRecovery(String token, String newPassword) throws Exception {
+
         UserAccount userAccount = userAccountRepo.getByUserAccountByTokenPassword(token).orElseThrow(
                 () -> new NotFoundException(
                         "error.email_not_found_token",new Object[]{token}));

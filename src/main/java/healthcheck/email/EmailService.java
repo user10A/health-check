@@ -3,7 +3,6 @@ package healthcheck.email;
 import healthcheck.dto.Authentication.AuthenticationResponse;
 import healthcheck.dto.SimpleResponse;
 import jakarta.mail.MessagingException;
-
 import java.io.IOException;
 public interface EmailService {
     SimpleResponse forgotPassword(String email, String link) throws MessagingException, IOException;
