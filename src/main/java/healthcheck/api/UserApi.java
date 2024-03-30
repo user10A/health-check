@@ -6,6 +6,7 @@ import healthcheck.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,12 +35,11 @@ public class UserApi {
     public List<ResponseToGetUserAppointments> getAllUsersAppointments() {
         return userService.getAllAppointmentsOfUser();
     }
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @GetMapping("/appointmentId/{id}")
-    @Operation(summary = "get appointment by user id",
-            description = "page of appointment of user")
-    public ResponseToGetAppointmentByUserId getUserAppointmentById(@PathVariable Long id) {
-        return userService.getUserAppointmentById(id);
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/{appointmentId}/get")
+    @Operation(summary = "get appointment by user id", description = "page of appointment of user")
+    public ResponseToGetAppointmentByUserId getUserAppointmentById(@PathVariable Long appointmentId) {
+        return userService.getUserAppointmentById(appointmentId);
     }
 
     @PreAuthorize("hasAuthority('USER')")
