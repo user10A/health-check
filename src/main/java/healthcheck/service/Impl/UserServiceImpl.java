@@ -2,11 +2,13 @@ package healthcheck.service.Impl;
 
 import healthcheck.dto.SimpleResponse;
 import healthcheck.dto.User.*;
+import healthcheck.entities.Appointment;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
 import healthcheck.exceptions.NotFoundException;
+import healthcheck.repo.AppointmentRepo;
 import healthcheck.repo.Dao.UserDao;
 import healthcheck.repo.UserAccountRepo;
 import healthcheck.repo.UserRepo;
@@ -34,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserAccountRepo userAccountRepo;
     private final PasswordEncoder passwordEncoder;
     private final MessageSource messageSource;
+    private final AppointmentRepo appointmentRepo;
 
     @Override
     @Transactional
