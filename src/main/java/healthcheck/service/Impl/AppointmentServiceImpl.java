@@ -104,11 +104,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     @Transactional
-    public SimpleResponse addAppointment(Facility facility,AppointmentRequest request) throws MessagingException, IOException {
+    public SimpleResponse addAppointment(Facility facility, AppointmentRequest request) throws MessagingException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         log.info(email);
-        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(email);
+        UserAccount userAccount = userAccountRepo.findUserAccountByEmail(request.getEmail());
+        if (userAccount==null){
+            throw new NotFoundException("error.email_not_found", new Object[]{request.getEmail()});
+        }
         log.info("User account found: " + userAccount);
 
         Department department = departmentRepo.findByFacility(facility);
@@ -156,8 +159,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         timeSheetRepo.save(timeSheet);
         log.info("успешно обновлен бронирование на true ");
         log.info("Электронное письмо успешно отправлено на адрес: {}", email);
-        String userFullName=" "+request.getFullName();
-        emailService.sendMassage(userFullName,email,request.getEmail(),appointment.getVerificationCode(),
+        emailService.sendMassage(email,appointment.getVerificationCode(),
                 messageSource.getMessage("message.code_response",null,LocaleContextHolder.getLocale()));
         return new SimpleResponse(appointment.getId()+" "+appointment.getVerificationCode(), HttpStatus.OK);
     }
