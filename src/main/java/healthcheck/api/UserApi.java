@@ -36,7 +36,7 @@ public class UserApi {
     }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @GetMapping("/{id}")
+    @GetMapping("/appointmentId/{id}")
     @Operation(summary = "get appointment by user id",
             description = "page of appointment of user")
     public ResponseToGetAppointmentByUserId getUserAppointmentById(@PathVariable Long id) {
