@@ -4,6 +4,7 @@ import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetUserById;
 import healthcheck.dto.User.ResultUsersResponse;
+import healthcheck.entities.Appointment;
 import healthcheck.enums.Status;
 import healthcheck.repo.Dao.UserDao;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -112,7 +113,6 @@ public class UserDaoImpl implements UserDao {
             throw new NotFoundException("Appointments of user with ID " + id + " not found.");
         }
     }
-
     @Override
     public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
         var sql = """
@@ -148,6 +148,7 @@ public class UserDaoImpl implements UserDao {
                         d.last_name,
                         dep.facility;
                 """;
+
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) ->
                     ResponseToGetAppointmentByUserId.builder()
@@ -164,7 +165,7 @@ public class UserDaoImpl implements UserDao {
                             .build()
             );
         } catch (NotFoundException e) {
-            throw new NotFoundException("Appointment with this id not found");
+            throw new NotFoundException("error.appointment_not_found");
         }
     }
 
