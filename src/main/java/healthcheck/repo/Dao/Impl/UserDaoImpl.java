@@ -81,7 +81,7 @@ public class UserDaoImpl implements UserDao {
                            a.status,
                            CONCAT(d.first_name, ' ', d.last_name) AS full_name,
                            dep.facility,
-                           a.id as user_id,
+                           a.id as appointment_id,
                            d.image
                        FROM
                            appointment a
@@ -89,7 +89,7 @@ public class UserDaoImpl implements UserDao {
                                JOIN department dep ON d.department_id = dep.id
                                JOIN users u ON a.user_id = u.id
                        WHERE
-                               a.user_id = ?
+                               a.user_id =?
                        GROUP BY
                            a.appointment_date,
                            a.appointment_time,
@@ -116,40 +116,27 @@ public class UserDaoImpl implements UserDao {
     @Override
     public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
         var sql = """
-                    SELECT
-                        u.first_name as first_name,
-                        u.last_name as last_name,
-                        ua.email as email,
-                        u.phone_number as phone_number,
-                        d.image as image_url,
-                        a.appointment_date as appointment_date,
-                        a.appointment_time as appointment_time,
-                        a.status as status,
-                        CONCAT(d.first_name, ' ', d.last_name) AS full_name,
-                        dep.facility as department
-                    FROM
-                        appointment a
-                            JOIN users u ON a.user_id = u.id
-                            JOIN user_account ua ON u.user_account_id = ua.id
-                            JOIN doctor d ON a.doctor_id = d.id
-                            JOIN department dep ON d.department_id = dep.id
-                    WHERE
-                            a.id = ?
-                    GROUP BY
-                        u.first_name,
-                        u.last_name,
-                        ua.email,
-                        u.phone_number,
-                        d.image,  
-                        a.appointment_date,
-                        a.appointment_time,
-                        a.status,
-                        d.first_name, 
-                        d.last_name,
-                        dep.facility;
+                SELECT
+                    u.first_name as first_name,
+                    u.last_name as last_name,
+                    ua.email as email,
+                    u.phone_number as phone_number,
+                    d.image as image_url,
+                    a.appointment_date as appointment_date,
+                    a.appointment_time as appointment_time,
+                    a.status as status,
+                    CONCAT(d.first_name, ' ', d.last_name) AS full_name,
+                    dep.facility as department
+                FROM
+                    appointment a
+                    LEFT JOIN users u ON a.user_id = u.id
+                    LEFT JOIN user_account ua ON u.user_account_id = ua.id
+                    LEFT JOIN doctor d ON a.doctor_id = d.id
+                    LEFT JOIN department dep ON d.department_id = dep.id
+                WHERE
+                    a.id = ?
+                
                 """;
-
-        try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) ->
                     ResponseToGetAppointmentByUserId.builder()
                             .first_name(rs.getString("first_name"))
@@ -164,9 +151,6 @@ public class UserDaoImpl implements UserDao {
                             .department(rs.getString("department"))
                             .build()
             );
-        } catch (NotFoundException e) {
-            throw new NotFoundException("error.appointment_not_found");
-        }
     }
 
     @Override
