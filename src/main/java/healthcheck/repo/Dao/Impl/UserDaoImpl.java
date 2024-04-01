@@ -86,7 +86,7 @@ public class UserDaoImpl implements UserDao {
                                JOIN doctor d ON a.doctor_id = d.id
                                JOIN department dep ON d.department_id = dep.id
                                JOIN users u ON a.user_id = u.id
-                               JOIN user_account ac ON u.id=ac.id
+                               JOIN user_account ac ON u.user_account_id = ac.id
                        WHERE
                                ac.id = ?;
                     """;
@@ -100,7 +100,7 @@ public class UserDaoImpl implements UserDao {
                     .image(rs.getString("image"))
                     .build());
         } catch (NotFoundException e) {
-            throw new NotFoundException("application.deleteNotFound",new Object[]{id});
+            throw new NotFoundException("error.user_not_found",new Object[]{id});
         }
     }
     @Override
