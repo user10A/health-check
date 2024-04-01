@@ -36,6 +36,7 @@ public class UserApi {
         return userService.getAllAppointmentsOfUser();
     }
     @GetMapping("/getAppointmentId")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @Operation(summary = "get appointment by user id", description = "page of appointment of user")
     public ResponseToGetAppointmentByUserId getUserAppointmentById(@RequestParam Long appointmentId) {
         return userService.getUserAppointmentById(appointmentId);

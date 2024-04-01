@@ -5,6 +5,7 @@ import healthcheck.dto.User.*;
 import healthcheck.entities.Appointment;
 import healthcheck.entities.User;
 import healthcheck.entities.UserAccount;
+import healthcheck.exceptions.BadCredentialsException;
 import healthcheck.exceptions.DataUpdateException;
 import healthcheck.exceptions.InvalidPasswordException;
 import healthcheck.exceptions.NotFoundException;
@@ -106,7 +107,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
         log.info("Appointment id: "+id);
-        return userDao.getUserAppointmentById(id);
+        ResponseToGetAppointmentByUserId response = userDao.getUserAppointmentById(id);
+        if (response == null) {
+            throw new NotFoundException("error.not_found");
+        }
+        return response;
     }
 
     @Override
