@@ -97,6 +97,7 @@ public class UserServiceImpl implements UserService {
     public List<ResponseToGetUserAppointments> getAllAppointmentsOfUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        log.info("email: "+email);
         UserAccount user = userAccountRepo.getUserAccountByEmail(email).orElseThrow(() -> {
             log.error(String.format("User with email :%s is not found !!!", email));
             return new NotFoundException("user.not.found");

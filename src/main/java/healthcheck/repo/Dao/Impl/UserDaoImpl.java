@@ -4,13 +4,11 @@ import healthcheck.dto.User.ResponseToGetAppointmentByUserId;
 import healthcheck.dto.User.ResponseToGetUserAppointments;
 import healthcheck.dto.User.ResponseToGetUserById;
 import healthcheck.dto.User.ResultUsersResponse;
-import healthcheck.entities.Appointment;
 import healthcheck.enums.Status;
+import healthcheck.exceptions.NotFoundException;
 import healthcheck.repo.Dao.UserDao;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.webjars.NotFoundException;
-
 import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
@@ -79,7 +77,7 @@ public class UserDaoImpl implements UserDao {
                            a.appointment_date,
                            a.appointment_time,
                            a.status,
-                           CONCAT(d.first_name, ' ', d.last_name) AS full_name,
+                           CONCAT(d.first_name, ' ', d.last_name) AS doctor_full_name,
                            dep.facility,
                            a.id as appointment_id,
                            d.image
@@ -88,29 +86,21 @@ public class UserDaoImpl implements UserDao {
                                JOIN doctor d ON a.doctor_id = d.id
                                JOIN department dep ON d.department_id = dep.id
                                JOIN users u ON a.user_id = u.id
+                               JOIN user_account ac ON u.id=ac.id
                        WHERE
-                               a.user_id =?
-                       GROUP BY
-                           a.appointment_date,
-                           a.appointment_time,
-                           d.first_name,
-                           d.last_name,
-                           a.status,
-                           dep.facility,
-                           a.id,
-                           d.image;
+                               ac.id = ?;
                     """;
             return jdbcTemplate.query(sql, new Object[]{id}, (rs, rowNum) -> ResponseToGetUserAppointments.builder()
-                    .appointmentDate(rs.getDate(1).toLocalDate())
-                    .appointmentTime(rs.getTime(2).toLocalTime())
-                    .status(Status.valueOf(rs.getString(3).toUpperCase()))  // Convert to upper case for safety
-                    .surname(rs.getString(4))
-                    .department(rs.getString(5))
-                    .id(rs.getLong("user_id"))
+                    .appointmentDate(rs.getDate("appointment_date").toLocalDate())
+                    .appointmentTime(rs.getTime("appointment_time").toLocalTime())
+                    .status(Status.valueOf(rs.getString("status")))
+                    .surname(rs.getString("doctor_full_name"))
+                    .department(rs.getString("facility"))
+                    .id(rs.getLong("appointment_id"))
                     .image(rs.getString("image"))
                     .build());
         } catch (NotFoundException e) {
-            throw new NotFoundException("Appointments of user with ID " + id + " not found.");
+            throw new NotFoundException("application.deleteNotFound",new Object[]{id});
         }
     }
     @Override
