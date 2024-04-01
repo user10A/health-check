@@ -35,9 +35,9 @@ public class UserApi {
     public List<ResponseToGetUserAppointments> getAllUsersAppointments() {
         return userService.getAllAppointmentsOfUser();
     }
-    @GetMapping("/{appointmentId}/get")
+    @GetMapping("/getAppointmentId")
     @Operation(summary = "get appointment by user id", description = "page of appointment of user")
-    public ResponseToGetAppointmentByUserId getUserAppointmentById(@PathVariable Long appointmentId) {
+    public ResponseToGetAppointmentByUserId getUserAppointmentById(@RequestParam Long appointmentId) {
         return userService.getUserAppointmentById(appointmentId);
     }
 
