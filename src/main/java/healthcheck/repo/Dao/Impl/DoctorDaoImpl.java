@@ -58,7 +58,7 @@ public class DoctorDaoImpl implements DoctorDao {
                 .firstName(rs.getString(4))
                 .lastName(rs.getString(5))
                 .department(rs.getString(6))
-                .endDateWork(rs.getDate(7).toLocalDate())
+                .endDateWork(rs.getDate(7).toString())
                 .position(rs.getString(8))
                 .build());
     }
@@ -77,7 +77,7 @@ public class DoctorDaoImpl implements DoctorDao {
                                                          d.position,
                                                          d.creation_date
                                                      FROM Doctor d
-                                                     JOIN schedule s ON d.id = s.doctor_id
+                                                     LEFT JOIN schedule s ON d.id = s.doctor_id
                                                      JOIN department d2 on d.department_id = d2.id
                 ORDER BY d.id
                 """;
@@ -90,9 +90,12 @@ public class DoctorDaoImpl implements DoctorDao {
             responseByWord.setFirstName(rs.getString(4));
             responseByWord.setLastName(rs.getString(5));
             responseByWord.setDepartment(rs.getString(6));
-            responseByWord.setEndDateWork(rs.getDate(7).toLocalDate());
             responseByWord.setPosition(rs.getString(8));
-
+            if (rs.getDate("end_date_work") != null) {
+                responseByWord.setEndDateWork(rs.getDate("end_date_work").toString());
+            } else {
+                responseByWord.setEndDateWork("-");
+            }
             Timestamp creationTimestamp = rs.getTimestamp(9);
             if (creationTimestamp != null) {
                 responseByWord.setCreationDate(Timestamp.valueOf(creationTimestamp.toLocalDateTime()));

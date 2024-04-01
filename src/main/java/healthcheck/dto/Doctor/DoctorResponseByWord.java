@@ -20,6 +20,6 @@ public class DoctorResponseByWord {
     private String firstName;
     private String lastName;
     private String department;
-    private LocalDate endDateWork;
+    private String endDateWork;
     private Timestamp creationDate;
 }
