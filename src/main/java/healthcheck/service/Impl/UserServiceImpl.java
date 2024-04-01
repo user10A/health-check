@@ -105,6 +105,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseToGetAppointmentByUserId getUserAppointmentById(Long id) {
+        log.info("Appointment id: "+id);
         return userDao.getUserAppointmentById(id);
     }
 
