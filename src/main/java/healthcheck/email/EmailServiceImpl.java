@@ -107,7 +107,7 @@ public class EmailServiceImpl implements EmailService {
                        "error.email_not_found",new Object[]{email}));
         User user = userAccount.getUser();
         Context context = new Context();
-        context.setVariable("userName", user.getFirstName()+" "+user.getLastName());
+        context.setVariable("userName"," "+ user.getFirstName()+" "+user.getLastName());
         context.setVariable("greeting", getGreeting());
         context.setVariable("verificationCode", code);
         String emailContent = templateEngine.process("registrationCode", context);
@@ -129,21 +129,22 @@ public class EmailServiceImpl implements EmailService {
         long minutesDifference = TimeUnit.MILLISECONDS.toMinutes(currentTime.getTime() - sentTime.getTime());
         return minutesDifference > verificationCodeExpirationMinutes;
     }
-
     public String getGreeting() {
         ZoneId zoneId = ZoneId.of("Asia/Bishkek");
         ZonedDateTime currentTime = ZonedDateTime.now(zoneId);
         LocalTime time = currentTime.toLocalTime();
         String greeting;
-        if (time.isBefore(LocalTime.NOON)) {
-            greeting = messageSource.getMessage("greeting_good_morning",null,LocaleContextHolder.getLocale());
-        } else if (time.isBefore(LocalTime.of(18, 0))) {
-            greeting = messageSource.getMessage("greeting_good_afternoon",null,LocaleContextHolder.getLocale());
-        } else if (time.isBefore(LocalTime.of(21, 0))) {
-            greeting = messageSource.getMessage("greeting_good_evening",null,LocaleContextHolder.getLocale());
+
+        if (time.isAfter(LocalTime.of(5, 0)) && time.isBefore(LocalTime.of(10, 0))) {
+            greeting = messageSource.getMessage("greeting_good_morning", null, LocaleContextHolder.getLocale());
+        } else if (time.isAfter(LocalTime.of(10, 0)) && time.isBefore(LocalTime.of(18, 0))) {
+            greeting = messageSource.getMessage("greeting_good_afternoon", null, LocaleContextHolder.getLocale());
+        } else if (time.isAfter(LocalTime.of(18, 0)) && time.isBefore(LocalTime.of(23, 0))) {
+            greeting = messageSource.getMessage("greeting_good_evening", null, LocaleContextHolder.getLocale());
         } else {
-            greeting = messageSource.getMessage("greeting_good_night",null,LocaleContextHolder.getLocale());
+            greeting = messageSource.getMessage("greeting_good_night", null, LocaleContextHolder.getLocale());
         }
+
         return greeting;
     }
 }
