@@ -202,13 +202,12 @@ public class UserDaoImpl implements UserDao {
                 result r ON r.user_id = u.id AND r.result_date = r_max.max_result_date
                 LEFT JOIN
                 user_account ua ON ua.id = u.user_account_id
-                WHERE concat(u.first_name, ' ', u.last_name) LIKE '%' || ? || '%'
-                OR ua.email LIKE '%' || ? || '%'
-                ORDER BY
-                u.id;
+                WHERE LOWER(u.first_name) LIKE concat('%', LOWER(?), '%') OR
+                          LOWER(u.last_name) LIKE concat('%', LOWER(?), '%') OR
+                          LOWER(ua.email) LIKE concat('%', LOWER(?), '%')
                 """;
 
-        return jdbcTemplate.query(sql, new Object[]{word, word}, (rs, rowNum) -> {
+        return jdbcTemplate.query(sql, new Object[]{word, word, word}, (rs, rowNum) -> {
             ResultUsersResponse response = new ResultUsersResponse();
             response.setId(rs.getLong("id"));
             response.setSurname(rs.getString("full_name"));
